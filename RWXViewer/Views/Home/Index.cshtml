@@ -1,3 +1,12 @@
 ﻿@{
     ViewBag.Title = "Home Page";
 }
+
+@section scripts
+{
+    <script src="@Url.Content("~/Scripts/RWXModel.js")"></script>
+}
+
+<canvas id="viewport" width="512" height="512">
+    Your browser does not support the HTML 5 Canvas element.
+</canvas>
