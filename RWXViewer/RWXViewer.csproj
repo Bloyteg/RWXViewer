@@ -160,7 +160,13 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Scripts\RWXModel.js">
+      <DependentUpon>RWXModel.ts</DependentUpon>
+    </Content>
     <TypeScriptCompile Include="Scripts\RWXModel.ts" />
+    <Content Include="Scripts\RWXViewer.js">
+      <DependentUpon>RWXViewer.ts</DependentUpon>
+    </Content>
     <TypeScriptCompile Include="Scripts\RWXViewer.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
   </ItemGroup>
