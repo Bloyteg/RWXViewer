@@ -161,6 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\RWXModel.ts" />
+    <TypeScriptCompile Include="Scripts\RWXViewer.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
   </ItemGroup>
   <PropertyGroup>
