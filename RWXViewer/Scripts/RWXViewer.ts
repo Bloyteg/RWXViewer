@@ -1,6 +1,6 @@
 ﻿function initGL() {
     var canvas = <HTMLCanvasElement>document.getElementById("viewport");
-    return <WebGLRenderingContext>(canvas.getContext("webgl") || canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true })); 
+    return <WebGLRenderingContext>(canvas.getContext("webgl") || canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true }));
 }
 
 $(() => {

@@ -1,0 +1,15 @@
+﻿modelbegin
+clumpbegin
+vertex -.1 0 0
+vertex .1 0 0
+vertex .1 0 .1
+vertex -.1 0 .1
+
+surface .5 .3 0
+color 1 1 1
+
+quad 1 2 3 4
+quad 4 3 2 1
+
+clumpend
+modelend
