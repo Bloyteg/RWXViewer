@@ -1,17 +1,22 @@
-﻿using System.Web;
-using System.Web.Http;
-using MrByte.RWX;
-using MrByte.RWX.Model;
+﻿using System.Web.Http;
+using RWXViewer.Models;
 
 namespace RWXViewer.Controllers
 {
     public class ModelController : ApiController
     {
-        [Route("api/Model/{name}")]
-        public Model Get(string name)
+        private readonly IModelLoader _modelLoader;
+
+        public ModelController(IModelLoader modelLoader)
         {
-            var loader = new Loader();
-            return loader.LoadFromFile(HttpContext.Current.Server.MapPath("~/App_Data/" + name));
+            _modelLoader = modelLoader;
+        }
+
+        [Route("api/Model/{name}")]
+        public IHttpActionResult Get(string name)
+        {
+            var model = _modelLoader.GetModel("default", "test.rwx");
+            return model == null ? (IHttpActionResult)NotFound() : Ok(model);
         }
     }
 }
