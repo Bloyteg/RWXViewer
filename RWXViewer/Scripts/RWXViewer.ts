@@ -1,15 +1,14 @@
-﻿function initGL() {
-    var canvas = <HTMLCanvasElement>document.getElementById("viewport");
-    return <WebGLRenderingContext>(canvas.getContext("webgl") || canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true }));
-}
+﻿import $ = require("jquery");
+import Renderer = require("./viewer/Renderer");
+import ModelLoader = require('./viewer/ModelLoader');
+
+var renderer: Renderer.Renderer;
 
 $(() => {
-    var gl = initGL();
+    renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0]);
+    renderer.draw();
 
-    if (gl) {
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        gl.enable(gl.DEPTH_TEST);
-        gl.depthFunc(gl.LEQUAL);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    }
+    ModelLoader.loadModel("test.rwx", model => {
+        renderer.setCurrentModel(model);
+    });
 });

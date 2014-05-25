@@ -6,8 +6,7 @@
         <title>@ViewBag.Title</title>
 
         @Styles.Render("~/Content/css")
-        @Scripts.Render("~/bundles/jquery")
-        @RenderSection("scripts", false)
+        @RenderSection("scripts", required: false)
     </head>
     <body>
         @RenderBody()

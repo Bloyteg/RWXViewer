@@ -187,8 +187,11 @@
     <Content Include="Content\Site.css" />
     <Content Include="App_Data\default\test.rwx" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
+    <Content Include="Scripts\config.js" />
     <Content Include="Scripts\jquery-2.1.1.js" />
     <Content Include="Scripts\jquery-2.1.1.min.js" />
+    <Content Include="Scripts\r.js" />
+    <Content Include="Scripts\require.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -209,21 +212,24 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Scripts\RWXModel.js">
-      <DependentUpon>RWXModel.ts</DependentUpon>
-    </Content>
-    <TypeScriptCompile Include="Scripts\RWXModel.ts" />
+    <TypeScriptCompile Include="Scripts\viewer\Drawable.ts" />
+    <TypeScriptCompile Include="Scripts\viewer\Model.ts" />
+    <TypeScriptCompile Include="Scripts\viewer\ModelLoader.ts" />
     <Content Include="Scripts\RWXViewer.js">
       <DependentUpon>RWXViewer.ts</DependentUpon>
     </Content>
     <TypeScriptCompile Include="Scripts\RWXViewer.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
+    <TypeScriptCompile Include="Scripts\viewer\Renderer.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <TypeScriptModuleKind>amd</TypeScriptModuleKind>
+  </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />

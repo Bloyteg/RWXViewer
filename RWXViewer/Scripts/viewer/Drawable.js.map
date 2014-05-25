@@ -1,0 +1,1 @@
+{"version":3,"file":"Drawable.js","sourceRoot":"","sources":["Drawable.ts"],"names":["MeshDrawable","MeshDrawable.constructor","MeshDrawable.draw"],"mappings":"AAAA;IAMA;QACIA,sBAAYA,EAAyBA,EAAEA,KAAmBA;QAE1DC,CAACA;QAEDD,8BAAAA;QAEAE,CAACA;QACLF,oBAACA;IAADA,CAACA,IAAA;IARD,oCAQC;GAAA"}

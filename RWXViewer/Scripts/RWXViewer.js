@@ -1,16 +1,13 @@
-﻿function initGL() {
-    var canvas = document.getElementById("viewport");
-    return (canvas.getContext("webgl") || canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true }));
-}
+﻿define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ModelLoader'], function(require, exports, $, Renderer, ModelLoader) {
+    var renderer;
 
-$(function () {
-    var gl = initGL();
+    $(function () {
+        renderer = new Renderer.Renderer($('#viewport')[0]);
+        renderer.draw();
 
-    if (gl) {
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        gl.enable(gl.DEPTH_TEST);
-        gl.depthFunc(gl.LEQUAL);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    }
+        ModelLoader.loadModel("test.rwx", function (model) {
+            renderer.setCurrentModel(model);
+        });
+    });
 });
 //# sourceMappingURL=RWXViewer.js.map

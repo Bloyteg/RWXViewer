@@ -1,110 +1,110 @@
-﻿interface IVector3 {
+﻿export interface IVector3 {
     X: number;
     Y: number;
     Z: number;
 }
 
-interface IVertex {
+export interface IVertex {
     Position: IVector3;
     Uv: IUv;
     Prelight: IColor;
     Normal: IVector3;
 }
 
-interface IUv {
+export interface IUv {
     U: number;
     V: number;
 }
 
-interface ITriangle {
+export interface ITriangle {
     Normal: IVector3;
     Indices: number[];
 }
 
-interface IFace {
+export interface IFace {
     Tag: number;
     MaterialId: number;
     Indices: number[];
     Triangles: ITriangle[];
 }
 
-interface ITransformable {
+export interface ITransformable {
     Matrix: number[];
 }
 
-interface IGeometry {
+export interface IGeometry {
     Vertices: IVertex[];
     Faces: IFace[];
 }
 
-interface IMeshGeometry extends IGeometry {
+export interface IMeshGeometry extends IGeometry {
     Children: IClump[];
     Primitives: IPrimitiveGeometry[];
     PrototypeInstances: IPrototypeInstance[];
     IsPrelit: boolean;
 }
 
-interface IPrimitiveGeometry extends IGeometry, ITransformable{
+export interface IPrimitiveGeometry extends IGeometry, ITransformable {
     MaterialId: number;
 }
 
-interface IPrototype extends IGeometry {
+export interface IPrototype extends IGeometry {
     Name: string;
 }
 
-interface IPrototypeInstance extends ITransformable {
+export interface IPrototypeInstance extends ITransformable {
     Name: string;
     MaterialId: number;
 }
 
-interface IClump extends IMeshGeometry, ITransformable {
+export interface IClump extends IMeshGeometry, ITransformable {
     Tag: number;
     IsCollidable: boolean;
 }
 
-enum AxisAlignment {
+export enum AxisAlignment {
     None,
     ZOrientX,
     ZOrientY,
     Xyz
 }
 
-enum GeometrySampling {
+export enum GeometrySampling {
     Solid,
     Wireframe,
     Pointcloud
 }
 
-enum LightSampling {
+export enum LightSampling {
     Facet,
     Vertex
 }
 
-enum TextureMode {
+export enum TextureMode {
     Null = 0,
     Lit = 1,
     Foreshorten = 2,
     Filter = 4
 }
 
-enum TextureAddressMode {
+export enum TextureAddressMode {
     Wrap,
     Mirror,
     Clamp
 }
 
-enum MaterialMode {
+export enum MaterialMode {
     Null,
     Double
 }
 
-interface IColor {
+export interface IColor {
     R: number;
     G: number;
     B: number;
 }
 
-interface IMaterial {
+export interface IMaterial {
     Color: IColor;
     Opacity: number;
     Ambient: number;
@@ -121,7 +121,7 @@ interface IMaterial {
     MaterialMode: MaterialMode;
 }
 
-interface IModel {
+export interface IModel {
     Prototypes: IPrototype[];
     Materials: IMaterial[];
     Clump: IClump;
