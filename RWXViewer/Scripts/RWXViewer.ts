@@ -6,9 +6,14 @@ var renderer: Renderer.Renderer;
 
 $(() => {
     renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0]);
-    renderer.draw();
 
     ModelLoader.loadModel("test.rwx", model => {
         renderer.setCurrentModel(model);
     });
+
+    (function tick() {
+        renderer.draw();
+
+        window.requestAnimationFrame(tick);
+    })();
 });

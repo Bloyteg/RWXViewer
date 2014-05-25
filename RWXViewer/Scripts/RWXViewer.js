@@ -3,11 +3,16 @@
 
     $(function () {
         renderer = new Renderer.Renderer($('#viewport')[0]);
-        renderer.draw();
 
         ModelLoader.loadModel("test.rwx", function (model) {
             renderer.setCurrentModel(model);
         });
+
+        (function tick() {
+            renderer.draw();
+
+            window.requestAnimationFrame(tick);
+        })();
     });
 });
 //# sourceMappingURL=RWXViewer.js.map

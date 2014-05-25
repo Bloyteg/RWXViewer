@@ -25,8 +25,6 @@
                 if (this.currentDrawable) {
                     this.currentDrawable.draw();
                 }
-
-                window.requestAnimationFrame(this.draw);
             }
         };
 

@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "RWX Viewer by Byte";
 }
 
 @section scripts
@@ -8,6 +8,26 @@
     <script src="@Url.Content("~/Scripts/config.js")"></script>
 }
 
-<canvas id="viewport">
-    Your browser does not support the HTML 5 Canvas element.
-</canvas>
+<div id="header">
+    <div id="headerContent">
+        <h1>RWX Viewer by Byte</h1>
+    </div>
+</div>
+
+<div id="content">
+    <div id="modelSelector">
+        <label for="selectWorld">World:</label>
+        <select id="selectWorld">
+            <option>AW</option>
+        </select>
+        
+        <label for="selectModel">Object:</label>
+        <select id="selectModel">
+            <option>test.rwx</option>
+        </select>
+    </div>
+
+    <canvas id="viewport">
+        Your browser does not support the HTML 5 Canvas element.
+    </canvas>
+</div>
