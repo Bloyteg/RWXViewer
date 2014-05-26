@@ -17,7 +17,7 @@ define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ModelLoad
     $(function () {
         renderer = new Renderer.Renderer($('#viewport')[0], $("script[type='x-shader/x-fragment'], script[type='x-shader/x-vertex']").get());
 
-        ModelLoader.loadModel("test.rwx", function (model) {
+        ModelLoader.loadModel(1, function (model) {
             renderer.setCurrentModel(model);
         });
 

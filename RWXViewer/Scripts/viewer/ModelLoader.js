@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 define(["require", "exports"], function(require, exports) {
-    function loadModel(modelName, handler) {
-        $.getJSON("/api/Model/" + modelName).done(function (data) {
+    function loadModel(modelId, handler) {
+        $.getJSON("/api/Model/" + modelId).done(function (data) {
             handler(data);
         });
     }

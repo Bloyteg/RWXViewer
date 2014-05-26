@@ -11,12 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+using System.Threading.Tasks;
 using MrByte.RWX.Model;
 
 namespace RWXViewer.Models
 {
     public interface IModelLoader
     {
-        Model GetModel(string group, string name);
+        Task<Model> GetModelAsync(int id);
     }
 }

@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+using System.Threading.Tasks;
 using System.Web.Http;
 using RWXViewer.Models;
 
@@ -25,10 +27,10 @@ namespace RWXViewer.Controllers
             _modelLoader = modelLoader;
         }
 
-        [Route("api/Model/{name}")]
-        public IHttpActionResult Get(string name)
+        [Route("api/Model/{id}")]
+        public async Task<IHttpActionResult> Get(int id)
         {
-            var model = _modelLoader.GetModel("default", "test.rwx");
+            var model = await _modelLoader.GetModelAsync(id);
             return model == null ? (IHttpActionResult)NotFound() : Ok(model);
         }
     }

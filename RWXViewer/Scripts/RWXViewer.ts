@@ -21,7 +21,7 @@ var renderer: Renderer.Renderer;
 $(() => {
     renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0], $("script[type='x-shader/x-fragment'], script[type='x-shader/x-vertex']").get());
 
-    ModelLoader.loadModel("test.rwx", model => {
+    ModelLoader.loadModel(1, model => {
         renderer.setCurrentModel(model);
     });
 

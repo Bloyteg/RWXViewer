@@ -20,6 +20,10 @@ export interface IShaderCollection {
     [name: string]: WebGLShader
 }
 
+export interface IProgramCollection {
+    [name: string]: WebGLProgram;
+}
+
 export class Renderer {
     private gl: WebGLRenderingContext;
     private currentDrawable: Drawable.IDrawable;
@@ -79,7 +83,7 @@ export class Renderer {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             if (this.currentDrawable) {
-            //    this.currentDrawable.draw();
+                this.currentDrawable.draw();
             }
         }
     }

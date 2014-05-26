@@ -64,8 +64,6 @@ export class MeshDrawable implements IDrawable {
             gl.drawElements(gl.TRIANGLES, indexBuffer.indexCount, gl.UNSIGNED_SHORT, 0);
         });
 
-        gl.drawElements(gl.TRIANGLES, 500, gl.UNSIGNED_SHORT, 0);
-
         this.children.forEach(child => child.draw());
     }
 }

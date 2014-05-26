@@ -66,7 +66,7 @@ define(["require", "exports", "DrawableBuilder"], function(require, exports, Dra
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
                 if (this.currentDrawable) {
-                    //    this.currentDrawable.draw();
+                    this.currentDrawable.draw();
                 }
             }
         };

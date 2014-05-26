@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
-using System.IO;
+using System.Data.Entity;
+using System.Net;
 using System.Runtime.Caching;
-using System.Web;
+using System.Threading.Tasks;
 using MrByte.RWX;
 using MrByte.RWX.Model;
 
@@ -22,10 +23,10 @@ namespace RWXViewer.Models
 {
     public class ModelLoader : IModelLoader
     { 
-        public Model GetModel(string group, string name)
+        public async Task<Model> GetModelAsync(int id)
         {
             var cache = MemoryCache.Default;
-            var key = string.Format("{0}/{1}", group, name);
+            var key = string.Format("{0}", id);
             var model = cache[key] as Model;
 
             if (model != null)
@@ -33,18 +34,24 @@ namespace RWXViewer.Models
                 return model;
             }
 
-            var path = Path.Combine(HttpContext.Current.Server.MapPath("~/App_Data/"), @group, name);
-
-            if (!File.Exists(path))
+            using(var context = new ModelContext())
+            using (var webClient = new WebClient())
             {
-                return null;
+                var modelFile = await context.ModelFiles.FirstOrDefaultAsync(file => file.Id == id);
+
+                if (modelFile != null)
+                {
+                    var resultData = await webClient.DownloadDataTaskAsync(new Uri(new Uri(modelFile.World.ObjectPath), modelFile.FileName));
+
+                    var loader = new Loader();
+                    //model = loader.LoadFromFile(path);
+                    cache.Add(key, model, DateTimeOffset.Now + TimeSpan.FromHours(24));
+
+                    return model;
+                }
             }
 
-            var loader = new Loader();
-            model = loader.LoadFromFile(path);
-            cache.Add(key, model, DateTimeOffset.Now + TimeSpan.FromHours(24));
-
-            return model;
+            return null;
         }
     }
 }
