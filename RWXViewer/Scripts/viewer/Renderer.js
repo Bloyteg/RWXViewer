@@ -1,4 +1,4 @@
-﻿define(["require", "exports", "Drawable"], function(require, exports, Drawable) {
+﻿define(["require", "exports", "DrawableBuilder"], function(require, exports, DrawableBuilder) {
     var Renderer = (function () {
         function Renderer(canvas) {
             this.initialize(canvas);
@@ -23,13 +23,14 @@
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
                 if (this.currentDrawable) {
-                    this.currentDrawable.draw();
+                    //    this.currentDrawable.draw();
                 }
             }
         };
 
         Renderer.prototype.setCurrentModel = function (model) {
-            this.currentDrawable = new Drawable.MeshDrawable(this.gl, model);
+            var builder = new DrawableBuilder.DrawableBuilder(this.gl);
+            this.currentDrawable = builder.loadModel(model);
         };
         return Renderer;
     })();

@@ -213,6 +213,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\viewer\Drawable.ts" />
+    <TypeScriptCompile Include="Scripts\viewer\DrawableBuilder.ts" />
     <TypeScriptCompile Include="Scripts\viewer\Model.ts" />
     <TypeScriptCompile Include="Scripts\viewer\ModelLoader.ts" />
     <Content Include="Scripts\RWXViewer.js">

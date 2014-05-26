@@ -2,6 +2,7 @@
     baseUrl: "/Scripts",
     paths: {
         Drawable: "/Scripts/viewer/Drawable",
+        DrawableBuilder: "/Scripts/viewer/DrawableBuilder",
         Model: "/Scripts/viewer/Model",
         ModelLoader: "/Scripts/viewer/ModelLoader",
         Renderer: "/Scripts/viewer/Renderer",

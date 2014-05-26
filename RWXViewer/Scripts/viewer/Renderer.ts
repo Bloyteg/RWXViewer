@@ -1,9 +1,10 @@
 ﻿import Model = require("Model");
+import DrawableBuilder = require("DrawableBuilder");
 import Drawable = require("Drawable");
 
 export class Renderer {
     private gl: WebGLRenderingContext;
-    private currentDrawable: Drawable.MeshDrawable;
+    private currentDrawable: Drawable.IDrawable;
 
     constructor(canvas: HTMLCanvasElement) {
         this.initialize(canvas);
@@ -29,12 +30,13 @@ export class Renderer {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             if (this.currentDrawable) {
-                this.currentDrawable.draw();
+            //    this.currentDrawable.draw();
             }
         }
     }
 
     setCurrentModel(model: Model.IModel): void {
-        this.currentDrawable = new Drawable.MeshDrawable(this.gl, model);
+        var builder = new DrawableBuilder.DrawableBuilder(this.gl);
+        this.currentDrawable = builder.loadModel(model);
     }
 }
