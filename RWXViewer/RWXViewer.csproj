@@ -185,7 +185,7 @@
     <Compile Include="Models\IObjectPathItemLoader.cs" />
     <Compile Include="Models\ObjectPathContext.cs" />
     <Compile Include="Models\ObjectPathItem.cs" />
-    <Compile Include="Models\ItemObjectPathItemLoader.cs" />
+    <Compile Include="Models\ObjectPathItemLoader.cs" />
     <Compile Include="Models\World.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
