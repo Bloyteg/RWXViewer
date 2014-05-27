@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace RWXViewer.Models
@@ -22,10 +24,31 @@ namespace RWXViewer.Models
         Texture
     }
 
+    public static class ObjectPathItemTypeExtensions
+    {
+        public static string ToPathName(this ObjectPathItemType itemType)
+        {
+            switch (itemType)
+            {
+            case ObjectPathItemType.Model:
+                return "models";
+
+            case ObjectPathItemType.Avatar:
+                return "avatars";
+
+            case ObjectPathItemType.Texture:
+                return "textures";
+
+            default:
+                throw new InvalidEnumArgumentException("itemType");
+            }
+        }
+    }
+
     public class ObjectPathItem
     {
         [Key]
-        public int PathObjectId { get; set; }
+        public int ObjectPathId { get; set; }
         public string Name { get; set; }
         public ObjectPathItemType Type { get; set; }
         public string FileName { get; set; }
