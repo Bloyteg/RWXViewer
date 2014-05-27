@@ -178,14 +178,14 @@
     <Compile Include="App_Start\UnityConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\ModelController.cs" />
+    <Compile Include="Controllers\ObjectPathController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\IModelLoader.cs" />
-    <Compile Include="Models\ModelContext.cs" />
-    <Compile Include="Models\ModelFile.cs" />
-    <Compile Include="Models\ModelLoader.cs" />
+    <Compile Include="Models\IObjectPathItemLoader.cs" />
+    <Compile Include="Models\ObjectPathContext.cs" />
+    <Compile Include="Models\ObjectPathItem.cs" />
+    <Compile Include="Models\ItemObjectPathItemLoader.cs" />
     <Compile Include="Models\World.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -200,7 +200,9 @@
     <Content Include="Scripts\r.js" />
     <Content Include="Scripts\require.js" />
     <Content Include="Scripts\_references.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -224,7 +226,7 @@
     <TypeScriptCompile Include="Scripts\viewer\Drawable.ts" />
     <TypeScriptCompile Include="Scripts\viewer\DrawableBuilder.ts" />
     <TypeScriptCompile Include="Scripts\viewer\Model.ts" />
-    <TypeScriptCompile Include="Scripts\viewer\ModelLoader.ts" />
+    <TypeScriptCompile Include="Scripts\viewer\ObjectPathItemLoader.ts" />
     <Content Include="Scripts\RWXViewer.js">
       <DependentUpon>RWXViewer.ts</DependentUpon>
     </Content>

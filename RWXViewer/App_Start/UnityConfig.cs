@@ -24,7 +24,7 @@ namespace RWXViewer
         {
 			var container = new UnityContainer();
 
-            container.RegisterInstance<IModelLoader>(new ModelLoader());
+            container.RegisterInstance<IObjectPathItemLoader>(new ObjectPathItemLoader());
 
             GlobalConfiguration.Configuration.DependencyResolver = new UnityDependencyResolver(container);
         }

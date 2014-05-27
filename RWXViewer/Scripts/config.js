@@ -18,7 +18,7 @@ requirejs.config({
         Drawable: "/Scripts/viewer/Drawable",
         DrawableBuilder: "/Scripts/viewer/DrawableBuilder",
         Model: "/Scripts/viewer/Model",
-        ModelLoader: "/Scripts/viewer/ModelLoader",
+        ObjectPathItemLoader: "/Scripts/viewer/ObjectPathItemLoader",
         Renderer: "/Scripts/viewer/Renderer",
         jquery: "jquery-2.1.1"
     }

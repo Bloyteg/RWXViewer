@@ -11,13 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ModelLoader'], function(require, exports, $, Renderer, ModelLoader) {
+define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ObjectPathItemLoader'], function(require, exports, $, Renderer, PathObjectLoader) {
     var renderer;
 
     $(function () {
         renderer = new Renderer.Renderer($('#viewport')[0], $("script[type='x-shader/x-fragment'], script[type='x-shader/x-vertex']").get());
 
-        ModelLoader.loadModel(1, function (model) {
+        PathObjectLoader.loadModel(1, function (model) {
             renderer.setCurrentModel(model);
         });
 

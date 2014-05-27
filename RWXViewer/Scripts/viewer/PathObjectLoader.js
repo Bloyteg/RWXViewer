@@ -1,24 +1,22 @@
 ﻿// Copyright 2014 Joshua R. Rodgers
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //    http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-using System.Threading.Tasks;
-using MrByte.RWX.Model;
-
-namespace RWXViewer.Models
-{
-    public interface IModelLoader
-    {
-        Task<Model> GetModelAsync(int id);
+define(["require", "exports"], function(require, exports) {
+    function loadModel(modelId, handler) {
+        $.getJSON("/api/Model/" + modelId).done(function (data) {
+            handler(data);
+        });
     }
-}
+    exports.loadModel = loadModel;
+});
+//# sourceMappingURL=PathObjectLoader.js.map

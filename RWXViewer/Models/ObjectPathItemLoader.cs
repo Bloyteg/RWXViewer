@@ -21,7 +21,7 @@ using MrByte.RWX.Model;
 
 namespace RWXViewer.Models
 {
-    public class ModelLoader : IModelLoader
+    public class ObjectPathItemLoader : IObjectPathItemLoader
     { 
         public async Task<Model> GetModelAsync(int id)
         {
@@ -34,14 +34,14 @@ namespace RWXViewer.Models
                 return model;
             }
 
-            using(var context = new ModelContext())
+            using(var context = new ObjectPathContext())
             using (var webClient = new WebClient())
             {
-                var modelFile = await context.ModelFiles.FirstOrDefaultAsync(file => file.Id == id);
+                var pathObject = await context.ObjectPathItem.FirstOrDefaultAsync(file => file.PathObjectId == id);
 
-                if (modelFile != null)
+                if (pathObject != null)
                 {
-                    var resultData = await webClient.DownloadDataTaskAsync(new Uri(new Uri(modelFile.World.ObjectPath), modelFile.FileName));
+                    var resultData = await webClient.DownloadDataTaskAsync(new Uri(new Uri(pathObject.World.ObjectPathUrl), pathObject.FileName));
 
                     var loader = new Loader();
                     //model = loader.LoadFromFile(path);

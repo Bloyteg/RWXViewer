@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Model = require("Model");
+using System.Threading.Tasks;
+using MrByte.RWX.Model;
 
-export function loadModel(modelId: number, handler: (model: Model.IModel) => void) {
-    $.getJSON("/api/Model/" + modelId).done((data) => {
-        handler(data);
-    });
+namespace RWXViewer.Models
+{
+    public interface IObjectPathItemLoader
+    {
+        Task<Model> GetModelAsync(int id);
+    }
 }

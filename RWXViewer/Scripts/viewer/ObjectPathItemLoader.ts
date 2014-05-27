@@ -12,26 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Threading.Tasks;
-using System.Web.Http;
-using RWXViewer.Models;
+import Model = require("Model");
 
-namespace RWXViewer.Controllers
-{
-    public class ModelController : ApiController
-    {
-        private readonly IModelLoader _modelLoader;
-
-        public ModelController(IModelLoader modelLoader)
-        {
-            _modelLoader = modelLoader;
-        }
-
-        [Route("api/Model/{id}")]
-        public async Task<IHttpActionResult> Get(int id)
-        {
-            var model = await _modelLoader.GetModelAsync(id);
-            return model == null ? (IHttpActionResult)NotFound() : Ok(model);
-        }
-    }
+export function loadModel(modelId: number, handler: (model: Model.IModel) => void) {
+    $.getJSON("/api/ObjectPath/Model/" + modelId).done((data) => {
+        handler(data);
+    });
 }
