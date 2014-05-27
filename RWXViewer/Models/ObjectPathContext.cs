@@ -4,7 +4,7 @@ namespace RWXViewer.Models
 {
     public class ObjectPathContext : DbContext
     {
-        public ObjectPathContext() : base("ObjectPathContext")
+        public ObjectPathContext() : base("ObjectPathDb")
         {
             
         }
