@@ -25,16 +25,48 @@ namespace RWXViewer.Models
     { 
         public async Task<Model> GetModelAsync(int id)
         {
-            var cache = MemoryCache.Default;
-            var key = string.Format("{0}", id);
-            var model = cache[key] as Model;
+            var model = LoadFromCache(id);
 
             if (model != null)
             {
                 return model;
             }
 
-            using(var context = new ObjectPathContext())
+            model = await LoadFromObjectPath(id);
+
+            if (model != null)
+            {
+                AddToCache(id, model);
+            }
+
+            return model;
+        }
+
+        private static Model LoadFromCache(int id)
+        {
+            var cache = MemoryCache.Default;
+            var key = BuildCacheKey(id);
+            var model = cache[key] as Model;
+            return model;
+        }
+
+        private void AddToCache(int id, Model model)
+        {
+            var cache = MemoryCache.Default;
+            var key = BuildCacheKey(id);
+            cache.Add(key, model, DateTimeOffset.Now + TimeSpan.FromHours(24));
+        }
+
+        private static string BuildCacheKey(int id)
+        {
+            return string.Format("Model-{0}", id);
+        }
+
+        private static async Task<Model> LoadFromObjectPath(int id)
+        {
+            Model model = null;
+
+            using (var context = new ObjectPathContext())
             using (var webClient = new WebClient())
             {
                 var pathObject = await context.ObjectPathItem.FirstOrDefaultAsync(file => file.PathObjectId == id);
@@ -45,7 +77,6 @@ namespace RWXViewer.Models
 
                     var loader = new Loader();
                     //model = loader.LoadFromFile(path);
-                    cache.Add(key, model, DateTimeOffset.Now + TimeSpan.FromHours(24));
 
                     return model;
                 }
