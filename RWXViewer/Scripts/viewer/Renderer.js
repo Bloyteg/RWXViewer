@@ -11,15 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-define(["require", "exports", "DrawableBuilder"], function(require, exports, DrawableBuilder) {
+define(["require", "exports", "DrawableBuilder", "ShaderProgramLoader"], function(require, exports, DrawableBuilder, ShaderProgramLoader) {
     var Renderer = (function () {
-        function Renderer(canvas, shaderScripts) {
+        function Renderer(canvas) {
             this.initialize(canvas);
-            this.initializeShaders(shaderScripts);
         }
         Renderer.prototype.initialize = function (canvas) {
-            this.gl = (canvas.getContext("webgl") || canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true }));
-            var gl = this.gl;
+            this._gl = (canvas.getContext("webgl") || canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true }));
+            var gl = this._gl;
 
             if (gl) {
                 gl.viewport(0, 0, canvas.width, canvas.height);
@@ -28,52 +27,28 @@ define(["require", "exports", "DrawableBuilder"], function(require, exports, Dra
                 gl.enable(gl.DEPTH_TEST);
                 gl.depthFunc(gl.LEQUAL);
             }
-        };
 
-        Renderer.prototype.initializeShaders = function (shaderScripts) {
-            var compiledShaders = {};
-            var gl = this.gl;
-
-            shaderScripts.forEach(function (shaderScript) {
-                var shaderName = shaderScript.id;
-                var shaderContents = shaderScript.innerText;
-                var shaderType = shaderScript.type;
-                var shader;
-
-                if (shaderType === "x-shader/x-fragment") {
-                    shader = gl.createShader(gl.FRAGMENT_SHADER);
-                } else if (shaderType === "x-shader/x-vertex") {
-                    shader = gl.createShader(gl.VERTEX_SHADER);
-                } else {
-                    return;
-                }
-
-                gl.shaderSource(shader, shaderContents);
-                gl.compileShader(shader);
-
-                if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                    compiledShaders[shaderName] = shader;
-                }
+            ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl", function (program) {
+                console.log(program.attributes);
+                console.log(program.uniforms);
             });
-
-            this.shaders = compiledShaders;
         };
 
         Renderer.prototype.draw = function () {
-            var gl = this.gl;
+            var gl = this._gl;
 
             if (gl) {
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-                if (this.currentDrawable) {
-                    this.currentDrawable.draw();
+                if (this._currentDrawable) {
+                    this._currentDrawable.draw();
                 }
             }
         };
 
         Renderer.prototype.setCurrentModel = function (model) {
-            var builder = new DrawableBuilder.DrawableBuilder(this.gl);
-            this.currentDrawable = builder.loadModel(model);
+            var builder = new DrawableBuilder.DrawableBuilder(this._gl);
+            this._currentDrawable = builder.loadModel(model);
         };
         return Renderer;
     })();

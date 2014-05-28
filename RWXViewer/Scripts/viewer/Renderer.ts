@@ -15,28 +15,19 @@
 import Model = require("Model");
 import DrawableBuilder = require("DrawableBuilder");
 import Drawable = require("Drawable");
-
-export interface IShaderCollection {
-    [name: string]: WebGLShader
-}
-
-export interface IProgramCollection {
-    [name: string]: WebGLProgram;
-}
+import ShaderProgramLoader = require("ShaderProgramLoader");
 
 export class Renderer {
-    private gl: WebGLRenderingContext;
-    private currentDrawable: Drawable.IDrawable;
-    private shaders: IShaderCollection;
+    private _gl: WebGLRenderingContext;
+    private _currentDrawable: Drawable.IDrawable;
 
-    constructor(canvas: HTMLCanvasElement, shaderScripts: HTMLScriptElement[]) {
+    constructor(canvas: HTMLCanvasElement) {
         this.initialize(canvas);
-        this.initializeShaders(shaderScripts);
     }
 
     private initialize(canvas: HTMLCanvasElement) {
-        this.gl = <WebGLRenderingContext>(canvas.getContext("webgl") || canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true }));
-        var gl = this.gl;
+        this._gl = <WebGLRenderingContext>(canvas.getContext("webgl") || canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true }));
+        var gl = this._gl;
 
         if (gl) {
             gl.viewport(0, 0, canvas.width, canvas.height);
@@ -45,51 +36,27 @@ export class Renderer {
             gl.enable(gl.DEPTH_TEST);
             gl.depthFunc(gl.LEQUAL);
         }
-    }
 
-    private initializeShaders(shaderScripts: HTMLScriptElement[]) {
-        var compiledShaders: IShaderCollection = {};
-        var gl = this.gl;
-
-        shaderScripts.forEach(shaderScript => {
-            var shaderName = shaderScript.id;
-            var shaderContents = shaderScript.innerText;
-            var shaderType = shaderScript.type;
-            var shader: WebGLShader;
-
-            if (shaderType === "x-shader/x-fragment") {
-                shader = gl.createShader(gl.FRAGMENT_SHADER);
-            } else if (shaderType === "x-shader/x-vertex") {
-                shader = gl.createShader(gl.VERTEX_SHADER);
-            } else {
-                return;
-            }
-
-            gl.shaderSource(shader, shaderContents);
-            gl.compileShader(shader);
-
-            if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                compiledShaders[shaderName] = shader;
-            }
+        ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl", (program) => {
+            console.log(program.attributes);
+            console.log(program.uniforms);
         });
-
-        this.shaders = compiledShaders;
     }
 
     draw(): void {
-        var gl = this.gl;
+        var gl = this._gl;
 
         if (gl) {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            if (this.currentDrawable) {
-                this.currentDrawable.draw();
+            if (this._currentDrawable) {
+                this._currentDrawable.draw();
             }
         }
     }
 
     setCurrentModel(model: Model.IModel): void {
-        var builder = new DrawableBuilder.DrawableBuilder(this.gl);
-        this.currentDrawable = builder.loadModel(model);
+        var builder = new DrawableBuilder.DrawableBuilder(this._gl);
+        this._currentDrawable = builder.loadModel(model);
     }
 }

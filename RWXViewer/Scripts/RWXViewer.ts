@@ -19,7 +19,7 @@ import PathObjectLoader = require('./viewer/ObjectPathItemLoader');
 var renderer: Renderer.Renderer;
 
 $(() => {
-    renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0], $("script[type='x-shader/x-fragment'], script[type='x-shader/x-vertex']").get());
+    renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0]);
 
     PathObjectLoader.loadModel(1, model => {
         renderer.setCurrentModel(model);

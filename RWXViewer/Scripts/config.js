@@ -20,6 +20,8 @@ requirejs.config({
         Model: "/Scripts/viewer/Model",
         ObjectPathItemLoader: "/Scripts/viewer/ObjectPathItemLoader",
         Renderer: "/Scripts/viewer/Renderer",
+        ShaderProgram: "/Scripts/viewer/ShaderProgram",
+        ShaderProgramLoader: "/Scripts/viewer/ShaderProgramLoader",
         jquery: "jquery-2.1.1"
     }
 })

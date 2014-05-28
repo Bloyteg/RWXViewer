@@ -216,6 +216,12 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Scripts\jquery-2.1.1.min.map" />
+    <Content Include="Content\Shaders\vertexShader.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Shaders\fragmentShader.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -224,6 +230,7 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\viewer\ShaderProgramLoader.ts" />
     <TypeScriptCompile Include="Scripts\viewer\Drawable.ts" />
     <TypeScriptCompile Include="Scripts\viewer\DrawableBuilder.ts" />
     <TypeScriptCompile Include="Scripts\viewer\Model.ts" />
@@ -234,6 +241,7 @@
     <TypeScriptCompile Include="Scripts\RWXViewer.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\viewer\Renderer.ts" />
+    <TypeScriptCompile Include="Scripts\viewer\ShaderProgram.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

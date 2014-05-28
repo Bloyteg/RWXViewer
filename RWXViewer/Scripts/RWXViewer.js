@@ -15,7 +15,7 @@ define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ObjectPat
     var renderer;
 
     $(function () {
-        renderer = new Renderer.Renderer($('#viewport')[0], $("script[type='x-shader/x-fragment'], script[type='x-shader/x-vertex']").get());
+        renderer = new Renderer.Renderer($('#viewport')[0]);
 
         PathObjectLoader.loadModel(1, function (model) {
             renderer.setCurrentModel(model);
