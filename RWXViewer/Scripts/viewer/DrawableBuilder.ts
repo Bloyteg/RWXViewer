@@ -16,10 +16,10 @@ import Model = require("Model")
 import Drawable = require("Drawable");
 
 export class DrawableBuilder {
-    private gl: WebGLRenderingContext;
+    private _gl: WebGLRenderingContext;
 
     constructor(gl: WebGLRenderingContext) {
-        this.gl = gl;
+        this._gl = gl;
     }
 
     loadModel(model: Model.IModel): Drawable.IDrawable {
@@ -30,7 +30,7 @@ export class DrawableBuilder {
         var vertexBuffer: Drawable.IVertexBuffer = this.buildVertexBuffer(geometry);
         var indexBuffers: Drawable.IIndexBuffer[] = this.buildIndexBuffers(geometry);
 
-        var drawable = new Drawable.MeshDrawable(this.gl, vertexBuffer, indexBuffers);
+        var drawable = new Drawable.MeshDrawable(this._gl, vertexBuffer, indexBuffers);
 
         geometry.Children.forEach(child => {
             var childMeshDrawable = this.buildMeshDrawable(model, child);
@@ -58,7 +58,7 @@ export class DrawableBuilder {
             normals.push(vertex.Normal.Z);
         });
 
-        var gl = this.gl;
+        var gl = this._gl;
         var vertexBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -101,7 +101,7 @@ export class DrawableBuilder {
                 Array.prototype.push.apply(indices, triangle.Indices);
             });
 
-            var gl = this.gl;
+            var gl = this._gl;
             var indexBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);

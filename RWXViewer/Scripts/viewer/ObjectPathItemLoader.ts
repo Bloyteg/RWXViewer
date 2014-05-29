@@ -14,8 +14,12 @@
 
 import Model = require("Model");
 
-export function loadModel(modelId: number, handler: (model: Model.IModel) => void) {
-    $.getJSON("/api/ObjectPath/Model/" + modelId).done((data) => {
-        handler(data);
-    });
+export function loadModel(modelId: number) {
+    var deferred = $.Deferred<Model.IModel>();
+
+    $.getJSON("/api/ObjectPath/Model/" + modelId)
+        .done(data => deferred.resolve(data))
+        .fail(() => deferred.fail());
+
+    return deferred.promise();
 }

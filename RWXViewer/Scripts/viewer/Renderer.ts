@@ -37,10 +37,7 @@ export class Renderer {
             gl.depthFunc(gl.LEQUAL);
         }
 
-        ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl", (program) => {
-            console.log(program.attributes);
-            console.log(program.uniforms);
-        });
+        ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl").done(program => console.log(program));
     }
 
     draw(): void {
