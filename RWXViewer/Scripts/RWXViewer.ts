@@ -22,7 +22,7 @@ $(() => {
     renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0]);
 
     PathObjectLoader.loadModel(1)
-                    .done(renderer.setCurrentModel);
+                    .done(model => renderer.setCurrentModel(model));
 
     (function tick() {
         renderer.draw();

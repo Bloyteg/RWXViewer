@@ -37,7 +37,8 @@ export class Renderer {
             gl.depthFunc(gl.LEQUAL);
         }
 
-        ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl").done(program => console.log(program));
+        //TODO: Load all shader programs and store them.  Once done, notify that loading has completed. (Figure out how to use promises here?)
+        //ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl").done(program => console.log(program));
     }
 
     draw(): void {
