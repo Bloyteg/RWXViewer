@@ -21,12 +21,16 @@ var renderer: Renderer.Renderer;
 $(() => {
     renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0]);
 
-    PathObjectLoader.loadModel(1)
-                    .done(model => renderer.setCurrentModel(model));
+    $.when(renderer.initialize(), PathObjectLoader.loadModel(1))
+        .done((_, model) => {
+            renderer.setCurrentModel(model);
 
-    (function tick() {
-        renderer.draw();
+            function tick() {
+                renderer.draw();
 
-        window.requestAnimationFrame(tick);
-    })();
+                window.requestAnimationFrame(tick);
+            }
+
+            tick();
+        });
 });

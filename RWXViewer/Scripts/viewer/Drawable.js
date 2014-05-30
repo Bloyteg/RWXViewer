@@ -13,33 +13,40 @@
 // limitations under the License.
 define(["require", "exports"], function(require, exports) {
     var MeshDrawable = (function () {
-        function MeshDrawable(gl, vertexBuffer, indexBuffers) {
-            this.gl = gl;
-            this.vertexBuffer = vertexBuffer;
-            this.indexBuffers = indexBuffers;
+        function MeshDrawable(vertexBuffer, indexBuffers) {
+            this._vertexBuffer = vertexBuffer;
+            this._indexBuffers = indexBuffers;
             this.children = new Array();
         }
-        MeshDrawable.prototype.draw = function () {
-            var gl = this.gl;
+        MeshDrawable.prototype.draw = function (gl, shaders) {
+            shaders[0].useProgram();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer.vertexPositions);
+            gl.vertexAttribPointer(shaders[0].attributes["aVertexPosition"], 3, gl.FLOAT, false, 0, 0);
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer.vertexPositions);
+            //gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer.vertexUVs);
+            ////TODO: Set UV attributes.
+            //gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer.vertexNormals);
+            ////TODO: Set normal attributes.
+            var mvMatrix = mat4.create();
+            var pMatrix = mat4.create();
 
-            //TODO: Set position attributes.
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer.vertexUVs);
+            mat4.perspective(pMatrix, 45, 960 / 540, 0.1, 100.0);
+            mat4.identity(mvMatrix);
+            mat4.translate(mvMatrix, mvMatrix, [0, 0, -15]);
+            mat4.scale(mvMatrix, mvMatrix, [5, 5, 5]);
 
-            //TODO: Set UV attributes.
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer.vertexNormals);
-
-            //TODO: Set normal attributes.
-            this.indexBuffers.forEach(function (indexBuffer) {
+            this._indexBuffers.forEach(function (indexBuffer) {
+                //TODO: Set matrices.
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer.indexBuffer);
 
-                //TODO: Set matrices
+                gl.uniformMatrix4fv(shaders[0].uniforms["uMVMatrix"], false, mvMatrix);
+                gl.uniformMatrix4fv(shaders[0].uniforms["uPMatrix"], false, pMatrix);
+
                 gl.drawElements(gl.TRIANGLES, indexBuffer.indexCount, gl.UNSIGNED_SHORT, 0);
             });
 
             this.children.forEach(function (child) {
-                return child.draw();
+                return child.draw(gl, shaders);
             });
         };
         return MeshDrawable;

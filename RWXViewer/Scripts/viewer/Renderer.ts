@@ -16,39 +16,51 @@ import Model = require("Model");
 import DrawableBuilder = require("DrawableBuilder");
 import Drawable = require("Drawable");
 import ShaderProgramLoader = require("ShaderProgramLoader");
+import ShaderProgram = require("ShaderProgram");
 
 export class Renderer {
+    private _canvas: HTMLCanvasElement;
     private _gl: WebGLRenderingContext;
     private _currentDrawable: Drawable.IDrawable;
+    private _shaderPrograms: ShaderProgram.ShaderProgram[];
 
     constructor(canvas: HTMLCanvasElement) {
-        this.initialize(canvas);
+        this._canvas = canvas;
     }
 
-    private initialize(canvas: HTMLCanvasElement) {
+    initialize() {
+        var canvas = this._canvas;
         this._gl = <WebGLRenderingContext>(canvas.getContext("webgl") || canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true }));
         var gl = this._gl;
 
         if (gl) {
-            gl.viewport(0, 0, canvas.width, canvas.height);
+            gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
             gl.clearDepth(1.0);
             gl.enable(gl.DEPTH_TEST);
             gl.depthFunc(gl.LEQUAL);
         }
 
-        //TODO: Load all shader programs and store them.  Once done, notify that loading has completed. (Figure out how to use promises here?)
-        //ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl").done(program => console.log(program));
+        var deferred = $.Deferred<void>();
+
+        //TODO: Improve this so that it loads multiple shaders and stores them in a string -> ShaderProgram index.
+        ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl").done(program => {
+            this._shaderPrograms = [program];
+            deferred.resolve();
+        }).fail(_ => deferred.fail());
+
+        return deferred.promise(this);
     }
 
     draw(): void {
         var gl = this._gl;
 
         if (gl) {
+            gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             if (this._currentDrawable) {
-                this._currentDrawable.draw();
+                this._currentDrawable.draw(gl, this._shaderPrograms);
             }
         }
     }

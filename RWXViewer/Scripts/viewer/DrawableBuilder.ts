@@ -30,7 +30,7 @@ export class DrawableBuilder {
         var vertexBuffer: Drawable.IVertexBuffer = this.buildVertexBuffer(geometry);
         var indexBuffers: Drawable.IIndexBuffer[] = this.buildIndexBuffers(geometry);
 
-        var drawable = new Drawable.MeshDrawable(this._gl, vertexBuffer, indexBuffers);
+        var drawable = new Drawable.MeshDrawable(vertexBuffer, indexBuffers);
 
         geometry.Children.forEach(child => {
             var childMeshDrawable = this.buildMeshDrawable(model, child);
