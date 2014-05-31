@@ -51,7 +51,7 @@ export class Renderer {
         ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl").done(program => {
             this._shaderPrograms = [program];
             deferred.resolve();
-        }).fail(_ => deferred.fail());
+        }).fail(() => deferred.fail());
 
         return deferred.promise(this);
     }
@@ -69,7 +69,7 @@ export class Renderer {
             mat4.perspective(pMatrix, 45, 960 / 540, 0.1, 100.0);
 
             gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uPMatrix"], false, pMatrix);
-            gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uCMatrix"], false, this._camera.cameraMatrix);
+            gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uCMatrix"], false, this._camera.matrix);
 
             if (this._currentDrawable) {
                 this._currentDrawable.draw(gl, this._shaderPrograms);
@@ -82,7 +82,8 @@ export class Renderer {
         this._currentDrawable = builder.loadModel(model);
     }
 
-    setMouseDeltas(deltaX: number, deltaY: number) {
-        this._camera.rotateCamera(deltaX, deltaY);
+
+    get camera(): Camera.Camera {
+        return this._camera;
     }
 }

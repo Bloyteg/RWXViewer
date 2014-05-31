@@ -30,17 +30,17 @@
     font-weight: bold;
 }
 
-#modelSelector {
+.infoBar {
     background-color: #7b4f9d;
     color: #fff;
     padding: 10px 10px 10px 10px;
+    margin-top: 20px;
     margin-bottom: 20px;
 }
 
 #content {
     width: 960px;
     height: 100%;
-    padding-top: 20px;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 0;

@@ -19,19 +19,15 @@ export class Camera {
     private _target: Vec3Array;
     private _up: Vec3Array;
 
-    private _thetaDelta: number = 0;
-    private _phiDelta: number = 0;
+    private _thetaDelta: number;
+    private _phiDelta: number;
+    private _scale: number;
    
-
     constructor() {
-        this._cameraMatrix = mat4.create();
-        this._offset = vec3.create();
-        this._position = vec3.fromValues(0, 0, -5);
-        this._target = vec3.create();
-        this._up = vec3.fromValues(0, 1, 0);
+        this.reset();
     }
 
-    rotateCamera(deltaX: number, deltaY: number) {
+    rotate(deltaX: number, deltaY: number) {
         var rotateSpeed = 0.5;
         var width = 960;
         var height = 540;
@@ -40,11 +36,27 @@ export class Camera {
         this._phiDelta -= 2 * Math.PI * deltaY / height * rotateSpeed;
     }
 
-    resetCamera() {
+    reset() {
+        this._cameraMatrix = mat4.create();
+        this._offset = vec3.create();
+        this._position = vec3.fromValues(0, 0, -5);
+        this._target = vec3.create();
+        this._up = vec3.fromValues(0, 1, 0);
 
+        this._thetaDelta = 0;
+        this._phiDelta = 0;
+        this._scale = 1;
     }
 
-    get cameraMatrix(): Mat4Array {
+    zoomIn(zoomFactor: number) {
+        this._scale *= zoomFactor;
+    }
+
+    zoomOut(zoomFactor: number) {
+        this._scale /= zoomFactor;
+    }
+
+    get matrix(): Mat4Array {
 
         vec3.sub(this._offset, this._position, this._target);
 
@@ -60,9 +72,8 @@ export class Camera {
 
         //TODO: Restrict, but not right now.
 
-        //TODO: move this off as a constant.
-        var scale = 1;
-        var radius = vec3.length(this._offset) * scale;
+        var radius = vec3.length(this._offset) * this._scale;
+        this._scale = 1;
         //TODO: Restrict radius.
 
         this._offset[0] = radius * Math.sin(phi) * Math.sin(theta);

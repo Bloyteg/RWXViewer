@@ -14,15 +14,9 @@
 define(["require", "exports"], function(require, exports) {
     var Camera = (function () {
         function Camera() {
-            this._thetaDelta = 0;
-            this._phiDelta = 0;
-            this._cameraMatrix = mat4.create();
-            this._offset = vec3.create();
-            this._position = vec3.fromValues(0, 0, -5);
-            this._target = vec3.create();
-            this._up = vec3.fromValues(0, 1, 0);
+            this.reset();
         }
-        Camera.prototype.rotateCamera = function (deltaX, deltaY) {
+        Camera.prototype.rotate = function (deltaX, deltaY) {
             var rotateSpeed = 0.5;
             var width = 960;
             var height = 540;
@@ -31,10 +25,27 @@ define(["require", "exports"], function(require, exports) {
             this._phiDelta -= 2 * Math.PI * deltaY / height * rotateSpeed;
         };
 
-        Camera.prototype.resetCamera = function () {
+        Camera.prototype.reset = function () {
+            this._cameraMatrix = mat4.create();
+            this._offset = vec3.create();
+            this._position = vec3.fromValues(0, 0, -5);
+            this._target = vec3.create();
+            this._up = vec3.fromValues(0, 1, 0);
+
+            this._thetaDelta = 0;
+            this._phiDelta = 0;
+            this._scale = 1;
         };
 
-        Object.defineProperty(Camera.prototype, "cameraMatrix", {
+        Camera.prototype.zoomIn = function (zoomFactor) {
+            this._scale *= zoomFactor;
+        };
+
+        Camera.prototype.zoomOut = function (zoomFactor) {
+            this._scale /= zoomFactor;
+        };
+
+        Object.defineProperty(Camera.prototype, "matrix", {
             get: function () {
                 vec3.sub(this._offset, this._position, this._target);
 
@@ -49,9 +60,8 @@ define(["require", "exports"], function(require, exports) {
                 phi += this._phiDelta;
 
                 //TODO: Restrict, but not right now.
-                //TODO: move this off as a constant.
-                var scale = 1;
-                var radius = vec3.length(this._offset) * scale;
+                var radius = vec3.length(this._offset) * this._scale;
+                this._scale = 1;
 
                 //TODO: Restrict radius.
                 this._offset[0] = radius * Math.sin(phi) * Math.sin(theta);

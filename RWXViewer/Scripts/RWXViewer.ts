@@ -18,47 +18,68 @@ import PathObjectLoader = require('./viewer/ObjectPathItemLoader');
 
 var renderer: Renderer.Renderer;
 
+enum CameraState {
+    None,
+    Rotating,
+    Panning
+}
+
 $(() => {
     renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0]);
 
     (() => {
-        var mousedown = false;
+        var cameraState = CameraState.None;
         var lastMouseX = null;
         var lastMouseY = null;
 
-        $("#viewport").mousedown(() => {
-            mousedown = true;
+        $("#viewport").mousedown((event) => {
+            cameraState = event.button == 0 ? CameraState.Rotating : CameraState.Panning;
             lastMouseX = null;
             lastMouseY = null;
         });
 
-        $(document).mouseup(() => mousedown = false);
+        $(document).mouseup(() => cameraState = CameraState.None);
 
         $(document).mousemove((event) => {
-            if (mousedown) {
+            if (cameraState === CameraState.Rotating) {
+                event.preventDefault();
                 if (lastMouseX && lastMouseY) {
                     var deltaX = event.pageX - lastMouseX;
                     var deltaY = event.pageY - lastMouseY;
 
-                    renderer.setMouseDeltas(deltaX, deltaY);
+                    renderer.camera.rotate(deltaX, deltaY);
                 }
 
                 lastMouseX = event.pageX;
                 lastMouseY = event.pageY;
             }
         });
+
+        $('#viewport').on("mousewheel", false, event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            var originalEvent = event.originalEvent;
+
+            var delta: number = (<any>originalEvent).wheelDelta || -(<any>originalEvent).detail;
+
+            if (delta > 0) {
+                renderer.camera.zoomOut(0.95);
+            } else {
+                renderer.camera.zoomIn(0.95);
+            }
+        });
     })();
 
     $.when(renderer.initialize(), PathObjectLoader.loadModel(1))
-        .done((_, model) => {
-            renderer.setCurrentModel(model);
+     .done((_, model) => {
+         renderer.setCurrentModel(model);
 
-            function tick() {
-                renderer.draw();
+         function tick() {
+             renderer.draw();
+             window.requestAnimationFrame(tick);
+         }
 
-                window.requestAnimationFrame(tick);
-            }
-
-            tick();
-        });
+        tick();
+    });
 });

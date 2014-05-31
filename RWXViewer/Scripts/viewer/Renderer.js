@@ -37,7 +37,7 @@ define(["require", "exports", "DrawableBuilder", "ShaderProgramLoader", "Camera"
             ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl").done(function (program) {
                 _this._shaderPrograms = [program];
                 deferred.resolve();
-            }).fail(function (_) {
+            }).fail(function () {
                 return deferred.fail();
             });
 
@@ -57,7 +57,7 @@ define(["require", "exports", "DrawableBuilder", "ShaderProgramLoader", "Camera"
                 mat4.perspective(pMatrix, 45, 960 / 540, 0.1, 100.0);
 
                 gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uPMatrix"], false, pMatrix);
-                gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uCMatrix"], false, this._camera.cameraMatrix);
+                gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uCMatrix"], false, this._camera.matrix);
 
                 if (this._currentDrawable) {
                     this._currentDrawable.draw(gl, this._shaderPrograms);
@@ -70,9 +70,13 @@ define(["require", "exports", "DrawableBuilder", "ShaderProgramLoader", "Camera"
             this._currentDrawable = builder.loadModel(model);
         };
 
-        Renderer.prototype.setMouseDeltas = function (deltaX, deltaY) {
-            this._camera.rotateCamera(deltaX, deltaY);
-        };
+        Object.defineProperty(Renderer.prototype, "camera", {
+            get: function () {
+                return this._camera;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return Renderer;
     })();
     exports.Renderer = Renderer;

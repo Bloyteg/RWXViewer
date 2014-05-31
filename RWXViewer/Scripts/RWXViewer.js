@@ -14,35 +14,58 @@
 define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ObjectPathItemLoader'], function(require, exports, $, Renderer, PathObjectLoader) {
     var renderer;
 
+    var CameraState;
+    (function (CameraState) {
+        CameraState[CameraState["None"] = 0] = "None";
+        CameraState[CameraState["Rotating"] = 1] = "Rotating";
+        CameraState[CameraState["Panning"] = 2] = "Panning";
+    })(CameraState || (CameraState = {}));
+
     $(function () {
         renderer = new Renderer.Renderer($('#viewport')[0]);
 
         (function () {
-            var mousedown = false;
+            var cameraState = 0 /* None */;
             var lastMouseX = null;
             var lastMouseY = null;
 
-            $("#viewport").mousedown(function () {
-                mousedown = true;
+            $("#viewport").mousedown(function (event) {
+                cameraState = event.button == 0 ? 1 /* Rotating */ : 2 /* Panning */;
                 lastMouseX = null;
                 lastMouseY = null;
             });
 
             $(document).mouseup(function () {
-                return mousedown = false;
+                return cameraState = 0 /* None */;
             });
 
             $(document).mousemove(function (event) {
-                if (mousedown) {
+                if (cameraState === 1 /* Rotating */) {
+                    event.preventDefault();
                     if (lastMouseX && lastMouseY) {
                         var deltaX = event.pageX - lastMouseX;
                         var deltaY = event.pageY - lastMouseY;
 
-                        renderer.setMouseDeltas(deltaX, deltaY);
+                        renderer.camera.rotate(deltaX, deltaY);
                     }
 
                     lastMouseX = event.pageX;
                     lastMouseY = event.pageY;
+                }
+            });
+
+            $('#viewport').on("mousewheel", false, function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                var originalEvent = event.originalEvent;
+
+                var delta = originalEvent.wheelDelta || -originalEvent.detail;
+
+                if (delta > 0) {
+                    renderer.camera.zoomOut(0.95);
+                } else {
+                    renderer.camera.zoomIn(0.95);
                 }
             });
         })();
@@ -52,7 +75,6 @@ define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ObjectPat
 
             function tick() {
                 renderer.draw();
-
                 window.requestAnimationFrame(tick);
             }
 
