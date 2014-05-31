@@ -232,7 +232,8 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Scripts\viewer\glmatrix.d.ts" />
+    <TypeScriptCompile Include="Scripts\viewer\Camera.ts" />
+    <TypeScriptCompile Include="Scripts\gl-matrix\gl-matrix.d.ts" />
     <TypeScriptCompile Include="Scripts\viewer\ShaderProgramLoader.ts" />
     <TypeScriptCompile Include="Scripts\viewer\Drawable.ts" />
     <TypeScriptCompile Include="Scripts\viewer\DrawableBuilder.ts" />

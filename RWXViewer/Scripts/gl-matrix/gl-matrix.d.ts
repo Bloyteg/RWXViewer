@@ -215,6 +215,7 @@ interface Matrix4 {
     perspective(out: Mat4Array, fovy: number, aspect: number, near: number, far: number): Mat4Array;
     ortho(out: Mat4Array, left: number, right: number, bottom: number, top: number, near: number, far: number): Mat4Array;
     lookAt(out: Mat4Array, eye: Vec3Array, center: Vec3Array, up: Vec3Array): Mat4Array;
+    lookAt(out: Mat4Array, eye: number[], center: number[], up: number[]): Mat4Array;
 }
 
 declare var mat4: Matrix4;

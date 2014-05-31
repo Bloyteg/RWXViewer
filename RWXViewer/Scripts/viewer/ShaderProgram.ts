@@ -74,6 +74,7 @@ export class ShaderProgram {
         for (var attributeIndex = 0; attributeIndex < attributeCount; ++attributeIndex) {
             var attribute = gl.getActiveAttrib(this._shaderProgram, attributeIndex);
             attributes[attribute.name] = attributeIndex;
+            gl.enableVertexAttribArray(attributeIndex);
         }
 
         return attributes;
