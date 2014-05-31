@@ -69,7 +69,7 @@ export class Renderer {
             mat4.perspective(pMatrix, 45, 960 / 540, 0.1, 100.0);
 
             gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uPMatrix"], false, pMatrix);
-            gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uCMatrix"], false, this._camera.viewMatrix);
+            gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uCMatrix"], false, this._camera.cameraMatrix);
 
             if (this._currentDrawable) {
                 this._currentDrawable.draw(gl, this._shaderPrograms);

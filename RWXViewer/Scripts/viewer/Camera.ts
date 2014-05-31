@@ -14,26 +14,69 @@
 
 export class Camera {
     private _cameraMatrix: Mat4Array;
-    private _rotationMatrix: Mat4Array;
+    private _offset: Vec3Array;
+    private _position: Vec3Array;
+    private _target: Vec3Array;
+    private _up: Vec3Array;
+
+    private _thetaDelta: number = 0;
+    private _phiDelta: number = 0;
+   
 
     constructor() {
         this._cameraMatrix = mat4.create();
-        mat4.lookAt(this._cameraMatrix, [0, 1, -5], [0, 1, 0], [0, 1, 0]);
-
-        this._rotationMatrix = mat4.create();
+        this._offset = vec3.create();
+        this._position = vec3.fromValues(0, 0, -5);
+        this._target = vec3.create();
+        this._up = vec3.fromValues(0, 1, 0);
     }
 
     rotateCamera(deltaX: number, deltaY: number) {
-        mat4.rotate(this._rotationMatrix, this._rotationMatrix, (deltaX / 10) * (Math.PI / 180), [0, 1, 0]);
-        mat4.rotate(this._rotationMatrix, this._rotationMatrix, (deltaY / 10) * (Math.PI / 180), [-1, 0, 0]);
+        var rotateSpeed = 0.5;
+        var width = 960;
+        var height = 540;
+
+        this._thetaDelta -= 2 * Math.PI * deltaX / width * rotateSpeed;
+        this._phiDelta -= 2 * Math.PI * deltaY / height * rotateSpeed;
     }
 
     resetCamera() {
-        mat4.identity(this._rotationMatrix);
+
     }
 
-    get viewMatrix(): Mat4Array {
-        var viewMatrix = mat4.create();
-        return mat4.multiply(viewMatrix, this._cameraMatrix, this._rotationMatrix);
+    get cameraMatrix(): Mat4Array {
+
+        vec3.sub(this._offset, this._position, this._target);
+
+        var offsetX = this._offset[0];
+        var offsetY = this._offset[1];
+        var offsetZ = this._offset[2];
+
+        var theta = Math.atan2(offsetX, offsetZ);
+        var phi = Math.atan2(Math.sqrt(offsetX * offsetX + offsetZ * offsetZ), offsetY);
+
+        theta += this._thetaDelta;
+        phi += this._phiDelta;
+
+        //TODO: Restrict, but not right now.
+
+        //TODO: move this off as a constant.
+        var scale = 1;
+        var radius = vec3.length(this._offset) * scale;
+        //TODO: Restrict radius.
+
+        this._offset[0] = radius * Math.sin(phi) * Math.sin(theta);
+        this._offset[1] = radius * Math.cos(phi);
+        this._offset[2] = radius * Math.sin(phi) * Math.cos(theta);
+
+        //TODO: Pan target location.
+
+
+        vec3.add(this._position, this._target, this._offset);
+
+        this._thetaDelta = 0;
+        this._phiDelta = 0;
+
+        return mat4.lookAt(this._cameraMatrix, this._position, this._target, this._up);
     }
 }
