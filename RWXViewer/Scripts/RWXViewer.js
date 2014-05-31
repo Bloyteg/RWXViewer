@@ -35,6 +35,10 @@ define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ObjectPat
                 lastMouseY = null;
             });
 
+            $("#viewport").on("contextmenu", function () {
+                return false;
+            });
+
             $(document).mouseup(function () {
                 return cameraState = 0 /* None */;
             });
@@ -42,11 +46,24 @@ define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ObjectPat
             $(document).mousemove(function (event) {
                 if (cameraState === 1 /* Rotating */) {
                     event.preventDefault();
+
                     if (lastMouseX && lastMouseY) {
                         var deltaX = event.pageX - lastMouseX;
                         var deltaY = event.pageY - lastMouseY;
 
                         renderer.camera.rotate(deltaX, deltaY);
+                    }
+
+                    lastMouseX = event.pageX;
+                    lastMouseY = event.pageY;
+                } else if (cameraState == 2 /* Panning */) {
+                    event.preventDefault();
+
+                    if (lastMouseX && lastMouseY) {
+                        var deltaX = event.pageX - lastMouseX;
+                        var deltaY = event.pageY - lastMouseY;
+
+                        renderer.camera.pan(deltaX, deltaY);
                     }
 
                     lastMouseX = event.pageX;

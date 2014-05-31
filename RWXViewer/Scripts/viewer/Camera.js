@@ -12,37 +12,64 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 define(["require", "exports"], function(require, exports) {
-    var Camera = (function () {
-        function Camera() {
-            this.reset();
-        }
-        Camera.prototype.rotate = function (deltaX, deltaY) {
-            var rotateSpeed = 0.5;
-            var width = 960;
-            var height = 540;
+    var ZOOM_FACTOR = 0.95;
+    var DEFAULT_RADIUS_SCALE = 1.0;
+    var DEFAULT_CAMERA_DISTANCE = 5.0;
+    var ROTATION_SPEED = 0.5;
 
-            this._thetaDelta -= 2 * Math.PI * deltaX / width * rotateSpeed;
-            this._phiDelta -= 2 * Math.PI * deltaY / height * rotateSpeed;
+    var Camera = (function () {
+        function Camera(viewportWidth, viewportHeight) {
+            this.reset();
+            this.setViewpowerSize(viewportWidth, viewportHeight);
+        }
+        Camera.prototype.setViewpowerSize = function (width, height) {
+            this._viewportWidth = width;
+            this._viewportHeight = height;
         };
 
         Camera.prototype.reset = function () {
             this._cameraMatrix = mat4.create();
             this._offset = vec3.create();
-            this._position = vec3.fromValues(0, 0, -5);
+            this._position = vec3.fromValues(0, 0, -DEFAULT_CAMERA_DISTANCE);
             this._target = vec3.create();
+            this._pan = vec3.create();
+            this._panOffset = vec3.create();
             this._up = vec3.fromValues(0, 1, 0);
 
             this._thetaDelta = 0;
             this._phiDelta = 0;
-            this._scale = 1;
+            this._scale = DEFAULT_RADIUS_SCALE;
+        };
+
+        Camera.prototype.rotate = function (deltaX, deltaY) {
+            this._thetaDelta -= 2 * Math.PI * deltaX / this._viewportWidth * ROTATION_SPEED;
+            this._phiDelta -= 2 * Math.PI * deltaY / this._viewportHeight * ROTATION_SPEED;
         };
 
         Camera.prototype.zoomIn = function (zoomFactor) {
-            this._scale *= zoomFactor;
+            this._scale *= (zoomFactor || ZOOM_FACTOR);
         };
 
         Camera.prototype.zoomOut = function (zoomFactor) {
-            this._scale /= zoomFactor;
+            this._scale /= (zoomFactor || ZOOM_FACTOR);
+        };
+
+        Camera.prototype.pan = function (deltaX, deltaY) {
+            vec3.sub(this._offset, this._position, this._target);
+            var distance = vec3.length(this._offset);
+
+            //TODO: Replace 45 with FOV constant.
+            distance *= Math.tan(45 / 2 * Math.PI / 180.0);
+
+            var xDistance = 2 * -deltaX * distance / this._viewportHeight;
+            vec3.set(this._panOffset, this._cameraMatrix[0], this._cameraMatrix[1], this._cameraMatrix[2]);
+            vec3.scale(this._panOffset, this._panOffset, xDistance);
+            vec3.add(this._pan, this._pan, this._panOffset);
+
+            var yDistance = 2 * deltaY * distance / this._viewportHeight;
+            vec3.set(this._panOffset, this._cameraMatrix[4], this._cameraMatrix[5], this._cameraMatrix[6]);
+            vec3.scale(this._panOffset, this._panOffset, yDistance);
+            vec3.add(this._pan, this._pan, this._panOffset);
         };
 
         Object.defineProperty(Camera.prototype, "matrix", {
@@ -59,20 +86,19 @@ define(["require", "exports"], function(require, exports) {
                 theta += this._thetaDelta;
                 phi += this._phiDelta;
 
-                //TODO: Restrict, but not right now.
                 var radius = vec3.length(this._offset) * this._scale;
                 this._scale = 1;
 
-                //TODO: Restrict radius.
                 this._offset[0] = radius * Math.sin(phi) * Math.sin(theta);
                 this._offset[1] = radius * Math.cos(phi);
                 this._offset[2] = radius * Math.sin(phi) * Math.cos(theta);
 
-                //TODO: Pan target location.
+                vec3.add(this._target, this._target, this._pan);
                 vec3.add(this._position, this._target, this._offset);
 
                 this._thetaDelta = 0;
                 this._phiDelta = 0;
+                vec3.set(this._pan, 0, 0, 0);
 
                 return mat4.lookAt(this._cameraMatrix, this._position, this._target, this._up);
             },

@@ -29,7 +29,6 @@ export class Renderer {
 
     constructor(canvas: HTMLCanvasElement) {
         this._canvas = canvas;
-        this._camera = new Camera.Camera();
     }
 
     initialize() {
@@ -38,6 +37,8 @@ export class Renderer {
         var gl = this._gl;
 
         if (gl) {
+            this._camera = new Camera.Camera(gl.drawingBufferWidth, gl.drawingBufferHeight);
+
             gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
             gl.clearDepth(1.0);
@@ -66,7 +67,7 @@ export class Renderer {
             this._shaderPrograms[0].useProgram();
 
             var pMatrix = mat4.create();
-            mat4.perspective(pMatrix, 45, 960 / 540, 0.1, 100.0);
+            mat4.perspective(pMatrix, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 100.0);
 
             gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uPMatrix"], false, pMatrix);
             gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uCMatrix"], false, this._camera.matrix);

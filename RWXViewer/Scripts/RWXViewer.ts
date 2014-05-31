@@ -38,16 +38,31 @@ $(() => {
             lastMouseY = null;
         });
 
+        $("#viewport").on("contextmenu", () => false);
+
         $(document).mouseup(() => cameraState = CameraState.None);
 
         $(document).mousemove((event) => {
             if (cameraState === CameraState.Rotating) {
                 event.preventDefault();
+
                 if (lastMouseX && lastMouseY) {
                     var deltaX = event.pageX - lastMouseX;
                     var deltaY = event.pageY - lastMouseY;
 
                     renderer.camera.rotate(deltaX, deltaY);
+                }
+
+                lastMouseX = event.pageX;
+                lastMouseY = event.pageY;
+            } else if (cameraState == CameraState.Panning) {
+                event.preventDefault();
+
+                if (lastMouseX && lastMouseY) {
+                    var deltaX = event.pageX - lastMouseX;
+                    var deltaY = event.pageY - lastMouseY;
+
+                    renderer.camera.pan(deltaX, deltaY);
                 }
 
                 lastMouseX = event.pageX;
