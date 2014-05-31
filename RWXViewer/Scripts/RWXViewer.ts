@@ -21,6 +21,34 @@ var renderer: Renderer.Renderer;
 $(() => {
     renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0]);
 
+    (() => {
+        var mousedown = false;
+        var lastMouseX = null;
+        var lastMouseY = null;
+
+        $("#viewport").mousedown(() => {
+            mousedown = true;
+            lastMouseX = null;
+            lastMouseY = null;
+        });
+
+        $(document).mouseup(() => mousedown = false);
+
+        $(document).mousemove((event) => {
+            if (mousedown) {
+                if (lastMouseX && lastMouseY) {
+                    var deltaX = event.pageX - lastMouseX;
+                    var deltaY = event.pageY - lastMouseY;
+
+                    renderer.setMouseDeltas(deltaX, deltaY);
+                }
+
+                lastMouseX = event.pageX;
+                lastMouseY = event.pageY;
+            }
+        });
+    })();
+
     $.when(renderer.initialize(), PathObjectLoader.loadModel(1))
         .done((_, model) => {
             renderer.setCurrentModel(model);

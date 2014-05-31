@@ -207,6 +207,7 @@ interface Matrix4 {
     scale(out: Mat4Array, a: Mat4Array, v: Vec3Array): Mat4Array;
     scale(out: Mat4Array, a: Mat4Array, v: number[]): Mat4Array;
     rotate(out: Mat4Array, a: Mat4Array, rad: number, axis: Vec3Array): Mat4Array;
+    rotate(out: Mat4Array, a: Mat4Array, rad: number, axis: number[]): Mat4Array;
     rotateX(out: Mat4Array, a: Mat4Array, rad: number): Mat4Array;
     rotateY(out: Mat4Array, a: Mat4Array, rad: number): Mat4Array;
     rotateZ(out: Mat4Array, a: Mat4Array, rad: number): Mat4Array;

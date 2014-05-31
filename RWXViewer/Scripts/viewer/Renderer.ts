@@ -17,15 +17,19 @@ import DrawableBuilder = require("DrawableBuilder");
 import Drawable = require("Drawable");
 import ShaderProgramLoader = require("ShaderProgramLoader");
 import ShaderProgram = require("ShaderProgram");
+import Camera = require("Camera");
 
 export class Renderer {
     private _canvas: HTMLCanvasElement;
     private _gl: WebGLRenderingContext;
     private _currentDrawable: Drawable.IDrawable;
     private _shaderPrograms: ShaderProgram.ShaderProgram[];
+    private _camera: Camera.Camera;
+    
 
     constructor(canvas: HTMLCanvasElement) {
         this._canvas = canvas;
+        this._camera = new Camera.Camera();
     }
 
     initialize() {
@@ -59,6 +63,14 @@ export class Renderer {
             gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+            this._shaderPrograms[0].useProgram();
+
+            var pMatrix = mat4.create();
+            mat4.perspective(pMatrix, 45, 960 / 540, 0.1, 100.0);
+
+            gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uPMatrix"], false, pMatrix);
+            gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uCMatrix"], false, this._camera.viewMatrix);
+
             if (this._currentDrawable) {
                 this._currentDrawable.draw(gl, this._shaderPrograms);
             }
@@ -68,5 +80,9 @@ export class Renderer {
     setCurrentModel(model: Model.IModel): void {
         var builder = new DrawableBuilder.DrawableBuilder(this._gl);
         this._currentDrawable = builder.loadModel(model);
+    }
+
+    setMouseDeltas(deltaX: number, deltaY: number) {
+        this._camera.rotateCamera(deltaX, deltaY);
     }
 }

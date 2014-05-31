@@ -45,22 +45,13 @@ export class MeshDrawable implements IDrawable {
     }
 
     draw(gl: WebGLRenderingContext, shaders: ShaderProgram.ShaderProgram[]): void {
-        shaders[0].useProgram();
+        //shaders[0].useProgram();
 
         var mvMatrix = mat4.create();
-        var pMatrix = mat4.create();
-        var cMatrix = mat4.create();
-
-        mat4.perspective(pMatrix, 45, 960 / 540, 0.1, 100.0);
-        mat4.identity(mvMatrix);
         mat4.translate(mvMatrix, mvMatrix, [0, 0, 0]);
         mat4.scale(mvMatrix, mvMatrix, [5, 5, 5]);
 
-        mat4.lookAt(cMatrix, [5, 5, 5], [0, 0, 0], [0, 1, 0]);
-
         gl.uniformMatrix4fv(shaders[0].uniforms["uMVMatrix"], false, mvMatrix);
-        gl.uniformMatrix4fv(shaders[0].uniforms["uPMatrix"], false, pMatrix);
-        gl.uniformMatrix4fv(shaders[0].uniforms["uCMatrix"], false, cMatrix);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer.vertexPositions);
         gl.vertexAttribPointer(shaders[0].attributes["aVertexPosition"], 3, gl.FLOAT, false, 0, 0);
