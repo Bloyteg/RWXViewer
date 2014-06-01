@@ -30,14 +30,18 @@ export class DrawableBuilder {
         var vertexBuffer: Drawable.IVertexBuffer = this.buildVertexBuffer(geometry);
         var indexBuffers: Drawable.IIndexBuffer[] = this.buildIndexBuffers(geometry);
 
-        var drawable = new Drawable.MeshDrawable(vertexBuffer, indexBuffers);
-
-        geometry.Children.forEach(child => {
-            var childMeshDrawable = this.buildMeshDrawable(model, child);
-            drawable.children.push(childMeshDrawable);
+        var meshMaterialGroups = indexBuffers.map(buffer => {
+            return {
+                vertexBuffer: vertexBuffer,
+                indexBuffer: buffer
+            };
         });
 
-        return drawable;
+        var children = geometry.Children.map(child => this.buildMeshDrawable(model, child));
+        var modelMatrix = mat4.create();
+        mat4.identity(modelMatrix);
+
+        return new Drawable.MeshDrawable(meshMaterialGroups, modelMatrix, children);
     }
 
     private buildVertexBuffer(geometry: Model.IMeshGeometry): Drawable.IVertexBuffer {

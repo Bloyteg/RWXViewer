@@ -68,10 +68,10 @@ export class Renderer {
             this._shaderPrograms[0].useProgram();
 
             var pMatrix = mat4.create();
-            mat4.perspective(pMatrix, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 100.0);
+            mat4.perspective(pMatrix, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.01, 100.0);
 
-            gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uPMatrix"], false, pMatrix);
-            gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["uCMatrix"], false, this._camera.matrix);
+            gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["u_projectionMatrix"], false, pMatrix);
+            gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["u_viewMatrix"], false, this._camera.matrix);
 
             if (this._currentDrawable) {
                 this._currentDrawable.draw(gl, this._shaderPrograms);

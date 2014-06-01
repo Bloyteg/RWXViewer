@@ -25,14 +25,20 @@ define(["require", "exports", "Drawable"], function(require, exports, Drawable) 
             var vertexBuffer = this.buildVertexBuffer(geometry);
             var indexBuffers = this.buildIndexBuffers(geometry);
 
-            var drawable = new Drawable.MeshDrawable(vertexBuffer, indexBuffers);
-
-            geometry.Children.forEach(function (child) {
-                var childMeshDrawable = _this.buildMeshDrawable(model, child);
-                drawable.children.push(childMeshDrawable);
+            var meshMaterialGroups = indexBuffers.map(function (buffer) {
+                return {
+                    vertexBuffer: vertexBuffer,
+                    indexBuffer: buffer
+                };
             });
 
-            return drawable;
+            var children = geometry.Children.map(function (child) {
+                return _this.buildMeshDrawable(model, child);
+            });
+            var modelMatrix = mat4.create();
+            mat4.identity(modelMatrix);
+
+            return new Drawable.MeshDrawable(meshMaterialGroups, modelMatrix, children);
         };
 
         DrawableBuilder.prototype.buildVertexBuffer = function (geometry) {

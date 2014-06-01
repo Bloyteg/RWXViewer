@@ -32,42 +32,42 @@ export interface IIndexBuffer {
     indexCount: number;
 }
 
+export interface IMeshMaterialGroup {
+    vertexBuffer: IVertexBuffer;
+    indexBuffer: IIndexBuffer;
+}
+
 export class MeshDrawable implements IDrawable {
-    private _vertexBuffer: IVertexBuffer;
-    private _indexBuffers: IIndexBuffer[];
+    private _meshMaterialGroups: IMeshMaterialGroup[];
+    private _modelMatrix: Mat4Array;
+    private _children: IDrawable[];
 
-    children: IDrawable[];
-
-    constructor(vertexBuffer: IVertexBuffer, indexBuffers: IIndexBuffer[]) {
-        this._vertexBuffer = vertexBuffer;
-        this._indexBuffers = indexBuffers;
-        this.children = new Array();
+    constructor(meshMaterialGroups: IMeshMaterialGroup[], modelMatrix: Mat4Array, children: IDrawable[]) {
+        this._meshMaterialGroups = meshMaterialGroups;
+        this._modelMatrix = modelMatrix;
+        this._children = children;
     }
 
     draw(gl: WebGLRenderingContext, shaders: ShaderProgram.ShaderProgram[]): void {
-        //shaders[0].useProgram();
+        //TODO: Handle any material specific parameters such as prelit, wireframe, texture bindings, etc.
 
-        var mvMatrix = mat4.create();
-        mat4.translate(mvMatrix, mvMatrix, [0, 0, 0]);
-        mat4.scale(mvMatrix, mvMatrix, [5, 5, 5]);
+        this._meshMaterialGroups.forEach(meshMaterialGroup => {
+            gl.uniformMatrix4fv(shaders[0].uniforms["u_modelMatrix"], false, this._modelMatrix);
 
-        gl.uniformMatrix4fv(shaders[0].uniforms["uMVMatrix"], false, mvMatrix);
+            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.vertexPositions);
+            gl.enableVertexAttribArray(0);
+            gl.vertexAttribPointer(shaders[0].attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer.vertexPositions);
-        gl.vertexAttribPointer(shaders[0].attributes["aVertexPosition"], 3, gl.FLOAT, false, 0, 0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.vertexUVs);
+            gl.vertexAttribPointer(shaders[0].attributes["a_vertexUV"], 2, gl.FLOAT, false, 0, 0);
 
-        //gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer.vertexUVs);
-        ////TODO: Set UV attributes.
+            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.vertexNormals);
+            gl.vertexAttribPointer(shaders[0].attributes["a_vertexNormal"], 3, gl.FLOAT, false, 0, 0);
 
-        //gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer.vertexNormals);
-        ////TODO: Set normal attributes.
-
-        this._indexBuffers.forEach(indexBuffer => {
-            //TODO: Set material specific data here.
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer.indexBuffer);         
-            gl.drawElements(gl.TRIANGLES, indexBuffer.indexCount, gl.UNSIGNED_SHORT, 0);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, meshMaterialGroup.indexBuffer.indexBuffer);
+            gl.drawElements(gl.TRIANGLES, meshMaterialGroup.indexBuffer.indexCount, gl.UNSIGNED_SHORT, 0);
         });
 
-        this.children.forEach(child => child.draw(gl, shaders));
+        this._children.forEach(child => child.draw(gl, shaders));
     }
 }

@@ -14,7 +14,7 @@
 define(["require", "exports"], function(require, exports) {
     var ZOOM_FACTOR = 0.95;
     var DEFAULT_RADIUS_SCALE = 1.0;
-    var DEFAULT_CAMERA_DISTANCE = 5.0;
+    var DEFAULT_CAMERA_DISTANCE = 0.5;
     var ROTATION_SPEED = 0.5;
     var FOV = 45;
     var RADS_PER_DEGREE = Math.PI / 180;

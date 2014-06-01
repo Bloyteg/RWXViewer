@@ -12,12 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-attribute vec3 aVertexPosition;
+attribute vec3 a_vertexPosition;
+attribute vec2 a_vertexUV;
+attribute vec3 a_vertexNormal;
         
-uniform mat4 uMVMatrix;
-uniform mat4 uPMatrix;
-uniform mat4 uCMatrix;
+uniform mat4 u_modelMatrix;
+uniform mat4 u_viewMatrix;
+uniform mat4 u_projectionMatrix;
+
+varying vec2 v_textureCoordinates;
+varying vec3 v_normals;
         
 void main(void) {
-    gl_Position = uPMatrix * uCMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+	v_textureCoordinates = a_vertexUV;
+	v_normals = a_vertexNormal;
+    gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(a_vertexPosition, 1.0);
 }
