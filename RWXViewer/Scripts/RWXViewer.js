@@ -74,13 +74,12 @@ define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ObjectPat
                 }
             });
 
-            $('#viewport').on("mousewheel", false, function (event) {
+            $('#viewport').on("wheel", function (event) {
                 event.preventDefault();
                 event.stopPropagation();
 
                 var originalEvent = event.originalEvent;
-
-                var delta = originalEvent.wheelDelta || -originalEvent.detail;
+                var delta = originalEvent.deltaY;
 
                 if (delta > 0) {
                     renderer.camera.zoomOut(0.95);

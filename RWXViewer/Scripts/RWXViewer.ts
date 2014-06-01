@@ -73,13 +73,12 @@ $(() => {
             }
         });
 
-        $('#viewport').on("mousewheel", false, event => {
+        $('#viewport').on("wheel", event => {
             event.preventDefault();
             event.stopPropagation();
 
-            var originalEvent = event.originalEvent;
-
-            var delta: number = (<any>originalEvent).wheelDelta || -(<any>originalEvent).detail;
+            var originalEvent = <Event>event.originalEvent;
+            var delta: number = (<WheelEvent>originalEvent).deltaY;
 
             if (delta > 0) {
                 renderer.camera.zoomOut(0.95);
