@@ -63,6 +63,7 @@ export class Renderer {
         if (gl) {
             gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.enable(gl.CULL_FACE);
 
             this._shaderPrograms[0].useProgram();
 
