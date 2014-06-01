@@ -16,6 +16,9 @@ var ZOOM_FACTOR: number = 0.95;
 var DEFAULT_RADIUS_SCALE: number = 1.0;
 var DEFAULT_CAMERA_DISTANCE: number = 5.0;
 var ROTATION_SPEED: number = 0.5;
+var FOV: number = 45;
+var RADS_PER_DEGREE: number = Math.PI / 180;
+var PHI_EPS = 0.000001;
 
 export class Camera {
     private _cameraMatrix: Mat4Array;
@@ -95,7 +98,7 @@ export class Camera {
         var distance = vec3.length(this._offset);
 
         //TODO: Replace 45 with FOV constant.
-        distance *= Math.tan((45 / 2) * Math.PI / 180.0);
+        distance *= Math.tan((FOV / 2) * RADS_PER_DEGREE);
 
         var xDistance: number = 2 * deltaX * distance / this._viewportHeight;
         vec3.set(this._panOffset, this._cameraMatrixInverse[0], this._cameraMatrixInverse[1], this._cameraMatrixInverse[2]);
@@ -123,6 +126,9 @@ export class Camera {
 
         theta += this._thetaDelta;
         phi += this._phiDelta;
+
+        phi = Math.max(PHI_EPS, Math.min(Math.PI - PHI_EPS, phi));
+
 
         var radius = vec3.length(this._offset) * this._scale;
 
