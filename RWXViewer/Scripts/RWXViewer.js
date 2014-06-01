@@ -44,14 +44,17 @@ define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ObjectPat
             });
 
             $(document).mousemove(function (event) {
+                var deltaX;
+                var deltaY;
+
                 if (cameraState === 1 /* Rotating */) {
                     event.preventDefault();
 
                     if (lastMouseX && lastMouseY) {
-                        var deltaX = event.pageX - lastMouseX;
-                        var deltaY = event.pageY - lastMouseY;
-
-                        renderer.camera.rotate(deltaX, deltaY);
+                        deltaX = event.pageX - lastMouseX;
+                        deltaY = event.pageY - lastMouseY;
+                        renderer.camera.rotate(-deltaX, deltaY);
+                        renderer.camera.update();
                     }
 
                     lastMouseX = event.pageX;
@@ -60,10 +63,10 @@ define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ObjectPat
                     event.preventDefault();
 
                     if (lastMouseX && lastMouseY) {
-                        var deltaX = event.pageX - lastMouseX;
-                        var deltaY = event.pageY - lastMouseY;
-
-                        renderer.camera.pan(deltaX, deltaY);
+                        deltaX = event.pageX - lastMouseX;
+                        deltaY = event.pageY - lastMouseY;
+                        renderer.camera.pan(-deltaX, deltaY);
+                        renderer.camera.update();
                     }
 
                     lastMouseX = event.pageX;
@@ -84,6 +87,8 @@ define(["require", "exports", "jquery", "./viewer/Renderer", './viewer/ObjectPat
                 } else {
                     renderer.camera.zoomIn(0.95);
                 }
+
+                renderer.camera.update();
             });
         })();
 
