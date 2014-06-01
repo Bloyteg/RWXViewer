@@ -23,6 +23,7 @@ requirejs.config({
         ShaderProgram: "/Scripts/viewer/ShaderProgram",
         ShaderProgramLoader: "/Scripts/viewer/ShaderProgramLoader",
         Camera: "/Scripts/viewer/Camera",
+        CameraController: "/Scripts/viewer/CameraController",
         jquery: "jquery-2.1.1"
     }
 })

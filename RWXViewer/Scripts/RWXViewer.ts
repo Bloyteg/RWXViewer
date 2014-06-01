@@ -14,91 +14,21 @@
 
 import $ = require("jquery");
 import Renderer = require("./viewer/Renderer");
+import CameraController = require("./viewer/CameraController");
 import PathObjectLoader = require('./viewer/ObjectPathItemLoader');
 
 var renderer: Renderer.Renderer;
 
-enum CameraState {
-    None,
-    Rotating,
-    Panning
+renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0]);
+
+function tick() {
+    renderer.draw();
+    window.requestAnimationFrame(tick);
 }
 
-$(() => {
-    renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0]);
-
-    (() => {
-        var cameraState = CameraState.None;
-        var lastMouseX = null;
-        var lastMouseY = null;
-
-        $("#viewport").mousedown((event) => {
-            cameraState = event.button == 0 ? CameraState.Rotating : CameraState.Panning;
-            lastMouseX = null;
-            lastMouseY = null;
-        });
-
-        $("#viewport").on("contextmenu", () => false);
-
-        $(document).mouseup(() => cameraState = CameraState.None);
-
-        $(document).mousemove((event) => {
-            var deltaX;
-            var deltaY;
-
-            if (cameraState === CameraState.Rotating) {
-                event.preventDefault();
-
-                if (lastMouseX && lastMouseY) {
-                    deltaX = event.pageX - lastMouseX;
-                    deltaY = event.pageY - lastMouseY;
-                    renderer.camera.rotate(-deltaX, deltaY);
-                    renderer.camera.update();
-                }
-
-                lastMouseX = event.pageX;
-                lastMouseY = event.pageY;
-            } else if (cameraState == CameraState.Panning) {
-                event.preventDefault();
-
-                if (lastMouseX && lastMouseY) {
-                    deltaX = event.pageX - lastMouseX;
-                    deltaY = event.pageY - lastMouseY;
-                    renderer.camera.pan(-deltaX, deltaY);
-                    renderer.camera.update();
-                }
-
-                lastMouseX = event.pageX;
-                lastMouseY = event.pageY;
-            }
-        });
-
-        $('#viewport').on("wheel", event => {
-            event.preventDefault();
-            event.stopPropagation();
-
-            var originalEvent = <Event>event.originalEvent;
-            var delta: number = (<WheelEvent>originalEvent).deltaY;
-
-            if (delta > 0) {
-                renderer.camera.zoomOut(0.95);
-            } else {
-                renderer.camera.zoomIn(0.95);
-            }
-
-            renderer.camera.update();
-        });
-    })();
-
-    $.when(renderer.initialize(), PathObjectLoader.loadModel(1))
-     .done((_, model) => {
-         renderer.setCurrentModel(model);
-
-         function tick() {
-             renderer.draw();
-             window.requestAnimationFrame(tick);
-         }
-
+$.when(renderer.initialize(), PathObjectLoader.loadModel(1))
+    .done((_, model) => {
+        CameraController.registerCamera(renderer.camera);
+        renderer.setCurrentModel(model);
         tick();
     });
-});

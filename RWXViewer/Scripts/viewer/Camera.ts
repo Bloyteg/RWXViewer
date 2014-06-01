@@ -53,7 +53,7 @@ export class Camera {
         this._cameraMatrixInverse = mat4.create();
 
         this._offset = vec3.create();
-        this._position = vec3.fromValues(0, 0, -DEFAULT_CAMERA_DISTANCE);
+        this._position = vec3.fromValues(0, 0, DEFAULT_CAMERA_DISTANCE);
         this._target = vec3.create();
         this._pan = vec3.create();
         this._panOffset = vec3.create();
@@ -66,19 +66,27 @@ export class Camera {
         this._thetaDelta = 0;
         this._phiDelta = 0;
         this._scale = DEFAULT_RADIUS_SCALE;
+
+        this.update();
     }
 
     rotate(deltaX: number, deltaY: number) {
         this._thetaDelta -= 2 * Math.PI * deltaX / this._viewportWidth * ROTATION_SPEED;
         this._phiDelta -= 2 * Math.PI * deltaY / this._viewportHeight * ROTATION_SPEED;
+
+        this.update();
     }
 
     zoomIn(zoomFactor?: number) {
         this._scale *= (zoomFactor || ZOOM_FACTOR);
+
+        this.update();
     }
 
     zoomOut(zoomFactor?: number) {
         this._scale /= (zoomFactor || ZOOM_FACTOR);
+
+        this.update();
     }
 
     pan(deltaX: number, deltaY: number) {
@@ -98,9 +106,11 @@ export class Camera {
         vec3.set(this._panOffset, this._cameraMatrixInverse[4], this._cameraMatrixInverse[5], this._cameraMatrixInverse[6]);
         vec3.scale(this._panOffset, this._panOffset, yDistance);
         vec3.add(this._pan, this._pan, this._panOffset);
+
+        this.update();
     }
 
-    update() {
+    private update() {
         vec3.sub(this._offset, this._position, this._target);
         vec3.transformQuat(this._offset, this._offset, this._upQuaternion);
 
