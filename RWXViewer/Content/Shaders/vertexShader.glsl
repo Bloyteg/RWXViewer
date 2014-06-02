@@ -20,6 +20,9 @@ uniform mat4 u_modelMatrix;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 
+uniform float u_ambientFactor;
+uniform float u_diffuseFactory;
+
 varying vec2 v_textureCoordinates;
 varying float v_lightWeighting;
         
@@ -27,7 +30,7 @@ void main(void) {
 	vec3 lightDirection = normalize(vec3(0, 1, 1));
 
 	v_textureCoordinates = a_vertexUV;
-	v_lightWeighting = 0.5 + max(dot(a_vertexNormal, lightDirection), 0.0) * 0.5;
+	v_lightWeighting = u_ambientFactor + max(dot(a_vertexNormal, lightDirection), 0.0) * u_diffuseFactor;
 
     gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(a_vertexPosition, 1.0);
 }

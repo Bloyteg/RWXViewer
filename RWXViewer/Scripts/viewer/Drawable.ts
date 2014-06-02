@@ -34,6 +34,8 @@ export interface IIndexBuffer {
 export interface IMeshMaterialGroup {
     vertexBuffer: IVertexBuffer;
     baseColor: Vec4Array;
+    ambient: number;
+    diffuse: number;
 }
 
 export class MeshDrawable implements IDrawable {
@@ -51,6 +53,8 @@ export class MeshDrawable implements IDrawable {
         //TODO: Handle any material specific parameters such as prelit, wireframe, texture bindings, etc.
 
         this._meshMaterialGroups.forEach(meshMaterialGroup => {
+            gl.uniform1f(shaders[0].uniforms["u_ambientFactor"], meshMaterialGroup.ambient);
+            gl.uniform1f(shaders[0].uniforms["u_diffuseFactor"], meshMaterialGroup.diffuse);
             gl.uniform4fv(shaders[0].uniforms["u_baseColor"], meshMaterialGroup.baseColor);
             gl.uniformMatrix4fv(shaders[0].uniforms["u_modelMatrix"], false, this._modelMatrix);
 

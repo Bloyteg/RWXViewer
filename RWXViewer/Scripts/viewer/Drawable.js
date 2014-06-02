@@ -22,6 +22,8 @@ define(["require", "exports"], function(require, exports) {
             //TODO: Handle any material specific parameters such as prelit, wireframe, texture bindings, etc.
             var _this = this;
             this._meshMaterialGroups.forEach(function (meshMaterialGroup) {
+                gl.uniform1f(shaders[0].uniforms["u_ambientFactor"], meshMaterialGroup.ambient);
+                gl.uniform1f(shaders[0].uniforms["u_diffuseFactor"], meshMaterialGroup.diffuse);
                 gl.uniform4fv(shaders[0].uniforms["u_baseColor"], meshMaterialGroup.baseColor);
                 gl.uniformMatrix4fv(shaders[0].uniforms["u_modelMatrix"], false, _this._modelMatrix);
 

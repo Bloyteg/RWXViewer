@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-define(["require", "exports", "Drawable"], function(require, exports, Drawable) {
+define(["require", "exports", "Model", "Drawable"], function(require, exports, Model, Drawable) {
     var DrawableBuilder = (function () {
         function DrawableBuilder(gl) {
             this._gl = gl;
@@ -48,35 +48,43 @@ define(["require", "exports", "Drawable"], function(require, exports, Drawable) 
             });
 
             return trianglesByMaterial.map(function (triangleGroup, materialId) {
-                var indices = triangleGroup.reduce(function (array, triangle) {
-                    return array.concat(triangle.Indices);
-                }, []);
                 var material = model.Materials[materialId];
+
                 return {
-                    vertexBuffer: _this.buildVertexBuffer(geometry.Vertices, indices),
-                    baseColor: vec4.fromValues(material.Color.R, material.Color.G, material.Color.B, 1.0)
+                    vertexBuffer: _this.buildVertexBuffer(geometry.Vertices, triangleGroup, material),
+                    baseColor: vec4.fromValues(material.Color.R, material.Color.G, material.Color.B, 1.0),
+                    ambient: material.Ambient,
+                    diffuse: material.Diffuse
                 };
             });
         };
 
-        DrawableBuilder.prototype.buildVertexBuffer = function (vertices, indices) {
+        DrawableBuilder.prototype.buildVertexBuffer = function (vertices, triangles, material) {
             var positions = [];
             var uvs = [];
             var normals = [];
 
-            indices.forEach(function (index) {
-                var vertex = vertices[index];
+            triangles.forEach(function (triangle) {
+                triangle.Indices.forEach(function (index) {
+                    var vertex = vertices[index];
 
-                positions.push(vertex.Position.X);
-                positions.push(vertex.Position.Y);
-                positions.push(vertex.Position.Z);
+                    positions.push(vertex.Position.X);
+                    positions.push(vertex.Position.Y);
+                    positions.push(vertex.Position.Z);
 
-                uvs.push(((vertex.Uv) || {}).U || 0);
-                uvs.push(((vertex.Uv) || {}).V || 0);
+                    uvs.push(((vertex.Uv) || {}).U || 0);
+                    uvs.push(((vertex.Uv) || {}).V || 0);
 
-                normals.push(vertex.Normal.X);
-                normals.push(vertex.Normal.Y);
-                normals.push(vertex.Normal.Z);
+                    if (material.LightSampling === 1 /* Vertex */) {
+                        normals.push(vertex.Normal.X);
+                        normals.push(vertex.Normal.Y);
+                        normals.push(vertex.Normal.Z);
+                    } else {
+                        normals.push(triangle.Normal.X);
+                        normals.push(triangle.Normal.Y);
+                        normals.push(triangle.Normal.Z);
+                    }
+                });
             });
 
             var gl = this._gl;
@@ -96,7 +104,7 @@ define(["require", "exports", "Drawable"], function(require, exports, Drawable) 
                 positions: positionBuffer,
                 uvs: uvBuffer,
                 normals: normalBuffer,
-                count: indices.length
+                count: positions.length / 3
             };
         };
         return DrawableBuilder;

@@ -49,33 +49,43 @@ export class DrawableBuilder {
         });
 
         return trianglesByMaterial.map((triangleGroup: Model.ITriangle[], materialId) => {
-            var indices: number[] = triangleGroup.reduce((array: number[], triangle) => array.concat(triangle.Indices), []);
             var material = model.Materials[materialId];
+
             return {
-                vertexBuffer: this.buildVertexBuffer(geometry.Vertices, indices),
-                baseColor: vec4.fromValues(material.Color.R, material.Color.G, material.Color.B, 1.0)
+                vertexBuffer: this.buildVertexBuffer(geometry.Vertices, triangleGroup, material),
+                baseColor: vec4.fromValues(material.Color.R, material.Color.G, material.Color.B, 1.0),
+                ambient: material.Ambient,
+                diffuse: material.Diffuse
             };
         });
     }
 
-    private buildVertexBuffer(vertices: Model.IVertex[], indices: number[]): Drawable.IVertexBuffer {
+    private buildVertexBuffer(vertices: Model.IVertex[], triangles: Model.ITriangle[], material: Model.IMaterial): Drawable.IVertexBuffer {
         var positions: number[] = [];
         var uvs: number[] = [];
         var normals: number[] = [];
 
-        indices.forEach((index: number) => {
-            var vertex = vertices[index];
+        triangles.forEach(triangle => {
+            triangle.Indices.forEach(index => {
+                var vertex = vertices[index];
 
-            positions.push(vertex.Position.X);
-            positions.push(vertex.Position.Y);
-            positions.push(vertex.Position.Z);
+                positions.push(vertex.Position.X);
+                positions.push(vertex.Position.Y);
+                positions.push(vertex.Position.Z);
 
-            uvs.push((<any>(vertex.Uv) || {}).U || 0);
-            uvs.push((<any>(vertex.Uv) || {}).V || 0);
+                uvs.push((<any>(vertex.Uv) || {}).U || 0);
+                uvs.push((<any>(vertex.Uv) || {}).V || 0);
 
-            normals.push(vertex.Normal.X);
-            normals.push(vertex.Normal.Y);
-            normals.push(vertex.Normal.Z);
+                if (material.LightSampling === Model.LightSampling.Vertex) {
+                    normals.push(vertex.Normal.X);
+                    normals.push(vertex.Normal.Y);
+                    normals.push(vertex.Normal.Z);
+                } else {
+                    normals.push(triangle.Normal.X);
+                    normals.push(triangle.Normal.Y);
+                    normals.push(triangle.Normal.Z);
+                }
+            });
         });
 
         var gl = this._gl;
@@ -95,7 +105,7 @@ export class DrawableBuilder {
             positions: positionBuffer,
             uvs: uvBuffer,
             normals: normalBuffer,
-            count: indices.length
+            count: positions.length / 3
         };
     }
 } 
