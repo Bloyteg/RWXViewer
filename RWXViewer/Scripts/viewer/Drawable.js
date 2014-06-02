@@ -22,20 +22,20 @@ define(["require", "exports"], function(require, exports) {
             //TODO: Handle any material specific parameters such as prelit, wireframe, texture bindings, etc.
             var _this = this;
             this._meshMaterialGroups.forEach(function (meshMaterialGroup) {
+                gl.uniform4fv(shaders[0].uniforms["u_baseColor"], meshMaterialGroup.baseColor);
                 gl.uniformMatrix4fv(shaders[0].uniforms["u_modelMatrix"], false, _this._modelMatrix);
 
-                gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.vertexPositions);
+                gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
                 gl.enableVertexAttribArray(0);
                 gl.vertexAttribPointer(shaders[0].attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
 
-                gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.vertexUVs);
+                gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.uvs);
                 gl.vertexAttribPointer(shaders[0].attributes["a_vertexUV"], 2, gl.FLOAT, false, 0, 0);
 
-                gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.vertexNormals);
+                gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.normals);
                 gl.vertexAttribPointer(shaders[0].attributes["a_vertexNormal"], 3, gl.FLOAT, false, 0, 0);
 
-                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, meshMaterialGroup.indexBuffer.indexBuffer);
-                gl.drawElements(gl.TRIANGLES, meshMaterialGroup.indexBuffer.indexCount, gl.UNSIGNED_SHORT, 0);
+                gl.drawArrays(gl.TRIANGLES, 0, meshMaterialGroup.vertexBuffer.count);
             });
 
             this._children.forEach(function (child) {

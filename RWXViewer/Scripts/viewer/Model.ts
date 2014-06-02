@@ -42,8 +42,12 @@ export interface IFace {
     Triangles: ITriangle[];
 }
 
-export interface ITransformable {
+export interface IMatrix {
     Matrix: number[];
+}
+
+export interface ITransformable {
+    Transform: IMatrix;
 }
 
 export interface IGeometry {

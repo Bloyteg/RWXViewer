@@ -26,7 +26,7 @@ function tick() {
     window.requestAnimationFrame(tick);
 }
 
-$.when(renderer.initialize(), PathObjectLoader.loadModel(1))
+$.when(renderer.initialize(), PathObjectLoader.loadModel(2))
     .done((_, model) => {
         CameraController.registerCamera(renderer.camera);
         renderer.setCurrentModel(model);

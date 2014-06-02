@@ -17,70 +17,23 @@ define(["require", "exports", "Drawable"], function(require, exports, Drawable) 
             this._gl = gl;
         }
         DrawableBuilder.prototype.loadModel = function (model) {
-            return this.buildMeshDrawable(model, model.Clump);
+            return this.buildMeshDrawableFromClump(model, model.Clump);
         };
 
-        DrawableBuilder.prototype.buildMeshDrawable = function (model, geometry) {
+        DrawableBuilder.prototype.buildMeshDrawableFromClump = function (model, clump, parentMatrix) {
             var _this = this;
-            var vertexBuffer = this.buildVertexBuffer(geometry);
-            var indexBuffers = this.buildIndexBuffers(geometry);
+            if (typeof parentMatrix === "undefined") { parentMatrix = mat4.create(); }
+            var matrix = mat4.clone(clump.Transform.Matrix);
+            mat4.multiply(matrix, parentMatrix, matrix);
 
-            var meshMaterialGroups = indexBuffers.map(function (buffer) {
-                return {
-                    vertexBuffer: vertexBuffer,
-                    indexBuffer: buffer
-                };
+            var children = clump.Children.map(function (child) {
+                return _this.buildMeshDrawableFromClump(model, child, matrix);
             });
 
-            var children = geometry.Children.map(function (child) {
-                return _this.buildMeshDrawable(model, child);
-            });
-            var modelMatrix = mat4.create();
-            mat4.identity(modelMatrix);
-
-            return new Drawable.MeshDrawable(meshMaterialGroups, modelMatrix, children);
+            return new Drawable.MeshDrawable(this.buildMeshMaterialGroups(model, clump), matrix, children);
         };
 
-        DrawableBuilder.prototype.buildVertexBuffer = function (geometry) {
-            var vertices = [];
-            var uvs = [];
-            var normals = [];
-
-            geometry.Vertices.forEach(function (vertex) {
-                vertices.push(vertex.Position.X);
-                vertices.push(vertex.Position.Y);
-                vertices.push(vertex.Position.Z);
-
-                uvs.push(((vertex.Uv) || {}).U || 0);
-                uvs.push(((vertex.Uv) || {}).V || 0);
-
-                normals.push(vertex.Normal.X);
-                normals.push(vertex.Normal.Y);
-                normals.push(vertex.Normal.Z);
-            });
-
-            var gl = this._gl;
-            var vertexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
-            var uvBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvs), gl.STATIC_DRAW);
-
-            var normalBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-
-            return {
-                vertexPositions: vertexBuffer,
-                vertexUVs: uvBuffer,
-                vertexNormals: normalBuffer,
-                vertexCount: geometry.Vertices.length
-            };
-        };
-
-        DrawableBuilder.prototype.buildIndexBuffers = function (geometry) {
+        DrawableBuilder.prototype.buildMeshMaterialGroups = function (model, geometry) {
             var _this = this;
             var trianglesByMaterial = Array();
 
@@ -94,27 +47,57 @@ define(["require", "exports", "Drawable"], function(require, exports, Drawable) 
                 });
             });
 
-            var indexBuffers = [];
+            return trianglesByMaterial.map(function (triangleGroup, materialId) {
+                var indices = triangleGroup.reduce(function (array, triangle) {
+                    return array.concat(triangle.Indices);
+                }, []);
+                var material = model.Materials[materialId];
+                return {
+                    vertexBuffer: _this.buildVertexBuffer(geometry.Vertices, indices),
+                    baseColor: vec4.fromValues(material.Color.R, material.Color.G, material.Color.B, 1.0)
+                };
+            });
+        };
 
-            trianglesByMaterial.forEach(function (triangleGroup) {
-                var indices = [];
+        DrawableBuilder.prototype.buildVertexBuffer = function (vertices, indices) {
+            var positions = [];
+            var uvs = [];
+            var normals = [];
 
-                triangleGroup.forEach(function (triangle) {
-                    Array.prototype.push.apply(indices, triangle.Indices);
-                });
+            indices.forEach(function (index) {
+                var vertex = vertices[index];
 
-                var gl = _this._gl;
-                var indexBuffer = gl.createBuffer();
-                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+                positions.push(vertex.Position.X);
+                positions.push(vertex.Position.Y);
+                positions.push(vertex.Position.Z);
 
-                indexBuffers.push({
-                    indexBuffer: indexBuffer,
-                    indexCount: indices.length
-                });
+                uvs.push(((vertex.Uv) || {}).U || 0);
+                uvs.push(((vertex.Uv) || {}).V || 0);
+
+                normals.push(vertex.Normal.X);
+                normals.push(vertex.Normal.Y);
+                normals.push(vertex.Normal.Z);
             });
 
-            return indexBuffers;
+            var gl = this._gl;
+            var positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+            var uvBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvs), gl.STATIC_DRAW);
+
+            var normalBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+
+            return {
+                positions: positionBuffer,
+                uvs: uvBuffer,
+                normals: normalBuffer,
+                count: indices.length
+            };
         };
         return DrawableBuilder;
     })();

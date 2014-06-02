@@ -193,6 +193,7 @@ declare var mat3: Matrix3;
 interface Matrix4 {
     create(): Mat4Array;
     clone(a: Mat4Array): Mat4Array;
+    clone(a: number[]): Mat4Array;
     copy(out: Mat4Array, a: Mat4Array): Mat4Array;
     identity(out: Mat4Array): Mat4Array;
     transpose(out: Mat4Array, a: Mat4Array): Mat4Array;

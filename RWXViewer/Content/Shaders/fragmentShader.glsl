@@ -13,7 +13,9 @@
 // limitations under the License.
 
 precision mediump float;
-        
+       
+uniform vec4 u_baseColor;
+	    
 void main(void) {
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    gl_FragColor = u_baseColor;
 }

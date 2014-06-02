@@ -21,7 +21,7 @@ define(["require", "exports", "jquery", "./viewer/Renderer", "./viewer/CameraCon
         window.requestAnimationFrame(tick);
     }
 
-    $.when(renderer.initialize(), PathObjectLoader.loadModel(1)).done(function (_, model) {
+    $.when(renderer.initialize(), PathObjectLoader.loadModel(2)).done(function (_, model) {
         CameraController.registerCamera(renderer.camera);
         renderer.setCurrentModel(model);
         tick();

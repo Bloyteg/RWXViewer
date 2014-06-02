@@ -20,11 +20,10 @@ export interface IDrawable {
 }
 
 export interface IVertexBuffer {
-    vertexPositions: WebGLBuffer;
-    vertexUVs: WebGLBuffer;
-    vertexNormals: WebGLBuffer;
-
-    vertexCount: number;
+    positions: WebGLBuffer;
+    uvs: WebGLBuffer;
+    normals: WebGLBuffer;
+    count: number;
 }
 
 export interface IIndexBuffer {
@@ -34,7 +33,7 @@ export interface IIndexBuffer {
 
 export interface IMeshMaterialGroup {
     vertexBuffer: IVertexBuffer;
-    indexBuffer: IIndexBuffer;
+    baseColor: Vec4Array;
 }
 
 export class MeshDrawable implements IDrawable {
@@ -52,20 +51,20 @@ export class MeshDrawable implements IDrawable {
         //TODO: Handle any material specific parameters such as prelit, wireframe, texture bindings, etc.
 
         this._meshMaterialGroups.forEach(meshMaterialGroup => {
+            gl.uniform4fv(shaders[0].uniforms["u_baseColor"], meshMaterialGroup.baseColor);
             gl.uniformMatrix4fv(shaders[0].uniforms["u_modelMatrix"], false, this._modelMatrix);
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.vertexPositions);
+            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
             gl.enableVertexAttribArray(0);
             gl.vertexAttribPointer(shaders[0].attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.vertexUVs);
+            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.uvs);
             gl.vertexAttribPointer(shaders[0].attributes["a_vertexUV"], 2, gl.FLOAT, false, 0, 0);
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.vertexNormals);
+            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.normals);
             gl.vertexAttribPointer(shaders[0].attributes["a_vertexNormal"], 3, gl.FLOAT, false, 0, 0);
 
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, meshMaterialGroup.indexBuffer.indexBuffer);
-            gl.drawElements(gl.TRIANGLES, meshMaterialGroup.indexBuffer.indexCount, gl.UNSIGNED_SHORT, 0);
+            gl.drawArrays(gl.TRIANGLES, 0, meshMaterialGroup.vertexBuffer.count);
         });
 
         this._children.forEach(child => child.draw(gl, shaders));
