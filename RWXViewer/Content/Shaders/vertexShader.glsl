@@ -24,7 +24,7 @@ varying vec2 v_textureCoordinates;
 varying float v_lightWeighting;
         
 void main(void) {
-	vec3 lightDirection = vec3(1, 1, 1);
+	vec3 lightDirection = normalize(vec3(0, 1, 1));
 
 	v_textureCoordinates = a_vertexUV;
 	v_lightWeighting = 0.5 + max(dot(a_vertexNormal, lightDirection), 0.0) * 0.5;
