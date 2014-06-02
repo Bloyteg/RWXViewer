@@ -21,7 +21,7 @@ uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 
 uniform float u_ambientFactor;
-uniform float u_diffuseFactory;
+uniform float u_diffuseFactor;
 
 varying vec2 v_textureCoordinates;
 varying float v_lightWeighting;
