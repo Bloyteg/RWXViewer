@@ -49,7 +49,7 @@ export class DrawableBuilder {
         });
 
         return trianglesByMaterial.map((triangleGroup: Model.ITriangle[], materialId) => {
-            var indices: number[] = triangleGroup.reduce((array: number[], triangle: Model.ITriangle) => array.concat(triangle.Indices), []);
+            var indices: number[] = triangleGroup.reduce((array: number[], triangle) => array.concat(triangle.Indices), []);
             var material = model.Materials[materialId];
             return {
                 vertexBuffer: this.buildVertexBuffer(geometry.Vertices, indices),

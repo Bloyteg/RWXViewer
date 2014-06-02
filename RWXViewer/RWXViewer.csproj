@@ -233,7 +233,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\viewer\Camera.ts" />
-    <TypeScriptCompile Include="Scripts\gl-matrix\gl-matrix.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\gl-matrix\gl-matrix.d.ts" />
     <TypeScriptCompile Include="Scripts\viewer\CameraController.ts" />
     <TypeScriptCompile Include="Scripts\viewer\ShaderProgramLoader.ts" />
     <TypeScriptCompile Include="Scripts\viewer\Drawable.ts" />
