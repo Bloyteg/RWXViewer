@@ -21,10 +21,13 @@ uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 
 varying vec2 v_textureCoordinates;
-varying vec3 v_normals;
+varying float v_lightWeighting;
         
 void main(void) {
+	vec3 lightDirection = vec3(1, 1, 1);
+
 	v_textureCoordinates = a_vertexUV;
-	v_normals = a_vertexNormal;
+	v_lightWeighting = 0.5 + max(dot(a_vertexNormal, lightDirection), 0.0) * 0.5;
+
     gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(a_vertexPosition, 1.0);
 }

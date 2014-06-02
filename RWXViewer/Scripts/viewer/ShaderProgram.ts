@@ -46,7 +46,7 @@ export class ShaderProgram {
         gl.linkProgram(shaderProgram);
 
         if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-            throw new Error("Failed to link shader program.");
+            throw new Error(gl.getProgramParameter(shaderProgram, gl.LINK_STATUS));
         }
 
         return shaderProgram;

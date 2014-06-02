@@ -15,7 +15,10 @@
 precision mediump float;
        
 uniform vec4 u_baseColor;
+
+varying vec2 v_textureCoordinates;
+varying float v_lightWeighting;
 	    
 void main(void) {
-    gl_FragColor = u_baseColor;
+    gl_FragColor = vec4(u_baseColor.rgb * v_lightWeighting, u_baseColor.a);
 }
