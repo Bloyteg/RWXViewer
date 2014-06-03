@@ -33,7 +33,8 @@ export class Renderer {
 
     initialize() {
         var canvas = this._canvas;
-        this._gl = <WebGLRenderingContext>(canvas.getContext("webgl") || canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true }));
+        var glOptions: any = { preserveDrawingBuffer: true };
+        this._gl = <WebGLRenderingContext>(canvas.getContext("webgl", glOptions) || canvas.getContext("experimental-webgl", glOptions));
         var gl = this._gl;
 
         if (gl) {
