@@ -17,20 +17,53 @@ define(["require", "exports", "Model", "Drawable"], function(require, exports, M
             this._gl = gl;
         }
         DrawableBuilder.prototype.loadModel = function (model) {
-            return this.buildMeshDrawableFromClump(model, model.Clump);
+            var prototypes = this.buildPrototypeCache(model);
+
+            return this.buildMeshDrawableFromClump(model, model.Clump, prototypes);
         };
 
-        DrawableBuilder.prototype.buildMeshDrawableFromClump = function (model, clump, parentMatrix) {
+        DrawableBuilder.prototype.buildPrototypeCache = function (model) {
             var _this = this;
+            return model.Prototypes.reduce(function (prototypeCache, prototype) {
+                prototypeCache[prototype.Name] = _this.buildMeshDrawableFromPrototype(model, prototype, prototypeCache);
+                return prototypeCache;
+            }, {});
+        };
+
+        DrawableBuilder.prototype.buildMeshDrawableFromPrototype = function (model, prototype, prototypeCache) {
+            return this.buildMeshDrawableFromMeshGeometry(model, prototype, prototypeCache, mat4.create());
+        };
+
+        DrawableBuilder.prototype.buildMeshDrawableFromClump = function (model, clump, prototypeCache, parentMatrix) {
             if (typeof parentMatrix === "undefined") { parentMatrix = mat4.create(); }
             var matrix = mat4.clone(clump.Transform.Matrix);
             mat4.multiply(matrix, parentMatrix, matrix);
 
-            var children = clump.Children.map(function (child) {
-                return _this.buildMeshDrawableFromClump(model, child, matrix);
-            });
+            return this.buildMeshDrawableFromMeshGeometry(model, clump, prototypeCache, matrix);
+        };
 
-            return new Drawable.MeshDrawable(this.buildMeshMaterialGroups(model, clump), matrix, children);
+        DrawableBuilder.prototype.buildMeshDrawableFromMeshGeometry = function (model, geometry, prototypeCache, matrix) {
+            var _this = this;
+            var children = [];
+            children = children.concat(geometry.Children.map(function (child) {
+                return _this.buildMeshDrawableFromClump(model, child, prototypeCache, matrix);
+            }));
+
+            //TODO: Handle the case where this is a prototypeinstancegeometry.
+            children = children.concat(geometry.PrototypeInstances.map(function (prototypeInstance) {
+                return prototypeCache[prototypeInstance.Name].cloneWithTransform(mat4.clone(prototypeInstance.Transform.Matrix));
+            }));
+            children = children.concat(geometry.Primitives.map(function (primitive) {
+                return _this.buildMeshDrawableFromPrimitive(model, primitive, matrix);
+            }));
+
+            return new Drawable.MeshDrawable(this.buildMeshMaterialGroups(model, geometry), matrix, children);
+        };
+        DrawableBuilder.prototype.buildMeshDrawableFromPrimitive = function (model, primitive, parentMatrix) {
+            var matrix = mat4.clone(primitive.Transform.Matrix);
+            mat4.multiply(matrix, parentMatrix, matrix);
+
+            return new Drawable.MeshDrawable(this.buildMeshMaterialGroups(model, primitive), matrix, []);
         };
 
         DrawableBuilder.prototype.buildMeshMaterialGroups = function (model, geometry) {

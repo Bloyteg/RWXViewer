@@ -66,7 +66,7 @@ export interface IPrimitiveGeometry extends IGeometry, ITransformable {
     MaterialId: number;
 }
 
-export interface IPrototype extends IGeometry {
+export interface IPrototype extends IMeshGeometry {
     Name: string;
 }
 

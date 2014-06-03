@@ -18,6 +18,15 @@ define(["require", "exports"], function(require, exports) {
             this._modelMatrix = modelMatrix;
             this._children = children;
         }
+        MeshDrawable.prototype.cloneWithTransform = function (matrix) {
+            var newTransformMatrix = mat4.clone(this._modelMatrix);
+            mat4.mul(newTransformMatrix, matrix, newTransformMatrix);
+
+            return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(function (child) {
+                return child instanceof MeshDrawable ? child.cloneWithTransform(matrix) : child;
+            }));
+        };
+
         MeshDrawable.prototype.draw = function (gl, shaders) {
             //TODO: Handle any material specific parameters such as prelit, wireframe, texture bindings, etc.
             var _this = this;

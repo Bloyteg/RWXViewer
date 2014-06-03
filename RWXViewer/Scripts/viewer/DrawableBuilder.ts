@@ -15,6 +15,10 @@
 import Model = require("Model")
 import Drawable = require("Drawable");
 
+interface IPrototypeCache {
+    [name: string]: Drawable.MeshDrawable
+}
+
 export class DrawableBuilder {
     private _gl: WebGLRenderingContext;
 
@@ -23,16 +27,43 @@ export class DrawableBuilder {
     }
 
     loadModel(model: Model.IModel): Drawable.IDrawable {
-        return this.buildMeshDrawableFromClump(model, model.Clump);
+        var prototypes: IPrototypeCache = this.buildPrototypeCache(model);
+
+        return this.buildMeshDrawableFromClump(model, model.Clump, prototypes);
     }
 
-    private buildMeshDrawableFromClump(model: Model.IModel, clump: Model.IClump, parentMatrix = mat4.create()): Drawable.MeshDrawable {
+    private buildPrototypeCache(model: Model.IModel): IPrototypeCache {
+        return model.Prototypes.reduce((prototypeCache: IPrototypeCache, prototype: Model.IPrototype) => {
+            prototypeCache[prototype.Name] = this.buildMeshDrawableFromPrototype(model, prototype, prototypeCache);
+            return prototypeCache;
+        }, <IPrototypeCache>{});
+    }
+
+    private buildMeshDrawableFromPrototype(model: Model.IModel, prototype: Model.IPrototype, prototypeCache: IPrototypeCache): Drawable.MeshDrawable {
+        return this.buildMeshDrawableFromMeshGeometry(model, prototype, prototypeCache, mat4.create());
+    }
+
+    private buildMeshDrawableFromClump(model: Model.IModel, clump: Model.IClump, prototypeCache: IPrototypeCache, parentMatrix = mat4.create()): Drawable.MeshDrawable {
         var matrix = mat4.clone(clump.Transform.Matrix);
         mat4.multiply(matrix, parentMatrix, matrix);
 
-        var children = clump.Children.map(child => this.buildMeshDrawableFromClump(model, child, matrix));
+        return this.buildMeshDrawableFromMeshGeometry(model, clump, prototypeCache, matrix);
+    }
 
-        return new Drawable.MeshDrawable(this.buildMeshMaterialGroups(model, clump), matrix, children);
+    private buildMeshDrawableFromMeshGeometry(model: Model.IModel, geometry: Model.IMeshGeometry, prototypeCache: IPrototypeCache, matrix: Mat4Array): Drawable.MeshDrawable {
+        var children: Drawable.MeshDrawable[] = [];
+        children = children.concat(geometry.Children.map(child => this.buildMeshDrawableFromClump(model, child, prototypeCache, matrix)));
+        //TODO: Handle the case where this is a prototypeinstancegeometry.
+        children = children.concat(geometry.PrototypeInstances.map(prototypeInstance => prototypeCache[prototypeInstance.Name].cloneWithTransform(mat4.clone(prototypeInstance.Transform.Matrix))));
+        children = children.concat(geometry.Primitives.map(primitive => this.buildMeshDrawableFromPrimitive(model, primitive, matrix)));
+
+        return new Drawable.MeshDrawable(this.buildMeshMaterialGroups(model, geometry), matrix, children);
+    }
+    private buildMeshDrawableFromPrimitive(model: Model.IModel, primitive: Model.IPrimitiveGeometry, parentMatrix: Mat4Array): Drawable.MeshDrawable {
+        var matrix = mat4.clone(primitive.Transform.Matrix);
+        mat4.multiply(matrix, parentMatrix, matrix);
+
+        return new Drawable.MeshDrawable(this.buildMeshMaterialGroups(model, primitive), matrix, []);
     }
 
     private buildMeshMaterialGroups(model: Model.IModel, geometry: Model.IGeometry): Drawable.IMeshMaterialGroup[] {

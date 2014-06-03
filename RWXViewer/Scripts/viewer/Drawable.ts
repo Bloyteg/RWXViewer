@@ -49,6 +49,13 @@ export class MeshDrawable implements IDrawable {
         this._children = children;
     }
 
+    cloneWithTransform(matrix: Mat4Array) {
+        var newTransformMatrix = mat4.clone(this._modelMatrix);
+        mat4.mul(newTransformMatrix, matrix, newTransformMatrix);
+
+        return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(child => child instanceof MeshDrawable ? (<MeshDrawable>child).cloneWithTransform(matrix) : child));
+    }
+
     draw(gl: WebGLRenderingContext, shaders: ShaderProgram.ShaderProgram[]): void {
         //TODO: Handle any material specific parameters such as prelit, wireframe, texture bindings, etc.
 
