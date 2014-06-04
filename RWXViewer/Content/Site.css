@@ -53,3 +53,7 @@
     border: none;
     display: block;
 }
+
+.uiSelect {
+    width: 80px;
+}
