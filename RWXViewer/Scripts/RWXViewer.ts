@@ -57,17 +57,17 @@ class ViewModel {
 }
 
 var viewModel = new ViewModel();
+ko.applyBindings(viewModel);
+
+$.when(ObjectPathItemLoader.getWorlds(), renderer.initialize())
+    .done((worlds) => {
+        viewModel.worlds(worlds);
+        CameraController.registerCamera(renderer.camera);
+        tick();
+    });
+
 
 function tick() {
     renderer.draw();
     window.requestAnimationFrame(tick);
 }
-
-$.when(ObjectPathItemLoader.getWorlds(), renderer.initialize())
-    .done((worlds) => {
-        viewModel.worlds(worlds);
-        ko.applyBindings(viewModel);
-
-        CameraController.registerCamera(renderer.camera);
-        tick();
-    });
