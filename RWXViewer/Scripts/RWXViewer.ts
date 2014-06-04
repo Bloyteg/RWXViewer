@@ -66,7 +66,6 @@ $.when(ObjectPathItemLoader.getWorlds(), renderer.initialize())
         tick();
     });
 
-
 function tick() {
     renderer.draw();
     window.requestAnimationFrame(tick);
