@@ -46,9 +46,12 @@ class ViewModel {
             if (model) {
                 ObjectPathItemLoader.loadModel(model.ObjectPathId).done(result => {
                     renderer.setCurrentModel(result);
-                    renderer.camera.reset();
                 });
+            } else {
+                renderer.setCurrentModel(null);
             }
+
+            renderer.camera.reset();
         });
     }
 }

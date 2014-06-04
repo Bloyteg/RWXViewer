@@ -81,10 +81,13 @@ export class Renderer {
     }
 
     setCurrentModel(model: Model.IModel): void {
-        var builder = new DrawableBuilder.DrawableBuilder(this._gl);
-        this._currentDrawable = builder.loadModel(model);
+        if (model) {
+            var builder = new DrawableBuilder.DrawableBuilder(this._gl);
+            this._currentDrawable = builder.loadModel(model);
+        } else {
+            this._currentDrawable = null;
+        }
     }
-
 
     get camera(): Camera.Camera {
         return this._camera;
