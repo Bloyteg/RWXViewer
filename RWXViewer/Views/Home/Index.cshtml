@@ -5,6 +5,7 @@
 @section scripts
 {
     <script src="@Url.Content("~/Scripts/gl-matrix.js")"></script>
+    <script src="@Url.Content("~/Scripts/knockout-3.1.0.js")"></script>
     <script src="@Url.Content("~/Scripts/require.js")" data-main="/Scripts/RWXViewer"></script>
     <script src="@Url.Content("~/Scripts/config.js")"></script>
 }
@@ -18,14 +19,10 @@
 <div id="content">
     <div id="modelSelector" class="infoBar">
         <label for="selectWorld">World:</label>
-        <select id="selectWorld">
-            <option>AW</option>
-        </select>
-        
+        <select id="selectWorld" data-bind="options: worlds, optionsText: 'Name', optionsCaption: '(None)', value: selectedWorld"></select>
+
         <label for="selectModel">Object:</label>
-        <select id="selectModel">
-            <option>test.rwx</option>
-        </select>
+        <select id="selectModel" data-bind="options: models, optionsText: 'Name', optionsCaption: '(None)', value: selectedModel, enable: selectedWorld"></select>  
     </div>
 
     <canvas id="viewport" width="960" height="540">

@@ -45,7 +45,7 @@ namespace RWXViewer.Controllers
             {
                 var world = context.Worlds.Include("Models").FirstOrDefault(w => w.WorldId == id);
                 return world != null
-                    ? world.Models.Where(item => item.Type == ObjectPathItemType.Model).ToList()
+                    ? world.Models.Where(item => item.Type == ObjectPathItemType.Model || item.Type == ObjectPathItemType.Avatar).ToList()
                     : Enumerable.Empty<ObjectPathItem>();
             }
         }

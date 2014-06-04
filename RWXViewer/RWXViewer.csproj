@@ -201,6 +201,8 @@
     <Content Include="Scripts\gl-matrix.js" />
     <Content Include="Scripts\jquery-2.1.1.js" />
     <Content Include="Scripts\jquery-2.1.1.min.js" />
+    <Content Include="Scripts\knockout-3.1.0.debug.js" />
+    <Content Include="Scripts\knockout-3.1.0.js" />
     <Content Include="Scripts\r.js" />
     <Content Include="Scripts\require.js" />
     <Content Include="Scripts\_references.js" />
@@ -233,6 +235,7 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\typings\knockout\knockout.d.ts" />
     <TypeScriptCompile Include="Scripts\viewer\Camera.ts" />
     <TypeScriptCompile Include="Scripts\typings\gl-matrix\gl-matrix.d.ts" />
     <TypeScriptCompile Include="Scripts\viewer\CameraController.ts" />

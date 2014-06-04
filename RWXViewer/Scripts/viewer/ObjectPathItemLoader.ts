@@ -23,3 +23,33 @@ export function loadModel(modelId: number) {
 
     return deferred.promise();
 }
+
+export interface IWorld {
+    Name: string;
+    WorldId: number;
+}
+
+export interface IObjectPathItem {
+    Name: string;
+    ObjectPathId: number;
+}
+
+export function getWorlds() {
+    var deferred = $.Deferred<IWorld>();
+
+    $.getJSON("/api/ObjectPath/Worlds")
+        .done(data => deferred.resolve(data))
+        .fail(() => deferred.fail());
+
+    return deferred.promise();
+}
+
+export function getModels(worldId: number) {
+    var deferred = $.Deferred<IObjectPathItem>();
+
+    $.getJSON("/api/ObjectPath/World/" + worldId + "/Models")
+        .done(data => deferred.resolve(data))
+        .fail(() => deferred.fail());
+
+    return deferred.promise();    
+}

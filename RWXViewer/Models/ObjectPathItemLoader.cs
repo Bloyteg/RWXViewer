@@ -13,6 +13,7 @@
 // limitations under the License.
 using System;
 using System.ComponentModel;
+using System.Data.Entity;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -70,7 +71,7 @@ namespace RWXViewer.Models
             using (var context = new ObjectPathContext())
             using (var webClient = new WebClient())
             {
-                var pathObject = await context.ObjectPathItem.FindAsync(id);
+                var pathObject = await context.ObjectPathItem.Include("World").FirstOrDefaultAsync(item => item.ObjectPathId == id);
 
                 if (pathObject != null)
                 {
@@ -128,17 +129,19 @@ namespace RWXViewer.Models
 
         private static ArchiveType GetArchiveType(byte[] resultData)
         {
-            if (resultData.Length >= 4)
+            if (resultData.Length < 4)
             {
-                if (resultData[0] == 0x50 && resultData[1] == 0x4B && resultData[2] == 0x03 && resultData[3] == 0x04)
-                {
-                    return ArchiveType.Zip;
-                }
+                return ArchiveType.Unknown;
+            }
+
+            if (resultData[0] == 0x50 && resultData[1] == 0x4B && resultData[2] == 0x03 && resultData[3] == 0x04)
+            {
+                return ArchiveType.Zip;
+            }
                 
-                if (resultData[0] == 0x1F && resultData[2] == 0x8B)
-                {
-                    return ArchiveType.Gzip;
-                }
+            if (resultData[0] == 0x1F && resultData[2] == 0x8B)
+            {
+                return ArchiveType.Gzip;
             }
 
             return ArchiveType.Unknown;
