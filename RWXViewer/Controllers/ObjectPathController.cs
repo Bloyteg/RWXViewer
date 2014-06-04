@@ -11,6 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using RWXViewer.Models;
@@ -24,6 +27,27 @@ namespace RWXViewer.Controllers
         public ObjectPathController(IObjectPathItemLoader objectPathItemLoader)
         {
             _objectPathItemLoader = objectPathItemLoader;
+        }
+
+        [Route("api/ObjectPath/Worlds")]
+        public IEnumerable<World> GetWorlds()
+        {
+            using (var context = new ObjectPathContext())
+            {
+                return context.Worlds.ToList();
+            }
+        }
+
+        [Route("api/ObjectPath/World/{id}/Models")]
+        public IEnumerable<ObjectPathItem> GetWorldModels(int id)
+        {
+            using (var context = new ObjectPathContext())
+            {
+                var world = context.Worlds.Include("Models").FirstOrDefault(w => w.WorldId == id);
+                return world != null
+                    ? world.Models.Where(item => item.Type == ObjectPathItemType.Model).ToList()
+                    : Enumerable.Empty<ObjectPathItem>();
+            }
         }
 
         [Route("api/ObjectPath/Model/{id}")]

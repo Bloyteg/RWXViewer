@@ -19,7 +19,7 @@ namespace RWXViewer.Models
     {
         public ObjectPathContext() : base("ObjectPathDb")
         {
-            
+            Configuration.ProxyCreationEnabled = false;
         }
 
         public DbSet<World> Worlds { get; set; }

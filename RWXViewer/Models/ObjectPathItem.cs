@@ -14,13 +14,18 @@
 
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace RWXViewer.Models
 {
+    [DataContract]
     public enum ObjectPathItemType
     {
+        [EnumMember]
         Model,
+        [EnumMember]
         Avatar,
+        [EnumMember]
         Texture
     }
 
@@ -45,13 +50,23 @@ namespace RWXViewer.Models
         }
     }
 
+    [DataContract]
     public class ObjectPathItem
     {
         [Key]
+        [DataMember]
         public int ObjectPathId { get; set; }
+
+        [DataMember]
         public string Name { get; set; }
+
+        [DataMember]
         public ObjectPathItemType Type { get; set; }
+
+        [DataMember]
         public string FileName { get; set; }
+
+        [DataMember]
         public virtual World World { get; set; }
     }
 }

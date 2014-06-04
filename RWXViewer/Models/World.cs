@@ -13,16 +13,24 @@
 // limitations under the License.
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace RWXViewer.Models
 {
+    [DataContract]
     public class World
     {
         [Key]
+        [DataMember]
         public int WorldId { get; set; }
+
+        [DataMember]
         public string Name { get; set; }
+
+        [DataMember]
         public string ObjectPathUrl { get; set; }
 
+        [IgnoreDataMember]
         public virtual ICollection<ObjectPathItem> Models
         {
             get;
