@@ -36,6 +36,7 @@ export interface IMeshMaterialGroup {
     baseColor: Vec4Array;
     ambient: number;
     diffuse: number;
+    drawMode: number;
 }
 
 export class MeshDrawable implements IDrawable {
@@ -57,7 +58,7 @@ export class MeshDrawable implements IDrawable {
     }
 
     draw(gl: WebGLRenderingContext, shaders: ShaderProgram.ShaderProgram[]): void {
-        //TODO: Handle any material specific parameters such as prelit, wireframe, texture bindings, etc.
+        //TODO: Handle any material specific parameters such as prelit, texture bindings, etc.
 
         this._meshMaterialGroups.forEach(meshMaterialGroup => {
             gl.uniform1f(shaders[0].uniforms["u_ambientFactor"], meshMaterialGroup.ambient);
@@ -73,9 +74,9 @@ export class MeshDrawable implements IDrawable {
             gl.vertexAttribPointer(shaders[0].attributes["a_vertexUV"], 2, gl.FLOAT, false, 0, 0);
 
             gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.normals);
-            gl.vertexAttribPointer(shaders[0].attributes["a_vertexNormal"], 3, gl.FLOAT, false, 0, 0);
+            gl.vertexAttribPointer(shaders[0].attributes["a_vertexNormal"], 3, gl.FLOAT, true, 0, 0);
 
-            gl.drawArrays(gl.TRIANGLES, 0, meshMaterialGroup.vertexBuffer.count);
+            gl.drawArrays(meshMaterialGroup.drawMode, 0, meshMaterialGroup.vertexBuffer.count);
         });
 
         this._children.forEach(child => child.draw(gl, shaders));
