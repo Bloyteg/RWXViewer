@@ -23,7 +23,7 @@ export class Renderer {
     private _canvas: HTMLCanvasElement;
     private _gl: WebGLRenderingContext;
     private _currentDrawable: Drawable.IDrawable;
-    private _shaderPrograms: ShaderProgram.ShaderProgram[];
+    private _shaderProgram: ShaderProgram.ShaderProgram;
     private _camera: Camera.Camera;
     
 
@@ -41,17 +41,19 @@ export class Renderer {
             this._camera = new Camera.Camera(gl.drawingBufferWidth, gl.drawingBufferHeight);
 
             gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clearColor(0.25, 0.25, 0.25, 1.0);
             gl.clearDepth(1.0);
             gl.enable(gl.DEPTH_TEST);
             gl.depthFunc(gl.LEQUAL);
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         }
 
         var deferred = $.Deferred<void>();
 
         //TODO: Improve this so that it loads multiple shaders and stores them in a string -> ShaderProgram index.
         ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl").done(program => {
-            this._shaderPrograms = [program];
+            this._shaderProgram = program;
             deferred.resolve();
         }).fail(() => deferred.fail());
 
@@ -66,16 +68,16 @@ export class Renderer {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             gl.enable(gl.CULL_FACE);
 
-            this._shaderPrograms[0].useProgram();
+            this._shaderProgram.useProgram();
 
             var pMatrix = mat4.create();
             mat4.perspective(pMatrix, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.01, 100.0);
 
-            gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["u_projectionMatrix"], false, pMatrix);
-            gl.uniformMatrix4fv(this._shaderPrograms[0].uniforms["u_viewMatrix"], false, this._camera.matrix);
+            gl.uniformMatrix4fv(this._shaderProgram.uniforms["u_projectionMatrix"], false, pMatrix);
+            gl.uniformMatrix4fv(this._shaderProgram.uniforms["u_viewMatrix"], false, this._camera.matrix);
 
             if (this._currentDrawable) {
-                this._currentDrawable.draw(gl, this._shaderPrograms);
+                this._currentDrawable.draw(gl, this._shaderProgram);
             }
         }
     }

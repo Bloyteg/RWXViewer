@@ -83,6 +83,7 @@ export class DrawableBuilder {
             return {
                 vertexBuffer: this.buildVertexBuffer(geometry.Vertices, faces, material),
                 baseColor: vec4.fromValues(material.Color.R, material.Color.G, material.Color.B, 1.0),
+                opacity: material.Opacity,
                 ambient: material.Ambient,
                 diffuse: material.Diffuse,
                 drawMode: material.GeometrySampling === Model.GeometrySampling.Wireframe ? this._gl.LINES : this._gl.TRIANGLES
