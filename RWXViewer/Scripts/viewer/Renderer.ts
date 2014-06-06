@@ -51,7 +51,6 @@ export class Renderer {
 
         var deferred = $.Deferred<void>();
 
-        //TODO: Improve this so that it loads multiple shaders and stores them in a string -> ShaderProgram index.
         ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl").done(program => {
             this._shaderProgram = program;
             deferred.resolve();
@@ -84,8 +83,7 @@ export class Renderer {
 
     setCurrentModel(model: Model.IModel): void {
         if (model) {
-            var builder = new DrawableBuilder.DrawableBuilder(this._gl);
-            this._currentDrawable = builder.loadModel(model);
+            this._currentDrawable = DrawableBuilder.createDrawableFromModel(this._gl, model);
         } else {
             this._currentDrawable = null;
         }

@@ -26,11 +26,6 @@ export interface IVertexBuffer {
     count: number;
 }
 
-export interface IIndexBuffer {
-    indexBuffer: WebGLBuffer;
-    indexCount: number;
-}
-
 export interface IMeshMaterialGroup {
     vertexBuffer: IVertexBuffer;
     baseColor: Vec4Array;
