@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.ComponentModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace RWXViewer.Models.DAL
@@ -21,7 +20,7 @@ namespace RWXViewer.Models.DAL
     public enum ModelType
     {
         Model,
-        Avatar,
+        Avatar
     }
 
     public static class ObjectPathItemTypeExtensions

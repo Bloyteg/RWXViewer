@@ -33,10 +33,9 @@ namespace RWXViewer.Models.DAL
         public string ObjectPathUrl { get; set; }
 
         [JsonIgnore]
-        public virtual ICollection<Model> Models
-        {
-            get;
-            set;
-        }
+        public virtual ICollection<Model> Models { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<Texture> Textures { get; set; }
     }
 }

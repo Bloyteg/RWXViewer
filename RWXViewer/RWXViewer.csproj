@@ -189,8 +189,11 @@
     <Compile Include="Models\IObjectPathItemLoader.cs" />
     <Compile Include="Models\DAL\ObjectPathContext.cs" />
     <Compile Include="Models\DAL\Model.cs" />
+    <Compile Include="Models\ModelLoader.cs" />
     <Compile Include="Models\ObjectPathItemLoader.cs" />
     <Compile Include="Models\DAL\World.cs" />
+    <Compile Include="Models\TextureLoader.cs" />
+    <Compile Include="Models\ArchiveFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
