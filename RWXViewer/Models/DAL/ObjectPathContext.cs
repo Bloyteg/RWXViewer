@@ -11,30 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 
-namespace RWXViewer.Models
+using System.Data.Entity;
+
+namespace RWXViewer.Models.DAL
 {
-    [DataContract]
-    public class World
+    public class ObjectPathContext : DbContext
     {
-        [Key]
-        [DataMember]
-        public int WorldId { get; set; }
-
-        [DataMember]
-        public string Name { get; set; }
-
-        [DataMember]
-        public string ObjectPathUrl { get; set; }
-
-        [IgnoreDataMember]
-        public virtual ICollection<ObjectPathItem> Models
+        public ObjectPathContext() : base("ObjectPathDb")
         {
-            get;
-            set;
         }
+
+        public DbSet<World> Worlds { get; set; }
+        public DbSet<Model> Models { get; set; }
+        public DbSet<Texture> Textures { get; set; }
     }
 }

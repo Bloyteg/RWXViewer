@@ -13,36 +13,28 @@
 // limitations under the License.
 
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
-namespace RWXViewer.Models
+namespace RWXViewer.Models.DAL
 {
-    [DataContract]
-    public enum ObjectPathItemType
+    public enum ModelType
     {
-        [EnumMember]
         Model,
-        [EnumMember]
         Avatar,
-        [EnumMember]
-        Texture
     }
 
     public static class ObjectPathItemTypeExtensions
     {
-        public static string ToPathName(this ObjectPathItemType itemType)
+        public static string ToPathName(this ModelType itemType)
         {
             switch (itemType)
             {
-            case ObjectPathItemType.Model:
+            case ModelType.Model:
                 return "models";
 
-            case ObjectPathItemType.Avatar:
+            case ModelType.Avatar:
                 return "avatars";
-
-            case ObjectPathItemType.Texture:
-                return "textures";
 
             default:
                 throw new InvalidEnumArgumentException("itemType");
@@ -50,23 +42,9 @@ namespace RWXViewer.Models
         }
     }
 
-    [DataContract]
-    public class ObjectPathItem
+    public class Model : ObjectPathItem
     {
-        [Key]
-        [DataMember]
-        public int ObjectPathId { get; set; }
-
-        [DataMember]
-        public string Name { get; set; }
-
-        [DataMember]
-        public ObjectPathItemType Type { get; set; }
-
-        [DataMember]
-        public string FileName { get; set; }
-
-        [DataMember]
-        public virtual World World { get; set; }
+        [JsonProperty(PropertyName = "type")]
+        public ModelType Type { get; set; }
     }
 }

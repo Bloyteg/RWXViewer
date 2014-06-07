@@ -17,6 +17,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using RWXViewer.Models;
+using RWXViewer.Models.DAL;
 
 namespace RWXViewer.Controllers
 {
@@ -38,22 +39,22 @@ namespace RWXViewer.Controllers
             }
         }
 
-        [Route("api/ObjectPath/World/{id}/Models")]
-        public IEnumerable<ObjectPathItem> GetWorldModels(int id)
+        [Route("api/ObjectPath/Worlds/{id}/Models")]
+        public async Task<IEnumerable<Model>> GetWorldModels(int id)
         {
             using (var context = new ObjectPathContext())
             {
-                var world = context.Worlds.Include("Models").FirstOrDefault(w => w.WorldId == id);
+                var world = await context.Worlds.FindAsync(id);
                 return world != null
-                    ? world.Models.Where(item => item.Type == ObjectPathItemType.Model || item.Type == ObjectPathItemType.Avatar).ToList()
-                    : Enumerable.Empty<ObjectPathItem>();
+                    ? world.Models.Where(item => item.Type == ModelType.Model || item.Type == ModelType.Avatar).ToList()
+                    : Enumerable.Empty<Model>();
             }
         }
 
-        [Route("api/ObjectPath/Model/{id}")]
-        public async Task<IHttpActionResult> Get(int id)
+        [Route("api/ObjectPath/Worlds/{id}/Models/{modelName}")]
+        public async Task<IHttpActionResult> Get(int id, string modelName)
         {
-            var model = await _objectPathItemLoader.GetModelAsync(id);
+            var model = await _objectPathItemLoader.GetModelAsync(id, modelName);
             return model == null ? (IHttpActionResult)NotFound() : Ok(model);
         }
     }

@@ -11,18 +11,32 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-using System.Data.Entity;
 
-namespace RWXViewer.Models
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
+
+namespace RWXViewer.Models.DAL
 {
-    public class ObjectPathContext : DbContext
+    [DataContract]
+    public class World
     {
-        public ObjectPathContext() : base("ObjectPathDb")
-        {
-            Configuration.ProxyCreationEnabled = false;
-        }
+        [Key]
+        [JsonProperty(PropertyName = "worldId")]
+        public int WorldId { get; set; }
 
-        public DbSet<World> Worlds { get; set; }
-        public DbSet<ObjectPathItem> ObjectPathItem { get; set; }
+        [JsonProperty(PropertyName = "name")]
+        public string Name { get; set; }
+
+        [JsonProperty(PropertyName = "objectPathUrl")]
+        public string ObjectPathUrl { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<Model> Models
+        {
+            get;
+            set;
+        }
     }
 }

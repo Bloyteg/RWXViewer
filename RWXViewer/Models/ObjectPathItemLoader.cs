@@ -13,7 +13,6 @@
 // limitations under the License.
 using System;
 using System.ComponentModel;
-using System.Data.Entity;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -21,57 +20,58 @@ using System.Net;
 using System.Runtime.Caching;
 using System.Threading.Tasks;
 using MrByte.RWX;
-using MrByte.RWX.Model;
+using RWXViewer.Models.DAL;
+using Model = RWXViewer.Models.DAL.Model;
 
 namespace RWXViewer.Models
 {
     public class ObjectPathItemLoader : IObjectPathItemLoader
     { 
-        public async Task<Model> GetModelAsync(int id)
+        public async Task<MrByte.RWX.Model.Model> GetModelAsync(int worldId, string modelName)
         {
-            var model = LoadFromCache(id);
+            var model = LoadFromCache(worldId, modelName);
 
             if (model != null)
             {
                 return model;
             }
 
-            model = await LoadFromObjectPath(id);
+            model = await LoadModel(worldId, modelName);
 
             if (model != null)
             {
-                AddToCache(id, model);
+                AddToCache(worldId, modelName, model);
             }
 
             return model;
         }
 
-        private static Model LoadFromCache(int id)
+        private static MrByte.RWX.Model.Model LoadFromCache(int worldId, string modelName)
         {
             var cache = MemoryCache.Default;
-            var key = BuildCacheKey(id);
-            var model = cache[key] as Model;
+            var key = BuildCacheKey(worldId, modelName);
+            var model = cache[key] as MrByte.RWX.Model.Model;
             return model;
         }
 
-        private void AddToCache(int id, Model model)
+        private void AddToCache(int worldId, string modelName, MrByte.RWX.Model.Model model)
         {
             var cache = MemoryCache.Default;
-            var key = BuildCacheKey(id);
+            var key = BuildCacheKey(worldId, modelName);
             cache.Add(key, model, DateTimeOffset.Now + TimeSpan.FromHours(24));
         }
 
-        private static string BuildCacheKey(int id)
+        private static string BuildCacheKey(int worldId, string modelName)
         {
-            return string.Format("Model-{0}", id);
+            return string.Format("world-{0}/{1}", worldId, modelName);
         }
 
-        private static async Task<Model> LoadFromObjectPath(int id)
+        private static async Task<MrByte.RWX.Model.Model> LoadModel(int worldId, string modelName)
         {
             using (var context = new ObjectPathContext())
             using (var webClient = new WebClient())
             {
-                var pathObject = await context.ObjectPathItem.Include("World").FirstOrDefaultAsync(item => item.ObjectPathId == id);
+                var pathObject = await context.Models.FindAsync(worldId, modelName);
 
                 if (pathObject != null)
                 {
@@ -85,7 +85,7 @@ namespace RWXViewer.Models
                             using (var archiveStream = OpenArchiveStream(archiveType, resultData))
                             {
                                 var loader = new Loader();
-                                Model model = loader.LoadFromStream(archiveStream);
+                                MrByte.RWX.Model.Model model = loader.LoadFromStream(archiveStream);
 
                                 return model;
                             }
@@ -147,7 +147,7 @@ namespace RWXViewer.Models
             return ArchiveType.Unknown;
         }
 
-        private static Uri BuildDownloadUri(ObjectPathItem pathObject)
+        private static Uri BuildDownloadUri(Model pathObject)
         {
             return new Uri(string.Format("{0}/{1}/{2}", pathObject.World.ObjectPathUrl, pathObject.Type.ToPathName(), pathObject.FileName));
         }

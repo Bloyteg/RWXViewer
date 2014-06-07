@@ -18,6 +18,6 @@ namespace RWXViewer.Models
 {
     public interface IObjectPathItemLoader
     {
-        Task<Model> GetModelAsync(int id);
+        Task<Model> GetModelAsync(int worldId, string modelName);
     }
 }

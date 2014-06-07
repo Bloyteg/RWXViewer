@@ -25,6 +25,8 @@ namespace RWXViewer
             config.MapHttpAttributeRoutes();
 
             config.Routes.MapHttpRoute("DefaultApi", "api/{controller}/{id}", new {id = RouteParameter.Optional});
+
+            config.Formatters.Remove(config.Formatters.XmlFormatter);
         }
     }
 }

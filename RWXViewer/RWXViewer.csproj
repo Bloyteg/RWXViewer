@@ -184,11 +184,13 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\DAL\ObjectPathItem.cs" />
+    <Compile Include="Models\DAL\Texture.cs" />
     <Compile Include="Models\IObjectPathItemLoader.cs" />
-    <Compile Include="Models\ObjectPathContext.cs" />
-    <Compile Include="Models\ObjectPathItem.cs" />
+    <Compile Include="Models\DAL\ObjectPathContext.cs" />
+    <Compile Include="Models\DAL\Model.cs" />
     <Compile Include="Models\ObjectPathItemLoader.cs" />
-    <Compile Include="Models\World.cs" />
+    <Compile Include="Models\DAL\World.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
