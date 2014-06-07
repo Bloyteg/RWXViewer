@@ -55,3 +55,38 @@ export function getModels(worldId: number) {
 
     return deferred.promise();    
 }
+
+function loadTexture(worldId: number, textureName: string) {
+    var deferred = $.Deferred();
+
+    var image = new Image();
+    image.onload = () => {
+        deferred.resolve({ image: image, textureName: textureName });
+    };
+
+    image.src = "/api/ObjectPath/Worlds/" + worldId + "/Textures/" + textureName;
+
+    return deferred.promise();
+}
+
+export function loadTextures(worldId: number, materials: Model.IMaterial[]): JQueryPromise<Model.IImageCollection> {
+    var deferred = $.Deferred();
+
+    var images = materials.map(material => material.Texture)
+        .filter((textureName, index, self) => self.indexOf(textureName) == index)
+        .map(textureName => loadTexture(worldId, textureName));
+
+    $.when.apply($, images).done(() => {
+        var cache: Model.IImageCollection = {};
+        var length = arguments.length;
+
+        for (var index = 0; index < length; ++index) {
+            var item = arguments[index];
+            cache[item.textureName] = item.image;
+        }
+
+        deferred.resolve(cache);
+    });
+
+    return deferred.promise();
+}

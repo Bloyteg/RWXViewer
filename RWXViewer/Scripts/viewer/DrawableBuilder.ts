@@ -19,14 +19,49 @@ interface IPrototypeCache {
     [name: string]: Drawable.MeshDrawable
 }
 
+interface ITextureCache {
+    [name: string]: WebGLTexture;
+}
+
 class MeshDrawableBuilder {
     private _gl: WebGLRenderingContext;
     private _model: Model.IModel;
+    private _textureCache: ITextureCache;
 
-    constructor(gl: WebGLRenderingContext, model: Model.IModel) {
+    constructor(gl: WebGLRenderingContext, model: Model.IModel, textures: Model.IImageCollection) {
         this._gl = gl;
         this._model = model;
+        this._textureCache = this.buildTextureCache(textures);
     }  
+
+    private buildTextureCache(textures: Model.IImageCollection): ITextureCache {
+        var result: ITextureCache = {};
+
+        var keys = Object.keys(textures);
+        var length = keys.length;
+
+        for (var index = 0; index < length; ++index) {
+            var key = keys[index];
+
+            result[key] = this.buildTextureFromImage(textures[key]);
+        }
+
+        return result;
+    }
+
+    buildTextureFromImage(image: HTMLImageElement): WebGLTexture {
+        var gl = this._gl;
+        var texture = gl.createTexture();
+
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
+        return texture;
+    }
 
     build(): Drawable.IDrawable {
         var prototypes: IPrototypeCache = this.buildPrototypeCache(this._model);
@@ -89,6 +124,7 @@ class MeshDrawableBuilder {
                 opacity: material.Opacity,
                 ambient: material.Ambient,
                 diffuse: material.Diffuse,
+                texture: this._textureCache[material.Texture],
                 drawMode: material.GeometrySampling === Model.GeometrySampling.Wireframe ? this._gl.LINES : this._gl.TRIANGLES
             };
         });
@@ -134,7 +170,7 @@ class MeshDrawableBuilder {
                     var vertex = vertices[vertexIndex];
 
                     positions.push(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
-                    uvs.push((<any>(vertex.Uv) || {}).U || 0, (<any>(vertex.Uv) || {}).V || 0);
+                    uvs.push((<any>(vertex.UV) || {}).U || 0, (<any>(vertex.UV) || {}).V || 0);
                     normals.push(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
                 });
             }
@@ -159,7 +195,7 @@ class MeshDrawableBuilder {
                     var normal = material.LightSampling == Model.LightSampling.Vertex ? vertex.Normal : triangle.Normal;
 
                     positions.push(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
-                    uvs.push((<any>(vertex.Uv) || {}).U || 0, (<any>(vertex.Uv) || {}).V || 0);
+                    uvs.push((<any>(vertex.UV) || {}).U || 0, (<any>(vertex.UV) || {}).V || 0);
                     normals.push(normal.X, normal.Y, normal.Z);
                 });
             });
@@ -173,6 +209,6 @@ class MeshDrawableBuilder {
     }
 }
 
-export function createDrawableFromModel(gl: WebGLRenderingContext, model: Model.IModel): Drawable.IDrawable {
-    return new MeshDrawableBuilder(gl, model).build();
+export function createDrawableFromModel(gl: WebGLRenderingContext, model: Model.IModel, textures: Model.IImageCollection): Drawable.IDrawable {
+    return new MeshDrawableBuilder(gl, model, textures).build();
 }

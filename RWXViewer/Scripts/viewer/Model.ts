@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export interface IImageCollection {
+    [name: string]: HTMLImageElement;
+}
+
 export interface IVector3 {
     X: number;
     Y: number;
@@ -20,7 +24,7 @@ export interface IVector3 {
 
 export interface IVertex {
     Position: IVector3;
-    Uv: IUv;
+    UV: IUv;
     Prelight: IColor;
     Normal: IVector3;
 }

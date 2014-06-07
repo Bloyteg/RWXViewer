@@ -81,9 +81,9 @@ export class Renderer {
         }
     }
 
-    setCurrentModel(model: Model.IModel): void {
+    setCurrentModel(model: Model.IModel, textures: Model.IImageCollection): void {
         if (model) {
-            this._currentDrawable = DrawableBuilder.createDrawableFromModel(this._gl, model);
+            this._currentDrawable = DrawableBuilder.createDrawableFromModel(this._gl, model, textures);
         } else {
             this._currentDrawable = null;
         }

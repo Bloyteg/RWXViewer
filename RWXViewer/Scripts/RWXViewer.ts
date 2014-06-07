@@ -45,10 +45,12 @@ class ViewModel {
         this.selectedModel.subscribe(model => {
             if (model) {
                 ObjectPathItemLoader.loadModel(model.worldId, model.name).done(result => {
-                    renderer.setCurrentModel(result);
+                    ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(textures => {
+                        renderer.setCurrentModel(result, textures);
+                    });
                 });
             } else {
-                renderer.setCurrentModel(null);
+                renderer.setCurrentModel(null, null);
             }
 
             renderer.camera.reset();
