@@ -20,11 +20,11 @@ import ObjectPathItemLoader = require('./viewer/ObjectPathItemLoader');
 var renderer: Renderer.Renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0]);
 
 class ViewModel {
-    worlds: KnockoutObservableArray<ObjectPathItemLoader.IWorld>;
-    models: KnockoutObservableArray<ObjectPathItemLoader.IObjectPathItem>;
+    worlds: KnockoutObservableArray<ObjectPathItemLoader.IObjectPathWorld>;
+    models: KnockoutObservableArray<ObjectPathItemLoader.IObjectPathModel>;
 
-    selectedWorld: KnockoutObservable<ObjectPathItemLoader.IWorld>;
-    selectedModel: KnockoutObservable<ObjectPathItemLoader.IObjectPathItem>;
+    selectedWorld: KnockoutObservable<ObjectPathItemLoader.IObjectPathWorld>;
+    selectedModel: KnockoutObservable<ObjectPathItemLoader.IObjectPathModel>;
 
     constructor() {
         this.worlds = ko.observableArray([]);
@@ -36,7 +36,7 @@ class ViewModel {
 
         this.selectedWorld.subscribe(world => {
             if (world) {
-                ObjectPathItemLoader.getModels(world.WorldId).done(models => self.models(models));
+                ObjectPathItemLoader.getModels(world.worldId).done(models => self.models(models));
             } else {
                 self.models([]);
             }
@@ -44,7 +44,7 @@ class ViewModel {
 
         this.selectedModel.subscribe(model => {
             if (model) {
-                ObjectPathItemLoader.loadModel(model.ObjectPathId).done(result => {
+                ObjectPathItemLoader.loadModel(model.worldId, model.name).done(result => {
                     renderer.setCurrentModel(result);
                 });
             } else {

@@ -14,28 +14,30 @@
 
 import Model = require("Model");
 
-export function loadModel(modelId: number) {
+export function loadModel(worldId: number, modelName: string) {
     var deferred = $.Deferred<Model.IModel>();
 
-    $.getJSON("/api/ObjectPath/Model/" + modelId)
+    $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models/" + modelName)
         .done(data => deferred.resolve(data))
         .fail(() => deferred.fail());
 
     return deferred.promise();
 }
 
-export interface IWorld {
-    Name: string;
-    WorldId: number;
+export interface IObjectPathWorld {
+    worldId: number;
+    name: string;
 }
 
-export interface IObjectPathItem {
-    Name: string;
-    ObjectPathId: number;
+export interface IObjectPathModel {
+    worldId: number;
+    name: string;
+    fileName: string;
+    type: number;
 }
 
 export function getWorlds() {
-    var deferred = $.Deferred<IWorld>();
+    var deferred = $.Deferred<IObjectPathWorld>();
 
     $.getJSON("/api/ObjectPath/Worlds")
         .done(data => deferred.resolve(data))
@@ -45,9 +47,9 @@ export function getWorlds() {
 }
 
 export function getModels(worldId: number) {
-    var deferred = $.Deferred<IObjectPathItem>();
+    var deferred = $.Deferred<IObjectPathModel>();
 
-    $.getJSON("/api/ObjectPath/World/" + worldId + "/Models")
+    $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models")
         .done(data => deferred.resolve(data))
         .fail(() => deferred.fail());
 
