@@ -73,8 +73,9 @@ export function loadTextures(worldId: number, materials: Model.IMaterial[]): JQu
     var deferred = $.Deferred();
 
     var images = materials.map(material => material.Texture)
-        .filter((textureName, index, self) => self.indexOf(textureName) == index)
-        .map(textureName => loadTexture(worldId, textureName));
+                          .concat(materials.map(material => material.Mask))
+                          .filter((textureName, index, self) => textureName!== null && self.indexOf(textureName) == index)
+                          .map(textureName => loadTexture(worldId, textureName));
 
     $.when.apply($, images).done(() => {
         var cache: Model.IImageCollection = {};

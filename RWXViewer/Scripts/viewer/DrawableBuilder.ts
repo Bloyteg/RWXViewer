@@ -124,7 +124,8 @@ class MeshDrawableBuilder {
                 opacity: material.Opacity,
                 ambient: material.Ambient,
                 diffuse: material.Diffuse,
-                texture: this._textureCache[material.Texture],
+                texture: this._textureCache[material.Texture] || null,
+                mask: this._textureCache[material.Mask] || null,
                 drawMode: material.GeometrySampling === Model.GeometrySampling.Wireframe ? this._gl.LINES : this._gl.TRIANGLES
             };
         });

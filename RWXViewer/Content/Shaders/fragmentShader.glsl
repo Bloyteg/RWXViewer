@@ -18,11 +18,17 @@ uniform vec4 u_baseColor;
 uniform float u_opacity;
 uniform sampler2D u_sampler;
 
+uniform bool u_hasTexture;
+
 varying vec2 v_textureCoordinates;
 varying float v_lightWeighting;
 	    
 void main(void) {
-	vec4 sampledColor = texture2D(u_sampler, vec2(v_textureCoordinates.s, v_textureCoordinates.t));
-
-    gl_FragColor = vec4(sampledColor.rgb * v_lightWeighting, sampledColor.a * u_opacity);
+	if(u_hasTexture) {
+		vec4 sampledColor = texture2D(u_sampler, vec2(v_textureCoordinates.s, v_textureCoordinates.t));
+	    gl_FragColor = vec4(sampledColor.rgb * v_lightWeighting, sampledColor.a * u_opacity);
+	} 
+	else {
+		gl_FragColor = vec4(u_baseColor.rgb * v_lightWeighting, u_baseColor.a * u_opacity);
+	}
 }

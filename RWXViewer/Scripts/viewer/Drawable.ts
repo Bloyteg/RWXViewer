@@ -64,10 +64,21 @@ export class MeshDrawable implements IDrawable {
             gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
             gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._modelMatrix);
 
-            //Bind textures.
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.texture);
-            gl.uniform1i(shader.uniforms["u_sampler"], 0);
+            if (meshMaterialGroup.texture !== null) {
+                gl.uniform1i(shader.uniforms["u_hasTexture"], 1);
+
+                //Bind textures.
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.texture);
+                gl.uniform1i(shader.uniforms["u_sampler"], 0);
+            } else {
+                gl.uniform1i(shader.uniforms["u_hasTexture"], 0);
+
+                //Bind textures.
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, null);
+                gl.uniform1i(shader.uniforms["u_sampler"], 0);                
+            }
 
             //Bind buffers.
             gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
