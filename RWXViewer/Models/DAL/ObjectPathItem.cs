@@ -6,14 +6,19 @@ namespace RWXViewer.Models.DAL
 {
     public class ObjectPathItem
     {
-        [Key, Column(Order = 0)]
+        [JsonProperty(PropertyName = "id")]
+        public int Id { get; set; }
+
+        [Index("IX_WorldAndName", IsUnique = true, Order = 1)]
         [JsonProperty(PropertyName = "worldId")]
         public int WorldId { get; set; }
 
-        [Key, Column(Order = 1)]
+        [Index("IX_WorldAndName", IsUnique = true, Order = 2)]
+        [MaxLength(32)]
         [JsonProperty(PropertyName = "name")]
         public string Name { get; set; }
 
+        [MaxLength(32)]
         [JsonProperty(PropertyName = "fileName")]
         public string FileName { get; set; }
 

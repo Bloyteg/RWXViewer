@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Entity;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -54,31 +55,31 @@ namespace RWXViewer.Models
             using (var context = new ObjectPathContext())
             using (var webClient = new WebClient())
             {
-                var texture = await context.Textures.FindAsync(worldId, textureName);
+                var texture = await context.Textures.SingleOrDefaultAsync(entity => entity.WorldId == worldId && entity.Name == textureName);
 
-                if (texture != null)
+                if (texture == null)
                 {
-                    try
-                    {
-                        var resultData = await webClient.DownloadDataTaskAsync(BuildDownloadUri(texture));
+                    return null;
+                }
 
-                        using (var inputStream = OpenTextureStream(texture, resultData))
-                        using (var outputStream = new MemoryStream())
-                        {
-                            var image = Image.FromStream(inputStream);
-                            image.Save(outputStream, ImageFormat.Png);
+                try
+                {
+                    var resultData = await webClient.DownloadDataTaskAsync(BuildDownloadUri(texture));
 
-                            return outputStream.ToArray();
-                        }
-                    }
-                    catch (WebException)
+                    using (var inputStream = OpenTextureStream(texture, resultData))
+                    using (var outputStream = new MemoryStream())
                     {
-                        return null;
+                        var image = Image.FromStream(inputStream);
+                        image.Save(outputStream, ImageFormat.Png);
+
+                        return outputStream.ToArray();
                     }
                 }
+                catch (WebException)
+                {
+                    return null;
+                }
             }
-
-            return null;
         }
 
         private Stream OpenTextureStream(Texture texture, byte[] resultData)

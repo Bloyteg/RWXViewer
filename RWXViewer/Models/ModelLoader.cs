@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Data.Entity;
 using System.Net;
 using System.Runtime.Caching;
 using System.Threading.Tasks;
@@ -53,34 +54,34 @@ namespace RWXViewer.Models
             using (var context = new ObjectPathContext())
             using (var webClient = new WebClient())
             {
-                var model = await context.Models.FindAsync(worldId, modelName);
+                var model = await context.Models.SingleOrDefaultAsync(entity => entity.WorldId == worldId && entity.Name == modelName);
 
-                if (model != null)
+                if (model == null)
                 {
-                    try
-                    {
-                        var resultData = await webClient.DownloadDataTaskAsync(BuildDownloadUri(model));
+                    return null;
+                }
 
-                        using (var archiveStream = ArchiveFile.OpenArchiveStream(resultData))
-                        {
-                            var loader = new Loader();
-                            MrByte.RWX.Model.Model modelResult = loader.LoadFromStream(archiveStream);
+                try
+                {
+                    var resultData = await webClient.DownloadDataTaskAsync(BuildDownloadUri(model));
 
-                            return modelResult;
-                        }
-                    }
-                    catch (WebException)
+                    using (var archiveStream = ArchiveFile.OpenArchiveStream(resultData))
                     {
-                        return null;
-                    }
-                    catch (InvalidEnumArgumentException)
-                    {
-                        return null;
+                        var loader = new Loader();
+                        var modelResult = loader.LoadFromStream(archiveStream);
+
+                        return modelResult;
                     }
                 }
+                catch (WebException)
+                {
+                    return null;
+                }
+                catch (InvalidEnumArgumentException)
+                {
+                    return null;
+                }
             }
-
-            return null;
         }
 
         private static Uri BuildDownloadUri(Model pathObject)
