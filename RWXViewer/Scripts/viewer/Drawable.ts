@@ -34,6 +34,7 @@ export interface IMeshMaterialGroup {
     drawMode: number;
     opacity: number;
     texture: WebGLTexture;
+    mask: WebGLTexture;
 }
 
 export class MeshDrawable implements IDrawable {
@@ -64,21 +65,37 @@ export class MeshDrawable implements IDrawable {
             gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
             gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._modelMatrix);
 
+
             if (meshMaterialGroup.texture !== null) {
                 gl.uniform1i(shader.uniforms["u_hasTexture"], 1);
 
-                //Bind textures.
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.texture);
-                gl.uniform1i(shader.uniforms["u_sampler"], 0);
+                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
             } else {
                 gl.uniform1i(shader.uniforms["u_hasTexture"], 0);
 
-                //Bind textures.
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, null);
-                gl.uniform1i(shader.uniforms["u_sampler"], 0);                
+                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);                
             }
+
+            if (meshMaterialGroup.mask !== null) {
+                gl.uniform1i(shader.uniforms["u_hasMask"], 1);
+
+                //Bind textures.
+                gl.activeTexture(gl.TEXTURE1);
+                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.mask);
+                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
+            } else {
+                gl.uniform1i(shader.uniforms["u_hasMask"], 0);
+
+                //Bind textures.
+                gl.activeTexture(gl.TEXTURE1);
+                gl.bindTexture(gl.TEXTURE_2D, null);
+                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
+            }
+
 
             //Bind buffers.
             gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);

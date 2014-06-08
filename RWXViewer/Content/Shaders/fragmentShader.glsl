@@ -16,17 +16,31 @@ precision mediump float;
        
 uniform vec4 u_baseColor;
 uniform float u_opacity;
-uniform sampler2D u_sampler;
+uniform sampler2D u_textureSampler;
+uniform sampler2D u_maskSampler;
 
 uniform bool u_hasTexture;
+uniform bool u_hasMask;
 
 varying vec2 v_textureCoordinates;
 varying float v_lightWeighting;
 	    
 void main(void) {
+	float alpha = 1.0;
+
+	if(u_hasMask) {
+		vec4 sampledMask = texture2D(u_maskSampler, vec2(v_textureCoordinates.s, v_textureCoordinates.t));
+
+		if(sampledMask.r < 0.2) {
+			discard;
+		}
+
+		alpha = sampledMask.r;
+	}
+
 	if(u_hasTexture) {
-		vec4 sampledColor = texture2D(u_sampler, vec2(v_textureCoordinates.s, v_textureCoordinates.t));
-	    gl_FragColor = vec4(sampledColor.rgb * v_lightWeighting, sampledColor.a * u_opacity);
+		vec4 sampledColor = texture2D(u_textureSampler, vec2(v_textureCoordinates.s, v_textureCoordinates.t));
+	    gl_FragColor = vec4(sampledColor.rgb * v_lightWeighting, sampledColor.a * alpha * u_opacity);
 	} 
 	else {
 		gl_FragColor = vec4(u_baseColor.rgb * v_lightWeighting, u_baseColor.a * u_opacity);
