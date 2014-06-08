@@ -54,7 +54,7 @@ namespace RWXViewer.Models
                 return ArchiveType.Zip;
             }
                 
-            if (resultData[0] == 0x1F && resultData[2] == 0x8B)
+            if (resultData[0] == 0x1F && resultData[1] == 0x8B)
             {
                 return ArchiveType.Gzip;
             }
