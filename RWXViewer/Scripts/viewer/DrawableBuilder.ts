@@ -39,17 +39,20 @@ class MeshDrawableBuilder {
 
         var keys = Object.keys(textures);
         var length = keys.length;
+        var anistropicFiltering = this._gl.getExtension("EXT_texture_filter_anisotropic")
+                               || this._gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic")
+                               || this._gl.getExtension("MOZ_EXT_texture_filter_anisotropic");
 
         for (var index = 0; index < length; ++index) {
             var key = keys[index];
 
-            result[key] = this.buildTextureFromImage(textures[key]);
+            result[key] = this.buildTextureFromImage(textures[key], anistropicFiltering);
         }
 
         return result;
     }
 
-    buildTextureFromImage(image: HTMLImageElement): WebGLTexture {
+    buildTextureFromImage(image: HTMLImageElement, anistropyExt): WebGLTexture {
         var gl = this._gl;
         var texture = gl.createTexture();
 
@@ -58,6 +61,12 @@ class MeshDrawableBuilder {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
         gl.generateMipmap(gl.TEXTURE_2D);
+
+        if (anistropyExt) {
+            var maxAnisotropy = gl.getParameter(anistropyExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT) || 4;
+            gl.texParameterf(gl.TEXTURE_2D, anistropyExt.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
+        }
+
         gl.bindTexture(gl.TEXTURE_2D, null);
 
         return texture;
