@@ -200,6 +200,8 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="Content\Shaders\SpatialGridVertexShader.glsl" />
+    <Content Include="Content\Shaders\SpatialGridFragmentShader.glsl" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <Content Include="Scripts\config.js" />
     <Content Include="Scripts\gl-matrix-min.js" />

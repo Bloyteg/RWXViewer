@@ -26,8 +26,10 @@ export class ShaderProgram {
 
     private _uniforms: IUniformInfo;
     private _attributes: IAttributeInfo;
-    
-    
+
+    private _attributeCount: number;
+
+
     constructor(gl: WebGLRenderingContext, vertexShaderSource: string, fragmentShaderSource: string) {
         this._gl = gl;
         this._shaderProgram = this.initializeProgram(vertexShaderSource, fragmentShaderSource);
@@ -70,11 +72,11 @@ export class ShaderProgram {
         var gl = this._gl;
         var attributeCount = gl.getProgramParameter(this._shaderProgram, gl.ACTIVE_ATTRIBUTES);
         var attributes: IAttributeInfo = {};
+        this._attributeCount = attributeCount;
 
         for (var attributeIndex = 0; attributeIndex < attributeCount; ++attributeIndex) {
             var attribute = gl.getActiveAttrib(this._shaderProgram, attributeIndex);
             attributes[attribute.name] = attributeIndex;
-            gl.enableVertexAttribArray(attributeIndex);
         }
 
         return attributes;
@@ -102,7 +104,17 @@ export class ShaderProgram {
         throw new Error(gl.getShaderInfoLog(shader));
     }
 
-    useProgram() {
+    use(handler: (program: ShaderProgram) => void) {
         this._gl.useProgram(this._shaderProgram);
+
+        for (var counter = 0; counter < this._attributeCount; ++counter) {
+            this._gl.enableVertexAttribArray(counter);
+        }
+
+        handler(this);
+
+        for (counter = 0; counter < this._attributeCount; ++counter) {
+            this._gl.disableVertexAttribArray(counter);
+        }
     }
 } 

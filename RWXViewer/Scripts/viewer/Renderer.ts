@@ -23,9 +23,11 @@ export class Renderer {
     private _canvas: HTMLCanvasElement;
     private _gl: WebGLRenderingContext;
     private _currentDrawable: Drawable.IDrawable;
+    private _spatialGridDrawable: Drawable.IDrawable;
+    private _spatialGridShaderProgram: ShaderProgram.ShaderProgram;
     private _shaderProgram: ShaderProgram.ShaderProgram;
     private _camera: Camera.Camera;
-    
+    private _projectionMatrix: Mat4Array = mat4.create();
 
     constructor(canvas: HTMLCanvasElement) {
         this._canvas = canvas;
@@ -39,9 +41,10 @@ export class Renderer {
 
         if (gl) {
             this._camera = new Camera.Camera(gl.drawingBufferWidth, gl.drawingBufferHeight);
+            this._spatialGridDrawable = new Drawable.SpatialGridDrawable(gl);
 
             gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-            gl.clearColor(0.25, 0.25, 0.25, 1.0);
+            gl.clearColor(0.75, 0.75, 0.75, 1.0);
             gl.clearDepth(1.0);
             gl.enable(gl.DEPTH_TEST);
             gl.depthFunc(gl.LEQUAL);
@@ -51,8 +54,12 @@ export class Renderer {
 
         var deferred = $.Deferred<void>();
 
-        ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl").done(program => {
+        var shaderProgram = ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl");
+        var spatialGridShaderProgram = ShaderProgramLoader.loadShaderProgram(gl, "SpatialGridVertexShader.glsl", "SpatialGridFragmentShader.glsl");
+
+        $.when(shaderProgram, spatialGridShaderProgram).done((program, spatialGridProgram) => {
             this._shaderProgram = program;
+            this._spatialGridShaderProgram = spatialGridProgram;
             deferred.resolve();
         }).fail(() => deferred.fail());
 
@@ -66,18 +73,22 @@ export class Renderer {
             gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             gl.enable(gl.CULL_FACE);
+            mat4.perspective(this._projectionMatrix, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.01, 100.0);
 
-            this._shaderProgram.useProgram();
+            //TODO: Handle vertex attribute enable/disable more cleanly.
+            this._spatialGridShaderProgram.use(program => {
+                gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, this._projectionMatrix);
+                gl.uniformMatrix4fv(program.uniforms["u_viewMatrix"], false, this._camera.matrix);
+                this._spatialGridDrawable.draw(gl, program);
+            });
 
-            var pMatrix = mat4.create();
-            mat4.perspective(pMatrix, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.01, 100.0);
-
-            gl.uniformMatrix4fv(this._shaderProgram.uniforms["u_projectionMatrix"], false, pMatrix);
-            gl.uniformMatrix4fv(this._shaderProgram.uniforms["u_viewMatrix"], false, this._camera.matrix);
-
-            if (this._currentDrawable) {
-                this._currentDrawable.draw(gl, this._shaderProgram);
-            }
+            this._shaderProgram.use(program => {
+                if (this._currentDrawable) {
+                    gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, this._projectionMatrix);
+                    gl.uniformMatrix4fv(program.uniforms["u_viewMatrix"], false, this._camera.matrix);
+                    this._currentDrawable.draw(gl, program);
+                }
+            });
         }
     }
 

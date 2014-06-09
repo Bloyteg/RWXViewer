@@ -37,6 +37,38 @@ export interface IMeshMaterialGroup {
     mask: WebGLTexture;
 }
 
+export class SpatialGridDrawable implements IDrawable {
+    private _vertexBuffer: WebGLBuffer;
+    private _vertexCount: number;
+
+    constructor(gl: WebGLRenderingContext) {
+        var vertices: number[] = [];
+
+        //Generate grid lines along the X-axis.
+        for (var x = -1; x <= 1; x += 0.1) {
+            vertices.push(x, 0, -1);
+            vertices.push(x, 0, 1);
+        }
+
+        //Generate grid lines along the Z-axis. 
+        for (var z = -1; z <= 1; z += 0.1) {
+            vertices.push(-1, 0, z);
+            vertices.push(1, 0, z);
+        }
+
+        this._vertexCount = vertices.length / 3;
+        this._vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    }
+
+    draw(gl: WebGLRenderingContext, shader: ShaderProgram.ShaderProgram): void {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
+        gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
+        gl.drawArrays(gl.LINES, 0, this._vertexCount);
+    }
+}
+
 export class MeshDrawable implements IDrawable {
     private _meshMaterialGroups: IMeshMaterialGroup[];
     private _modelMatrix: Mat4Array;
@@ -58,59 +90,66 @@ export class MeshDrawable implements IDrawable {
     draw(gl: WebGLRenderingContext, shader: ShaderProgram.ShaderProgram): void {
         //TODO: Handle any material specific parameters such as prelit, texture bindings, etc.
 
-        this._meshMaterialGroups.forEach(meshMaterialGroup => {
-            gl.uniform1f(shader.uniforms["u_ambientFactor"], meshMaterialGroup.ambient);
-            gl.uniform1f(shader.uniforms["u_diffuseFactor"], meshMaterialGroup.diffuse);
-            gl.uniform4fv(shader.uniforms["u_baseColor"], meshMaterialGroup.baseColor);
-            gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
-            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._modelMatrix);
-
-
-            if (meshMaterialGroup.texture !== null) {
-                gl.uniform1i(shader.uniforms["u_hasTexture"], 1);
-
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.texture);
-                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
-            } else {
-                gl.uniform1i(shader.uniforms["u_hasTexture"], 0);
-
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, null);
-                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);                
-            }
-
-            if (meshMaterialGroup.mask !== null) {
-                gl.uniform1i(shader.uniforms["u_hasMask"], 1);
-
-                //Bind textures.
-                gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.mask);
-                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
-            } else {
-                gl.uniform1i(shader.uniforms["u_hasMask"], 0);
-
-                //Bind textures.
-                gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, null);
-                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
-            }
-
-
-            //Bind buffers.
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
-            gl.enableVertexAttribArray(0);
-            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.uvs);
-            gl.vertexAttribPointer(shader.attributes["a_vertexUV"], 2, gl.FLOAT, false, 0, 0);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.normals);
-            gl.vertexAttribPointer(shader.attributes["a_vertexNormal"], 3, gl.FLOAT, true, 0, 0);
+        this._meshMaterialGroups.forEach((meshMaterialGroup: IMeshMaterialGroup) => {
+            this.setTransformUniforms(gl, shader, meshMaterialGroup);
+            this.setMaterialUniforms(gl, shader, meshMaterialGroup);
+            this.bindTexture(gl, shader, meshMaterialGroup);
+            this.bindMask(gl, shader, meshMaterialGroup);
+            this.bindVertexBuffers(gl, shader, meshMaterialGroup);
 
             gl.drawArrays(meshMaterialGroup.drawMode, 0, meshMaterialGroup.vertexBuffer.count);
         });
 
         this._children.forEach(child => child.draw(gl, shader));
+    }
+
+    setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram.ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {
+        gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._modelMatrix);
+    }
+
+    setMaterialUniforms(gl: WebGLRenderingContext, shader: ShaderProgram.ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {
+        gl.uniform1f(shader.uniforms["u_ambientFactor"], meshMaterialGroup.ambient);
+        gl.uniform1f(shader.uniforms["u_diffuseFactor"], meshMaterialGroup.diffuse);
+        gl.uniform4fv(shader.uniforms["u_baseColor"], meshMaterialGroup.baseColor);
+        gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
+    }
+
+    bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram.ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {
+        if (meshMaterialGroup.texture !== null) {
+            gl.uniform1i(shader.uniforms["u_hasTexture"], 1);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.texture);
+            gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
+        } else {
+            gl.uniform1i(shader.uniforms["u_hasTexture"], 0);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
+        }
+    }
+
+    bindMask(gl: WebGLRenderingContext, shader: ShaderProgram.ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {
+        if (meshMaterialGroup.mask !== null) {
+            gl.uniform1i(shader.uniforms["u_hasMask"], 1);
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.mask);
+            gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
+        } else {
+            gl.uniform1i(shader.uniforms["u_hasMask"], 0);
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
+        }
+    }
+
+    bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram.ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
+        gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.uvs);
+        gl.vertexAttribPointer(shader.attributes["a_vertexUV"], 2, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.normals);
+        gl.vertexAttribPointer(shader.attributes["a_vertexNormal"], 3, gl.FLOAT, true, 0, 0);
     }
 }
