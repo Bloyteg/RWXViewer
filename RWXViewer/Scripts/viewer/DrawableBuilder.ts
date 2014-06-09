@@ -75,7 +75,7 @@ class MeshDrawableBuilder {
     build(): Drawable.IDrawable {
         var prototypes: IPrototypeCache = this.buildPrototypeCache(this._model);
 
-        return this.buildMeshDrawableFromClump(this._model.Clump, prototypes);
+        return this.buildMeshDrawableFromClump(this._model.Clump, prototypes, mat4.create(), this._model.AxisAlignment !== Model.AxisAlignment.None);
     }
 
     private buildPrototypeCache(model: Model.IModel): IPrototypeCache {
@@ -89,19 +89,18 @@ class MeshDrawableBuilder {
         return this.buildMeshDrawableFromMeshGeometry(prototype, prototypeCache, mat4.create());
     }
 
-    private buildMeshDrawableFromClump(clump: Model.IClump, prototypeCache: IPrototypeCache, parentMatrix = mat4.create()): Drawable.MeshDrawable {
+    private buildMeshDrawableFromClump(clump: Model.IClump, prototypeCache: IPrototypeCache, parentMatrix = mat4.create(), isBillboard?: boolean): Drawable.MeshDrawable {
         var matrix = mat4.clone(clump.Transform.Matrix);
         mat4.multiply(matrix, parentMatrix, matrix);
 
-        return this.buildMeshDrawableFromMeshGeometry(clump, prototypeCache, matrix);
+        return this.buildMeshDrawableFromMeshGeometry(clump, prototypeCache, matrix, isBillboard);
     }
 
-    private buildMeshDrawableFromMeshGeometry(geometry: Model.IMeshGeometry, prototypeCache: IPrototypeCache, matrix: Mat4Array): Drawable.MeshDrawable {
+    private buildMeshDrawableFromMeshGeometry(geometry: Model.IMeshGeometry, prototypeCache: IPrototypeCache, matrix: Mat4Array, isBillboard?: boolean): Drawable.MeshDrawable {
         var children: Drawable.MeshDrawable[] = [];
-        children = children.concat(geometry.Children.map(child => this.buildMeshDrawableFromClump(child, prototypeCache, matrix)));
+        children = children.concat(geometry.Children.map(child => this.buildMeshDrawableFromClump(child, prototypeCache, matrix, isBillboard)));
         //TODO: Handle the case where this is a prototypeinstancegeometry.
         children = children.concat(geometry.PrototypeInstances.map(prototypeInstance => {
-
             var newMatrix = mat4.clone(prototypeInstance.Transform.Matrix);
             newMatrix = mat4.multiply(newMatrix, matrix, newMatrix);
 
@@ -109,7 +108,7 @@ class MeshDrawableBuilder {
         }));
         children = children.concat(geometry.Primitives.map(primitive => this.buildMeshDrawableFromPrimitive(primitive, matrix)));
 
-        return new Drawable.MeshDrawable(this.buildMeshMaterialGroups(geometry), matrix, children);
+        return new Drawable.MeshDrawable(this.buildMeshMaterialGroups(geometry), matrix, children, isBillboard);
     }
 
     private buildMeshDrawableFromPrimitive(primitive: Model.IPrimitiveGeometry, parentMatrix: Mat4Array): Drawable.MeshDrawable {

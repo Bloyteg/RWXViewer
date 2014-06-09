@@ -52,8 +52,6 @@ class ViewModel {
             } else {
                 renderer.setCurrentModel(null, null);
             }
-
-            renderer.camera.reset();
         });
     }
 }

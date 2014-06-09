@@ -73,11 +73,13 @@ export class MeshDrawable implements IDrawable {
     private _meshMaterialGroups: IMeshMaterialGroup[];
     private _modelMatrix: Mat4Array;
     private _children: IDrawable[];
+    private _isBillboard: boolean;
 
-    constructor(meshMaterialGroups: IMeshMaterialGroup[], modelMatrix: Mat4Array, children: IDrawable[]) {
+    constructor(meshMaterialGroups: IMeshMaterialGroup[], modelMatrix: Mat4Array, children: IDrawable[], isBillboard?: boolean) {
         this._meshMaterialGroups = meshMaterialGroups;
         this._modelMatrix = modelMatrix;
         this._children = children;
+        this._isBillboard = isBillboard || false;
     }
 
     cloneWithTransform(matrix: Mat4Array) {
@@ -105,6 +107,8 @@ export class MeshDrawable implements IDrawable {
 
     setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram.ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {
         gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._modelMatrix);
+
+        gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
     }
 
     setMaterialUniforms(gl: WebGLRenderingContext, shader: ShaderProgram.ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {

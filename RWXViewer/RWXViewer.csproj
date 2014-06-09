@@ -64,29 +64,29 @@
     <Reference Include="Microsoft.Practices.Unity.Configuration">
       <HintPath>..\packages\Unity.3.0.1304.1\lib\Net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
     </Reference>
-    <Reference Include="MrByte.FSharp.Helpers, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MrByte.FSharp.Helpers, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MrByte.RWX.1.0.2\lib\net45\MrByte.FSharp.Helpers.dll</HintPath>
+      <HintPath>..\packages\MrByte.RWX.1.0.4\lib\net45\MrByte.FSharp.Helpers.dll</HintPath>
     </Reference>
-    <Reference Include="MrByte.Math, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MrByte.Math, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MrByte.RWX.1.0.2\lib\net45\MrByte.Math.dll</HintPath>
+      <HintPath>..\packages\MrByte.RWX.1.0.4\lib\net45\MrByte.Math.dll</HintPath>
     </Reference>
-    <Reference Include="MrByte.RWX, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MrByte.RWX, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MrByte.RWX.1.0.2\lib\net45\MrByte.RWX.dll</HintPath>
+      <HintPath>..\packages\MrByte.RWX.1.0.4\lib\net45\MrByte.RWX.dll</HintPath>
     </Reference>
-    <Reference Include="MrByte.RWX.Model, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MrByte.RWX.Model, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MrByte.RWX.1.0.2\lib\net45\MrByte.RWX.Model.dll</HintPath>
+      <HintPath>..\packages\MrByte.RWX.1.0.4\lib\net45\MrByte.RWX.Model.dll</HintPath>
     </Reference>
-    <Reference Include="MrByte.RWX.Parser, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MrByte.RWX.Parser, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MrByte.RWX.1.0.2\lib\net45\MrByte.RWX.Parser.dll</HintPath>
+      <HintPath>..\packages\MrByte.RWX.1.0.4\lib\net45\MrByte.RWX.Parser.dll</HintPath>
     </Reference>
-    <Reference Include="MrByte.Utility, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MrByte.Utility, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MrByte.RWX.1.0.2\lib\net45\MrByte.Utility.dll</HintPath>
+      <HintPath>..\packages\MrByte.RWX.1.0.4\lib\net45\MrByte.Utility.dll</HintPath>
     </Reference>
     <Reference Include="policy.2.3.FSharp.Core">
       <HintPath>..\packages\FSharp.Core.3.0.0.2\lib\net40\policy.2.3.FSharp.Core.dll</HintPath>
