@@ -56,7 +56,7 @@ export class Camera {
         this._cameraMatrixInverse = mat4.create();
 
         this._offset = vec3.create();
-        this._position = vec3.fromValues(0, 0, DEFAULT_CAMERA_DISTANCE);
+        this._position = vec3.fromValues(DEFAULT_CAMERA_DISTANCE * 0.5, 0.707 * DEFAULT_CAMERA_DISTANCE, 0.5 * DEFAULT_CAMERA_DISTANCE);
         this._target = vec3.create();
         this._pan = vec3.create();
         this._panOffset = vec3.create();
