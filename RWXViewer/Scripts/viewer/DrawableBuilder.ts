@@ -100,7 +100,13 @@ class MeshDrawableBuilder {
         var children: Drawable.MeshDrawable[] = [];
         children = children.concat(geometry.Children.map(child => this.buildMeshDrawableFromClump(child, prototypeCache, matrix)));
         //TODO: Handle the case where this is a prototypeinstancegeometry.
-        children = children.concat(geometry.PrototypeInstances.map(prototypeInstance => prototypeCache[prototypeInstance.Name].cloneWithTransform(mat4.clone(prototypeInstance.Transform.Matrix))));
+        children = children.concat(geometry.PrototypeInstances.map(prototypeInstance => {
+
+            var newMatrix = mat4.clone(prototypeInstance.Transform.Matrix);
+            newMatrix = mat4.multiply(newMatrix, matrix, newMatrix);
+
+            return prototypeCache[prototypeInstance.Name].cloneWithTransform(newMatrix);
+        }));
         children = children.concat(geometry.Primitives.map(primitive => this.buildMeshDrawableFromPrimitive(primitive, matrix)));
 
         return new Drawable.MeshDrawable(this.buildMeshMaterialGroups(geometry), matrix, children);
