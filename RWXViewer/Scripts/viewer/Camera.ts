@@ -14,7 +14,7 @@
 
 var ZOOM_FACTOR: number = 0.95;
 var DEFAULT_RADIUS_SCALE: number = 1.0;
-var DEFAULT_CAMERA_DISTANCE: number = 0.5;
+var DEFAULT_CAMERA_DISTANCE: number = 1;
 var ROTATION_SPEED: number = 0.5;
 var FOV: number = 45;
 var RADS_PER_DEGREE: number = Math.PI / 180;
@@ -56,7 +56,7 @@ export class Camera {
         this._cameraMatrixInverse = mat4.create();
 
         this._offset = vec3.create();
-        this._position = vec3.fromValues(-0.5 * DEFAULT_CAMERA_DISTANCE, 0.707 * DEFAULT_CAMERA_DISTANCE, -0.5 * DEFAULT_CAMERA_DISTANCE);
+        this._position = vec3.fromValues(0.0, 0.707 * DEFAULT_CAMERA_DISTANCE, 0.707 * DEFAULT_CAMERA_DISTANCE);
         this._target = vec3.create();
         this._pan = vec3.create();
         this._panOffset = vec3.create();
