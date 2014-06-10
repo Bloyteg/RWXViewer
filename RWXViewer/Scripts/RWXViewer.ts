@@ -66,6 +66,7 @@ class ViewModel {
                             renderer.setCurrentModel(result, textures);
                             $('#loading').fadeOut(FADE_TIME);
                         }).fail(() => {
+                                renderer.setCurrentModel(result, {});
                                 $('#loading').fadeOut(FADE_TIME);
                                 self.errorMessage("Failed to load the textures for this object.");
                             });
