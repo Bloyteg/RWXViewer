@@ -15,6 +15,11 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
+*.sln.ide/
+*/[Ss]cripts/viewer/*.js
+*/[Ss]cripts/viewer/*.js.map
+RWXViewer.js.map
+RWXViewer.js
 
 # MSTest test Results
 [Tt]est[Rr]esult*/

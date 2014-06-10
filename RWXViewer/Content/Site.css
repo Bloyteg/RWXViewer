@@ -1,0 +1,120 @@
+﻿body {
+    width: 100%;
+    height: 100%;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    border: none;
+    font-family: "Segoe UI Light", "Segoe UI", "Tahoma Light", "Arial Light", Helvetica, sans-serif;
+}
+
+#header {
+    background-color: #f0f0f0;
+    width: 100%;
+    height: 60px;
+    padding: 0 0 0 0;
+}
+
+#headerContent {
+    width: 960px;
+    height: 100%;
+    line-height: 60px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 0 0 0;
+}
+
+#headerContent h1 {
+    padding: 0 0 0 0;
+    margin: 0 0 0 0;
+    color: #3f3f3f;
+    font-weight: bold;
+}
+
+.infoBar {
+    background-color: #7b4f9d;
+    color: #fff;
+    padding: 10px 10px 10px 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#content {
+    width: 960px;
+    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0;
+}
+
+#viewport {
+    width: 100%;
+    height: 540px;
+    padding: 0 0 0 0;
+    border: none;
+    display: block;
+}
+
+.uiSelect {
+    width: 120px;
+}
+
+.viewport {
+    position: relative;
+    padding: 0;
+    margin: 0;
+}
+
+.viewport #resetCamera {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    border: none;
+    height: 2em;
+
+    padding: 4px;
+    margin: 0;
+
+    background: #7b4f9d;
+    color: #fff;
+}
+
+.viewport #resetCamera:hover {
+    background: #5d00a5;
+}
+
+.viewport #loading {
+    margin: auto;
+    padding: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    text-align: center;
+
+/*    visibility: hidden; */
+}
+
+.viewport #error {
+    position: absolute;
+    left: 300px;
+    right: 300px;
+    bottom: 8px;
+    padding: 4px;
+
+    text-align: center;
+    background: red;
+    color: white;
+
+    border: 2px solid white;
+
+    visibility: hidden;
+}
+
+.viewport #error a {
+    color: white;
+}
+
+.viewport #error a:visited {
+    color: white;
+}
