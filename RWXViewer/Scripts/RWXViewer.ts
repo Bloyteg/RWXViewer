@@ -54,6 +54,10 @@ class ViewModel {
             }
         });
     }
+
+    resetCamera() {
+        renderer.camera.reset();
+    }
 }
 
 var viewModel = new ViewModel();

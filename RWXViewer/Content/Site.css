@@ -57,3 +57,27 @@
 .uiSelect {
     width: 120px;
 }
+
+.viewport {
+    position: relative;
+    padding: 0;
+    margin: 0;
+}
+
+.viewport #resetCamera {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    border: none;
+    height: 2em;
+
+    padding: 4px;
+    margin: 0;
+
+    background: #7b4f9d;
+    color: #fff;
+}
+
+.viewport #resetCamera:hover {
+    background: #5d00a5;
+}

@@ -24,11 +24,15 @@
         <label for="selectModel">Object:</label>
         <select class="uiSelect" id="selectModel" data-bind="options: models, optionsText: 'name', optionsCaption: '(None)', value: selectedModel, enable: selectedWorld"></select>  
     </div>
-
-    <canvas id="viewport" width="960" height="540">
-        Your browser does not support the HTML 5 Canvas element.
-    </canvas>
     
+    <div class="viewport">
+        <canvas id="viewport" width="960" height="540">
+            Your browser does not support the HTML 5 Canvas element.
+        </canvas>
+        
+        <button id="resetCamera" data-bind="click: resetCamera">Reset Camera</button>
+    </div>
+
     <div class="infoBar">
         Left Mouse: Rotate<br />
         Right Mouse: Pan<br />
