@@ -63,6 +63,8 @@ function loadTexture(worldId: number, textureName: string) {
     image.onload = () => {
         deferred.resolve({ image: image, textureName: textureName });
     };
+    
+    image.onerror = () => { deferred.reject(); };
 
     image.src = "/api/ObjectPath/Worlds/" + worldId + "/Textures/" + textureName;
 
