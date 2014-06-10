@@ -15,9 +15,11 @@
 import $ = require("jquery");
 import Renderer = require("./viewer/Renderer");
 import CameraController = require("./viewer/CameraController");
-import ObjectPathItemLoader = require('./viewer/ObjectPathItemLoader');
+import ObjectPathItemLoader = require("./viewer/ObjectPathItemLoader");
+import Model = require("./viewer/Model");
 
 var renderer: Renderer.Renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0]);
+var FADE_TIME = 500;
 
 class ViewModel {
     worlds: KnockoutObservableArray<ObjectPathItemLoader.IObjectPathWorld>;
@@ -26,11 +28,14 @@ class ViewModel {
     selectedWorld: KnockoutObservable<ObjectPathItemLoader.IObjectPathWorld>;
     selectedModel: KnockoutObservable<ObjectPathItemLoader.IObjectPathModel>;
 
+    errorMessage: KnockoutObservable<string>;
+
     constructor() {
         this.worlds = ko.observableArray([]);
         this.models = ko.observableArray([]);
         this.selectedWorld = ko.observable(null);
         this.selectedModel = ko.observable(null);
+        this.errorMessage = ko.observable(null);
 
         var self = this;
 
@@ -42,15 +47,32 @@ class ViewModel {
             }
         });
 
-        this.selectedModel.subscribe(model => {
-            if (model) {
-                ObjectPathItemLoader.loadModel(model.worldId, model.name).done(result => {
-                    ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(textures => {
-                        renderer.setCurrentModel(result, textures);
-                    });
-                });
+        this.errorMessage.subscribe(message => {
+            if (message) {
+                $('#error').fadeIn(FADE_TIME);
             } else {
-                renderer.setCurrentModel(null, null);
+                $('#error').fadeOut(FADE_TIME);
+            }
+        });
+
+        this.selectedModel.subscribe(model => {
+            self.errorMessage(null);
+            renderer.setCurrentModel(null, null);
+
+            if (model) {
+                $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), $('#loading').fadeIn(FADE_TIME))
+                    .done((result: Model.IModel) => {
+                        ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(textures => {
+                            renderer.setCurrentModel(result, textures);
+                            $('#loading').fadeOut(FADE_TIME);
+                        }).fail(() => {
+                                $('#loading').fadeOut(FADE_TIME);
+                                self.errorMessage("Failed to load the textures for this object.");
+                            });
+                    }).fail(() => {
+                        $('#loading').fadeOut(FADE_TIME);
+                        self.errorMessage("Failed to load this object.");
+                    });
             }
         });
     }
@@ -58,14 +80,23 @@ class ViewModel {
     resetCamera() {
         renderer.camera.reset();
     }
+
+    hideError() {
+        this.errorMessage(null);
+    }
 }
 
 var viewModel = new ViewModel();
+
+$('#error').css('visibility','visible').hide();
 
 $.when(ObjectPathItemLoader.getWorlds(), renderer.initialize())
     .done((worlds) => {
         viewModel.worlds(worlds);
         ko.applyBindings(viewModel);
+
+        $('#loading').fadeOut(FADE_TIME);
+
         CameraController.registerCamera(renderer.camera);
         tick();
     });

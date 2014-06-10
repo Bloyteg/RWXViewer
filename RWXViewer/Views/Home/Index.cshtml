@@ -22,15 +22,22 @@
         <select class="uiSelect" id="selectWorld" data-bind="options: worlds, optionsText: 'name', optionsCaption: '(None)', value: selectedWorld, enabled: worlds().length > 0"></select>
 
         <label for="selectModel">Object:</label>
-        <select class="uiSelect" id="selectModel" data-bind="options: models, optionsText: 'name', optionsCaption: '(None)', value: selectedModel, enable: selectedWorld"></select>  
+        <select class="uiSelect" id="selectModel" data-bind="options: models, optionsText: 'name', optionsCaption: '(None)', value: selectedModel, enable: selectedWorld"></select>
     </div>
-    
+
     <div class="viewport">
         <canvas id="viewport" width="960" height="540">
             Your browser does not support the HTML 5 Canvas element.
         </canvas>
-        
+
         <button id="resetCamera" data-bind="click: resetCamera">Reset Camera</button>
+
+        <h1 id="loading">Loading...</h1>
+
+        <div id="error">
+            <span id="errorText" data-bind="text: errorMessage"></span><br/>
+            <a href="http://github.com/Mr-Byte/RWXViewer/issues">Report an Issue</a> / <a href="#" data-bind="click: hideError">Close</a>
+        </div>
     </div>
 
     <div class="infoBar">

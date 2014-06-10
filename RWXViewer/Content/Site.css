@@ -81,3 +81,40 @@
 .viewport #resetCamera:hover {
     background: #5d00a5;
 }
+
+.viewport #loading {
+    margin: auto;
+    padding: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    text-align: center;
+
+/*    visibility: hidden; */
+}
+
+.viewport #error {
+    position: absolute;
+    left: 300px;
+    right: 300px;
+    bottom: 8px;
+    padding: 4px;
+
+    text-align: center;
+    background: red;
+    color: white;
+
+    border: 2px solid white;
+
+    visibility: hidden;
+}
+
+.viewport #error a {
+    color: white;
+}
+
+.viewport #error a:visited {
+    color: white;
+}

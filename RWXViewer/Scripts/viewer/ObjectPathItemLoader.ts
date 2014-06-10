@@ -19,7 +19,7 @@ export function loadModel(worldId: number, modelName: string) {
 
     $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models/" + modelName)
         .done(data => deferred.resolve(data))
-        .fail(() => deferred.fail());
+        .fail(() => deferred.reject());
 
     return deferred.promise();
 }
@@ -41,7 +41,7 @@ export function getWorlds() {
 
     $.getJSON("/api/ObjectPath/Worlds")
         .done(data => deferred.resolve(data))
-        .fail(() => deferred.fail());
+        .fail(() => deferred.reject());
 
     return deferred.promise();
 }
@@ -51,9 +51,9 @@ export function getModels(worldId: number) {
 
     $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models")
         .done(data => deferred.resolve(data))
-        .fail(() => deferred.fail());
+        .fail(() => deferred.reject());
 
-    return deferred.promise();    
+    return deferred.promise();
 }
 
 function loadTexture(worldId: number, textureName: string) {
@@ -73,9 +73,9 @@ export function loadTextures(worldId: number, materials: Model.IMaterial[]): JQu
     var deferred = $.Deferred();
 
     var images = materials.map(material => material.Texture)
-                          .concat(materials.map(material => material.Mask))
-                          .filter((textureName, index, self) => textureName!== null && self.indexOf(textureName) == index)
-                          .map(textureName => loadTexture(worldId, textureName));
+        .concat(materials.map(material => material.Mask))
+        .filter((textureName, index, self) => textureName !== null && self.indexOf(textureName) == index)
+        .map(textureName => loadTexture(worldId, textureName));
 
     $.when.apply($, images).done(() => {
         var cache: Model.IImageCollection = {};
@@ -87,7 +87,7 @@ export function loadTextures(worldId: number, materials: Model.IMaterial[]): JQu
         }
 
         deferred.resolve(cache);
-    });
+    }).fail(() => deferred.reject());
 
     return deferred.promise();
 }
