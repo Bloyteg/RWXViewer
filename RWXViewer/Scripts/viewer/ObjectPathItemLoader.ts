@@ -12,84 +12,84 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Model = require("Model");
+module ObjectPathItemLoader {
+    export function loadModel(worldId: number, modelName: string) {
+        var deferred = $.Deferred<RwxViewer.IModel>();
 
-export function loadModel(worldId: number, modelName: string) {
-    var deferred = $.Deferred<Model.IModel>();
+        $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models/" + modelName)
+            .done(data => deferred.resolve(data))
+            .fail(() => deferred.reject());
 
-    $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models/" + modelName)
-        .done(data => deferred.resolve(data))
-        .fail(() => deferred.reject());
+        return deferred.promise();
+    }
 
-    return deferred.promise();
-}
+    export interface IObjectPathWorld {
+        worldId: number;
+        name: string;
+    }
 
-export interface IObjectPathWorld {
-    worldId: number;
-    name: string;
-}
+    export interface IObjectPathModel {
+        worldId: number;
+        name: string;
+        fileName: string;
+        type: number;
+    }
 
-export interface IObjectPathModel {
-    worldId: number;
-    name: string;
-    fileName: string;
-    type: number;
-}
+    export function getWorlds() {
+        var deferred = $.Deferred<IObjectPathWorld>();
 
-export function getWorlds() {
-    var deferred = $.Deferred<IObjectPathWorld>();
+        $.getJSON("/api/ObjectPath/Worlds")
+            .done(data => deferred.resolve(data))
+            .fail(() => deferred.reject());
 
-    $.getJSON("/api/ObjectPath/Worlds")
-        .done(data => deferred.resolve(data))
-        .fail(() => deferred.reject());
+        return deferred.promise();
+    }
 
-    return deferred.promise();
-}
+    export function getModels(worldId: number) {
+        var deferred = $.Deferred<IObjectPathModel>();
 
-export function getModels(worldId: number) {
-    var deferred = $.Deferred<IObjectPathModel>();
+        $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models")
+            .done(data => deferred.resolve(data))
+            .fail(() => deferred.reject());
 
-    $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models")
-        .done(data => deferred.resolve(data))
-        .fail(() => deferred.reject());
+        return deferred.promise();
+    }
 
-    return deferred.promise();
-}
+    function loadTexture(worldId: number, textureName: string) {
+        var deferred = $.Deferred();
 
-function loadTexture(worldId: number, textureName: string) {
-    var deferred = $.Deferred();
+        var image = new Image();
+        image.onload = () => {
+            deferred.resolve({ image: image, textureName: textureName });
+        };
 
-    var image = new Image();
-    image.onload = () => {
-        deferred.resolve({ image: image, textureName: textureName });
-    };
-    
-    image.onerror = () => { deferred.reject(); };
+        image.onerror = () => { deferred.reject(); };
 
-    image.src = "/api/ObjectPath/Worlds/" + worldId + "/Textures/" + textureName;
+        image.src = "/api/ObjectPath/Worlds/" + worldId + "/Textures/" + textureName;
 
-    return deferred.promise();
-}
+        return deferred.promise();
+    }
 
-export function loadTextures(worldId: number, materials: Model.IMaterial[]): JQueryPromise<Model.IImageCollection> {
-    var deferred = $.Deferred();
+    export function loadTextures(worldId: number, materials: RwxViewer.IMaterial[]): JQueryPromise<RwxViewer.IImageCollection> {
+        var deferred = $.Deferred();
 
-    var images = materials.map(material => material.Texture)
-        .concat(materials.map(material => material.Mask))
-        .filter((textureName, index, self) => textureName !== null && self.indexOf(textureName) == index)
-        .map(textureName => loadTexture(worldId, textureName));
+        var images = materials.map(material => material.Texture)
+            .concat(materials.map(material => material.Mask))
+            .filter((textureName, index, self) => textureName !== null && self.indexOf(textureName) == index)
+            .map(textureName => loadTexture(worldId, textureName));
 
-    $.when.apply($, images).done(() => {
-        var cache: Model.IImageCollection = {};
-        var length = arguments.length;
+        $.when.apply($, images).done(() => {
+            var cache: RwxViewer.IImageCollection = {};
+            var length = arguments.length;
 
-        for (var index = 0; index < length; ++index) {
-            var item = arguments[index];
-            cache[item.textureName] = item.image;
-        }
+            for (var index = 0; index < length; ++index) {
+                var item = arguments[index];
+                cache[item.textureName] = item.image;
+            }
 
-        deferred.resolve(cache);
-    }).fail(() => deferred.reject());
+            deferred.resolve(cache);
+        }).fail(() => deferred.reject());
 
-    return deferred.promise();
+        return deferred.promise();
+    }
 }

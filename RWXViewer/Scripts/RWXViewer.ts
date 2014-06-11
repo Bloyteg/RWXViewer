@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import $ = require("jquery");
-import Renderer = require("./viewer/Renderer");
-import CameraController = require("./viewer/CameraController");
-import ObjectPathItemLoader = require("./viewer/ObjectPathItemLoader");
-import Model = require("./viewer/Model");
-
-var renderer: Renderer.Renderer = new Renderer.Renderer(<HTMLCanvasElement>$('#viewport')[0]);
 var FADE_TIME = 500;
+
+var canvas = <HTMLCanvasElement>document.getElementById("viewport");
+var glOptions: any = { preserveDrawingBuffer: true };
+var gl = <WebGLRenderingContext>(canvas.getContext("webgl", glOptions) || canvas.getContext("experimental-webgl", glOptions));
+var renderer: RwxViewer.Renderer = new RwxViewer.Renderer(gl);
 
 class ViewModel {
     worlds: KnockoutObservableArray<ObjectPathItemLoader.IObjectPathWorld>;
@@ -61,7 +59,7 @@ class ViewModel {
 
             if (model) {
                 $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), $('#loading').fadeIn(FADE_TIME))
-                    .done((result: Model.IModel) => {
+                    .done((result: RwxViewer.IModel) => {
                         ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(textures => {
                             renderer.setCurrentModel(result, textures);
                             $('#loading').fadeOut(FADE_TIME);
@@ -89,12 +87,15 @@ class ViewModel {
 
 var viewModel = new ViewModel();
 
-$('#error').css('visibility','visible').hide();
+$('#error').css('visibility', 'visible').hide();
 
-$.when(ObjectPathItemLoader.getWorlds(), renderer.initialize())
-    .done((worlds) => {
+$.when(ObjectPathItemLoader.getWorlds(),
+       ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl"),
+       ShaderProgramLoader.loadShaderProgram(gl, "SpatialGridVertexShader.glsl", "SpatialGridFragmentShader.glsl"))
+    .done((worlds: ObjectPathItemLoader.IObjectPathWorld[], mainProgram: RwxViewer.ShaderProgram, gridProgram: RwxViewer.ShaderProgram) => {
         viewModel.worlds(worlds);
         ko.applyBindings(viewModel);
+        renderer.initialize(mainProgram, gridProgram);
 
         $('#loading').fadeOut(FADE_TIME);
 
