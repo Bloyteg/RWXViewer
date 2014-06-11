@@ -309,4 +309,4 @@ function tick() {
     renderer.draw();
     window.requestAnimationFrame(tick);
 }
-//# sourceMappingURL=RWXViewer.js.map
+//# sourceMappingURL=viewer.js.map

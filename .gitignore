@@ -18,6 +18,8 @@ bld/
 *.sln.ide/
 */[Ss]cripts/viewer/*.js
 */[Ss]cripts/viewer/*.js.map
+RWXViewer.js
+RWXViewer.js.map
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
