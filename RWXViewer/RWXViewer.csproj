@@ -64,29 +64,29 @@
     <Reference Include="Microsoft.Practices.Unity.Configuration">
       <HintPath>..\packages\Unity.3.0.1304.1\lib\Net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
     </Reference>
-    <Reference Include="MrByte.FSharp.Helpers, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MrByte.FSharp.Helpers, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MrByte.RWX.1.0.4\lib\net45\MrByte.FSharp.Helpers.dll</HintPath>
+      <HintPath>..\packages\MrByte.RWX.1.0.5\lib\net45\MrByte.FSharp.Helpers.dll</HintPath>
     </Reference>
-    <Reference Include="MrByte.Math, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MrByte.Math, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MrByte.RWX.1.0.4\lib\net45\MrByte.Math.dll</HintPath>
+      <HintPath>..\packages\MrByte.RWX.1.0.5\lib\net45\MrByte.Math.dll</HintPath>
     </Reference>
-    <Reference Include="MrByte.RWX, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MrByte.RWX, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MrByte.RWX.1.0.4\lib\net45\MrByte.RWX.dll</HintPath>
+      <HintPath>..\packages\MrByte.RWX.1.0.5\lib\net45\MrByte.RWX.dll</HintPath>
     </Reference>
-    <Reference Include="MrByte.RWX.Model, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MrByte.RWX.Model, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MrByte.RWX.1.0.4\lib\net45\MrByte.RWX.Model.dll</HintPath>
+      <HintPath>..\packages\MrByte.RWX.1.0.5\lib\net45\MrByte.RWX.Model.dll</HintPath>
     </Reference>
-    <Reference Include="MrByte.RWX.Parser, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MrByte.RWX.Parser, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MrByte.RWX.1.0.4\lib\net45\MrByte.RWX.Parser.dll</HintPath>
+      <HintPath>..\packages\MrByte.RWX.1.0.5\lib\net45\MrByte.RWX.Parser.dll</HintPath>
     </Reference>
-    <Reference Include="MrByte.Utility, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MrByte.Utility, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MrByte.RWX.1.0.4\lib\net45\MrByte.Utility.dll</HintPath>
+      <HintPath>..\packages\MrByte.RWX.1.0.5\lib\net45\MrByte.Utility.dll</HintPath>
     </Reference>
     <Reference Include="policy.2.3.FSharp.Core">
       <HintPath>..\packages\FSharp.Core.3.0.0.2\lib\net40\policy.2.3.FSharp.Core.dll</HintPath>
@@ -203,15 +203,13 @@
     <Content Include="Content\Shaders\SpatialGridVertexShader.glsl" />
     <Content Include="Content\Shaders\SpatialGridFragmentShader.glsl" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
-    <Content Include="Scripts\config.js" />
     <Content Include="Scripts\gl-matrix-min.js" />
     <Content Include="Scripts\gl-matrix.js" />
     <Content Include="Scripts\jquery-2.1.1.js" />
     <Content Include="Scripts\jquery-2.1.1.min.js" />
     <Content Include="Scripts\knockout-3.1.0.debug.js" />
     <Content Include="Scripts\knockout-3.1.0.js" />
-    <Content Include="Scripts\r.js" />
-    <Content Include="Scripts\require.js" />
+    <Content Include="Scripts\MrByte.RwxViewer.Renderer.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -242,22 +240,17 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Scripts\typings\knockout\knockout.d.ts" />
-    <TypeScriptCompile Include="Scripts\viewer\Camera.ts" />
+    <TypeScriptCompile Include="Scripts\MrByte.RwxViewer.Renderer.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\gl-matrix\gl-matrix.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\knockout\knockout.d.ts" />
     <TypeScriptCompile Include="Scripts\viewer\CameraController.ts" />
     <TypeScriptCompile Include="Scripts\viewer\ShaderProgramLoader.ts" />
-    <TypeScriptCompile Include="Scripts\viewer\Drawable.ts" />
-    <TypeScriptCompile Include="Scripts\viewer\DrawableBuilder.ts" />
-    <TypeScriptCompile Include="Scripts\viewer\Model.ts" />
     <TypeScriptCompile Include="Scripts\viewer\ObjectPathItemLoader.ts" />
     <Content Include="Scripts\RWXViewer.js">
       <DependentUpon>RWXViewer.ts</DependentUpon>
     </Content>
     <TypeScriptCompile Include="Scripts\RWXViewer.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
-    <TypeScriptCompile Include="Scripts\viewer\Renderer.ts" />
-    <TypeScriptCompile Include="Scripts\viewer\ShaderProgram.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -266,6 +259,7 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptModuleKind>amd</TypeScriptModuleKind>
+    <TypeScriptOutFile>./Scripts/RWXViewer.js</TypeScriptOutFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />

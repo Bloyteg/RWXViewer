@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import ShaderProgram = require("ShaderProgram");
+module ShaderProgramLoader {
+    export function loadShaderProgram(gl: WebGLRenderingContext, vertexShader: string, fragmentShader: string) {
+        var shaderLocation = "/Content/Shaders/";
+        var deferred = $.Deferred<RwxViewer.ShaderProgram>();
 
-export function loadShaderProgram(gl: WebGLRenderingContext, vertexShader: string, fragmentShader: string) {
-    var shaderLocation = "/Content/Shaders/";
-    var deferred = $.Deferred<ShaderProgram.ShaderProgram>();
+        $.when($.get(shaderLocation + vertexShader),
+                $.get(shaderLocation + fragmentShader))
+            .done((vertexShaderData, fragmentShaderData) => deferred.resolve(new RwxViewer.ShaderProgram(gl, vertexShaderData[0], fragmentShaderData[0])))
+            .fail(() => deferred.fail());
 
-    $.when($.get(shaderLocation + vertexShader),
-           $.get(shaderLocation + fragmentShader))
-         .done((vertexShaderData, fragmentShaderData) => deferred.resolve(new ShaderProgram.ShaderProgram(gl, vertexShaderData[0], fragmentShaderData[0])))
-         .fail(() => deferred.fail());
-
-    return deferred.promise();
+        return deferred.promise();
+    }
 }
