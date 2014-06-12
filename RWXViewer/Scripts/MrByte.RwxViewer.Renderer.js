@@ -21,6 +21,11 @@ var RwxViewer;
     var RADS_PER_DEGREE = Math.PI / 180;
     var PHI_EPS = 0.000001;
 
+    function makeCamera(width, height) {
+        return new Camera(width, height);
+    }
+    RwxViewer.makeCamera = makeCamera;
+
     var Camera = (function () {
         function Camera(viewportWidth, viewportHeight) {
             this.reset();
@@ -137,7 +142,6 @@ var RwxViewer;
         });
         return Camera;
     })();
-    RwxViewer.Camera = Camera;
 })(RwxViewer || (RwxViewer = {}));
 // Copyright 2014 Joshua R. Rodgers
 //
@@ -152,130 +156,6 @@ var RwxViewer;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-var RwxViewer;
-(function (RwxViewer) {
-    
-
-    var SpatialGridDrawable = (function () {
-        function SpatialGridDrawable(gl) {
-            var vertices = [];
-
-            for (var x = -1; x <= 1; x += 0.1) {
-                vertices.push(x, 0, -1);
-                vertices.push(x, 0, 1);
-            }
-
-            for (var z = -1; z <= 1; z += 0.1) {
-                vertices.push(-1, 0, z);
-                vertices.push(1, 0, z);
-            }
-
-            this._vertexCount = vertices.length / 3;
-            this._vertexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        }
-        SpatialGridDrawable.prototype.draw = function (gl, shader) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
-            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
-            gl.drawArrays(gl.LINES, 0, this._vertexCount);
-        };
-        return SpatialGridDrawable;
-    })();
-    RwxViewer.SpatialGridDrawable = SpatialGridDrawable;
-
-    var MeshDrawable = (function () {
-        function MeshDrawable(meshMaterialGroups, modelMatrix, children, isBillboard) {
-            this._meshMaterialGroups = meshMaterialGroups;
-            this._modelMatrix = modelMatrix;
-            this._children = children;
-            this._isBillboard = isBillboard || false;
-        }
-        MeshDrawable.prototype.cloneWithTransform = function (matrix) {
-            var newTransformMatrix = mat4.clone(this._modelMatrix);
-            mat4.mul(newTransformMatrix, matrix, newTransformMatrix);
-
-            return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(function (child) {
-                return child instanceof MeshDrawable ? child.cloneWithTransform(matrix) : child;
-            }));
-        };
-
-        MeshDrawable.prototype.draw = function (gl, shader) {
-            //TODO: Handle any material specific parameters such as prelit, texture bindings, etc.
-            var _this = this;
-            this._meshMaterialGroups.forEach(function (meshMaterialGroup) {
-                _this.setTransformUniforms(gl, shader, meshMaterialGroup);
-                _this.setMaterialUniforms(gl, shader, meshMaterialGroup);
-                _this.bindTexture(gl, shader, meshMaterialGroup);
-                _this.bindMask(gl, shader, meshMaterialGroup);
-                _this.bindVertexBuffers(gl, shader, meshMaterialGroup);
-
-                gl.drawArrays(meshMaterialGroup.drawMode, 0, meshMaterialGroup.vertexBuffer.count);
-            });
-
-            this._children.forEach(function (child) {
-                return child.draw(gl, shader);
-            });
-        };
-
-        MeshDrawable.prototype.setTransformUniforms = function (gl, shader, meshMaterialGroup) {
-            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._modelMatrix);
-
-            gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
-        };
-
-        MeshDrawable.prototype.setMaterialUniforms = function (gl, shader, meshMaterialGroup) {
-            gl.uniform1f(shader.uniforms["u_ambientFactor"], meshMaterialGroup.ambient);
-            gl.uniform1f(shader.uniforms["u_diffuseFactor"], meshMaterialGroup.diffuse);
-            gl.uniform4fv(shader.uniforms["u_baseColor"], meshMaterialGroup.baseColor);
-            gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
-        };
-
-        //TODO: Refactor this logic off into ITexture types.
-        MeshDrawable.prototype.bindTexture = function (gl, shader, meshMaterialGroup) {
-            if (meshMaterialGroup.texture !== null) {
-                gl.uniform1i(shader.uniforms["u_hasTexture"], 1);
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.texture);
-                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
-            } else {
-                gl.uniform1i(shader.uniforms["u_hasTexture"], 0);
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, null);
-                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
-            }
-        };
-
-        //TODO: Refactor this off into ITexture types.
-        MeshDrawable.prototype.bindMask = function (gl, shader, meshMaterialGroup) {
-            if (meshMaterialGroup.mask !== null) {
-                gl.uniform1i(shader.uniforms["u_hasMask"], 1);
-                gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.mask);
-                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
-            } else {
-                gl.uniform1i(shader.uniforms["u_hasMask"], 0);
-                gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, null);
-                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
-            }
-        };
-
-        //TODO: Refactor this off into IVertexBuffer types.
-        MeshDrawable.prototype.bindVertexBuffers = function (gl, shader, meshMaterialGroup) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
-            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.uvs);
-            gl.vertexAttribPointer(shader.attributes["a_vertexUV"], 2, gl.FLOAT, false, 0, 0);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.normals);
-            gl.vertexAttribPointer(shader.attributes["a_vertexNormal"], 3, gl.FLOAT, true, 0, 0);
-        };
-        return MeshDrawable;
-    })();
-    RwxViewer.MeshDrawable = MeshDrawable;
-})(RwxViewer || (RwxViewer = {}));
 // Copyright 2014 Joshua R. Rodgers
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -500,6 +380,160 @@ var RwxViewer;
     }
     RwxViewer.createDrawableFromModel = createDrawableFromModel;
 })(RwxViewer || (RwxViewer = {}));
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    function makeGrid(gl) {
+        return new GridDrawable(gl);
+    }
+    RwxViewer.makeGrid = makeGrid;
+
+    var GridDrawable = (function () {
+        function GridDrawable(gl) {
+            var vertices = [];
+
+            for (var x = -1; x <= 1; x += 0.1) {
+                vertices.push(x, 0, -1);
+                vertices.push(x, 0, 1);
+            }
+
+            for (var z = -1; z <= 1; z += 0.1) {
+                vertices.push(-1, 0, z);
+                vertices.push(1, 0, z);
+            }
+
+            this._vertexCount = vertices.length / 3;
+            this._vertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        }
+        GridDrawable.prototype.draw = function (gl, shader) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
+            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.LINES, 0, this._vertexCount);
+        };
+        return GridDrawable;
+    })();
+    RwxViewer.GridDrawable = GridDrawable;
+})(RwxViewer || (RwxViewer = {}));
+// Copyright 2014 Joshua R. Rodgers
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    
+
+    //TODO: Handle prelit meshes.
+    var MeshDrawable = (function () {
+        function MeshDrawable(meshMaterialGroups, modelMatrix, children, isBillboard) {
+            this._meshMaterialGroups = meshMaterialGroups;
+            this._modelMatrix = modelMatrix;
+            this._children = children;
+            this._isBillboard = isBillboard || false;
+        }
+        MeshDrawable.prototype.cloneWithTransform = function (matrix) {
+            var newTransformMatrix = mat4.clone(this._modelMatrix);
+            mat4.mul(newTransformMatrix, matrix, newTransformMatrix);
+
+            return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(function (child) {
+                return child instanceof MeshDrawable ? child.cloneWithTransform(matrix) : child;
+            }));
+        };
+
+        MeshDrawable.prototype.draw = function (gl, shader) {
+            var _this = this;
+            this._meshMaterialGroups.forEach(function (meshMaterialGroup) {
+                _this.setTransformUniforms(gl, shader, meshMaterialGroup);
+                _this.setMaterialUniforms(gl, shader, meshMaterialGroup);
+                _this.bindTexture(gl, shader, meshMaterialGroup);
+                _this.bindMask(gl, shader, meshMaterialGroup);
+                _this.bindVertexBuffers(gl, shader, meshMaterialGroup);
+
+                gl.drawArrays(meshMaterialGroup.drawMode, 0, meshMaterialGroup.vertexBuffer.count);
+            });
+
+            this._children.forEach(function (child) {
+                return child.draw(gl, shader);
+            });
+        };
+
+        MeshDrawable.prototype.setTransformUniforms = function (gl, shader, meshMaterialGroup) {
+            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._modelMatrix);
+
+            gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
+        };
+
+        MeshDrawable.prototype.setMaterialUniforms = function (gl, shader, meshMaterialGroup) {
+            gl.uniform1f(shader.uniforms["u_ambientFactor"], meshMaterialGroup.ambient);
+            gl.uniform1f(shader.uniforms["u_diffuseFactor"], meshMaterialGroup.diffuse);
+            gl.uniform4fv(shader.uniforms["u_baseColor"], meshMaterialGroup.baseColor);
+            gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
+        };
+
+        //TODO: Refactor this logic off into ITexture types.
+        MeshDrawable.prototype.bindTexture = function (gl, shader, meshMaterialGroup) {
+            if (meshMaterialGroup.texture !== null) {
+                gl.uniform1i(shader.uniforms["u_hasTexture"], 1);
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.texture);
+                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
+            } else {
+                gl.uniform1i(shader.uniforms["u_hasTexture"], 0);
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, null);
+                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
+            }
+        };
+
+        //TODO: Refactor this off into ITexture types.
+        MeshDrawable.prototype.bindMask = function (gl, shader, meshMaterialGroup) {
+            if (meshMaterialGroup.mask !== null) {
+                gl.uniform1i(shader.uniforms["u_hasMask"], 1);
+                gl.activeTexture(gl.TEXTURE1);
+                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.mask);
+                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
+            } else {
+                gl.uniform1i(shader.uniforms["u_hasMask"], 0);
+                gl.activeTexture(gl.TEXTURE1);
+                gl.bindTexture(gl.TEXTURE_2D, null);
+                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
+            }
+        };
+
+        //TODO: Refactor this off into IVertexBuffer types.
+        MeshDrawable.prototype.bindVertexBuffers = function (gl, shader, meshMaterialGroup) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
+            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.uvs);
+            gl.vertexAttribPointer(shader.attributes["a_vertexUV"], 2, gl.FLOAT, false, 0, 0);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.normals);
+            gl.vertexAttribPointer(shader.attributes["a_vertexNormal"], 3, gl.FLOAT, true, 0, 0);
+        };
+        return MeshDrawable;
+    })();
+    RwxViewer.MeshDrawable = MeshDrawable;
+})(RwxViewer || (RwxViewer = {}));
 // Copyright 2014 Joshua R. Rodgers
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -581,8 +615,8 @@ var RwxViewer;
             var gl = this._gl;
 
             if (gl) {
-                this._camera = new RwxViewer.Camera(gl.drawingBufferWidth, gl.drawingBufferHeight); //TODO: Use this, but not make it.
-                this._spatialGridDrawable = new RwxViewer.SpatialGridDrawable(gl); //TODO: Use this, but not make it.
+                this._camera = RwxViewer.makeCamera(gl.drawingBufferWidth, gl.drawingBufferHeight); //TODO: Use this, but not make it.
+                this._spatialGridDrawable = RwxViewer.makeGrid(gl);
 
                 gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
                 gl.clearColor(0.75, 0.75, 0.75, 1.0);
@@ -593,7 +627,6 @@ var RwxViewer;
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
             }
 
-            ///TODO: Have shader programs injected.
             this._mainProgram = mainProgram;
             this._gridProgram = gridProgram;
         };

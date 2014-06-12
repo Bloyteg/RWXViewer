@@ -61,6 +61,8 @@
     <TypeScriptCompile Include="Camera.ts" />
     <TypeScriptCompile Include="Drawable.ts" />
     <TypeScriptCompile Include="DrawableBuilder.ts" />
+    <TypeScriptCompile Include="GridDrawable.ts" />
+    <TypeScriptCompile Include="MeshDrawable.ts" />
     <TypeScriptCompile Include="Model.ts" />
     <TypeScriptCompile Include="Renderer.ts" />
     <TypeScriptCompile Include="ShaderProgram.ts" />

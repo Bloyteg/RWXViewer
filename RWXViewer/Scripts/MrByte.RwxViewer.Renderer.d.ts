@@ -1,35 +1,33 @@
 ﻿declare module RwxViewer {
-    class Camera {
-        private _cameraMatrix;
-        private _cameraMatrixInverse;
-        private _offset;
-        private _position;
-        private _target;
-        private _pan;
-        private _panOffset;
-        private _up;
-        private _upQuaternion;
-        private _upQuarternionInverse;
-        private _thetaDelta;
-        private _phiDelta;
-        private _scale;
-        private _viewportWidth;
-        private _viewportHeight;
-        constructor(viewportWidth: number, viewportHeight: number);
-        public setViewpowerSize(width: number, height: number): void;
-        public reset(): void;
-        public rotate(deltaX: number, deltaY: number): void;
-        public zoomIn(zoomFactor?: number): void;
-        public zoomOut(zoomFactor?: number): void;
-        public pan(deltaX: number, deltaY: number): void;
-        private update();
-        public matrix : Mat4Array;
+    interface ICamera {
+        setViewpowerSize(width: number, height: number): any;
+        reset(): any;
+        rotate(deltaX: number, deltaY: number): any;
+        zoomIn(zoomFactor?: number): any;
+        zoomOut(zoomFactor?: number): any;
+        pan(deltaX: number, deltaY: number): any;
+        matrix: Mat4Array;
     }
+    function makeCamera(width: number, height: number): ICamera;
 }
 declare module RwxViewer {
     interface IDrawable {
         draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
     }
+}
+declare module RwxViewer {
+    function createDrawableFromModel(gl: WebGLRenderingContext, model: IModel, textures: IImageCollection): IDrawable;
+}
+declare module RwxViewer {
+    function makeGrid(gl: WebGLRenderingContext): GridDrawable;
+    class GridDrawable implements IDrawable {
+        private _vertexBuffer;
+        private _vertexCount;
+        constructor(gl: WebGLRenderingContext);
+        public draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
+    }
+}
+declare module RwxViewer {
     interface IVertexBuffer {
         positions: WebGLBuffer;
         uvs: WebGLBuffer;
@@ -46,12 +44,6 @@ declare module RwxViewer {
         texture: WebGLTexture;
         mask: WebGLTexture;
     }
-    class SpatialGridDrawable implements IDrawable {
-        private _vertexBuffer;
-        private _vertexCount;
-        constructor(gl: WebGLRenderingContext);
-        public draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
-    }
     class MeshDrawable implements IDrawable {
         private _meshMaterialGroups;
         private _modelMatrix;
@@ -66,9 +58,6 @@ declare module RwxViewer {
         public bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup): void;
         public bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup): void;
     }
-}
-declare module RwxViewer {
-    function createDrawableFromModel(gl: WebGLRenderingContext, model: IModel, textures: IImageCollection): IDrawable;
 }
 declare module RwxViewer {
     interface IImageCollection {
@@ -203,7 +192,7 @@ declare module RwxViewer {
         public initialize(mainProgram: ShaderProgram, gridProgram: ShaderProgram): void;
         public draw(): void;
         public setCurrentModel(model: IModel, textures: IImageCollection): void;
-        public camera : Camera;
+        public camera : ICamera;
     }
 }
 declare module RwxViewer {
