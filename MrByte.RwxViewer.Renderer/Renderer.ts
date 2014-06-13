@@ -30,7 +30,7 @@ module RwxViewer {
             var gl = this._gl;
 
             if (gl) {
-                this._camera = makeCamera(gl.drawingBufferWidth, gl.drawingBufferHeight); //TODO: Use this, but not make it.
+                this._camera = makeCamera(gl.drawingBufferWidth, gl.drawingBufferHeight);
                 this._spatialGridDrawable = makeGrid(gl);
 
                 gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);

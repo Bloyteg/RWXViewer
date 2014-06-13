@@ -615,7 +615,7 @@ var RwxViewer;
             var gl = this._gl;
 
             if (gl) {
-                this._camera = RwxViewer.makeCamera(gl.drawingBufferWidth, gl.drawingBufferHeight); //TODO: Use this, but not make it.
+                this._camera = RwxViewer.makeCamera(gl.drawingBufferWidth, gl.drawingBufferHeight);
                 this._spatialGridDrawable = RwxViewer.makeGrid(gl);
 
                 gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
