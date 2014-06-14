@@ -79,15 +79,15 @@ module ObjectPathItemLoader {
             .map(textureName => loadTexture(worldId, textureName));
 
         $.when.apply($, images).done(() => {
-            var cache = [];
+            var textures = {};
             var length = arguments.length;
 
             for (var index = 0; index < length; ++index) {
                 var item = arguments[index];
-                cache[item.textureName] = item.image;
+                textures[item.textureName] = item.image;
             }
 
-            deferred.resolve(cache);
+            deferred.resolve(textures);
         }).fail(() => deferred.reject());
 
         return deferred.promise();

@@ -35,14 +35,14 @@ declare module RwxViewer {
     }
 }
 declare module RwxViewer {
-    interface IVertexBuffer {
+    interface VertexBuffer {
         positions: WebGLBuffer;
         uvs: WebGLBuffer;
         normals: WebGLBuffer;
         count: number;
     }
-    interface IMeshMaterialGroup {
-        vertexBuffer: IVertexBuffer;
+    interface MeshMaterialGroup {
+        vertexBuffer: VertexBuffer;
         baseColor: Vec4Array;
         ambient: number;
         diffuse: number;
@@ -56,15 +56,15 @@ declare module RwxViewer {
         private _worldMatrix;
         private _children;
         private _isBillboard;
-        constructor(meshMaterialGroups: IMeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], isBillboard?: boolean);
+        constructor(meshMaterialGroups: MeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], isBillboard?: boolean);
         public worldMatrix : Mat4Array;
         public cloneWithTransform(matrix: Mat4Array): MeshDrawable;
         public draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
-        public setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup): void;
-        public setMaterialUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup): void;
-        public bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup): void;
-        public bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup): void;
-        public bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup): void;
+        public setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;
+        public setMaterialUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;
+        public bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;
+        public bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;
+        public bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;
     }
 }
 declare module RwxViewer {
@@ -225,9 +225,15 @@ declare module RwxViewer {
 }
 declare module RwxViewer {
     interface Texture {
-        bind(slot: number): any;
+        bind(slot: number, sampler: number): any;
         update(frameCount: number): any;
     }
-    function createTexture(gl: WebGLRenderingContext, name: string): Texture;
-    function createMask(gl: WebGLRenderingContext, name: string): Texture;
+    enum TextureFilteringMode {
+        None = 0,
+        MipMap = 1,
+    }
+    module TextureCache {
+        function addImageToCache(name: string, image: HTMLImageElement): void;
+        function getTexture(gl: WebGLRenderingContext, name: string, filteringMode: TextureFilteringMode): Texture;
+    }
 }

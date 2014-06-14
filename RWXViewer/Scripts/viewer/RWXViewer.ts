@@ -61,6 +61,9 @@ class ViewModel {
                 $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), $('#loading').fadeIn(FADE_TIME))
                     .done((result: RwxViewer.Model) => {
                         ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(textures => {
+
+                            Object.keys(textures).forEach(imageKey => RwxViewer.TextureCache.addImageToCache(imageKey, textures[imageKey]));
+                            
                             renderer.setCurrentModel(result);
                             $('#loading').fadeOut(FADE_TIME);
                         }).fail(() => {

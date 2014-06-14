@@ -176,27 +176,6 @@ var RwxViewer;
             this._gl = gl;
             this._model = model;
         }
-        //TODO: This gets moved out into classes for manging texture resources.
-        MeshDrawableBuilder.prototype.buildTextureFromImage = function (image, anistropyExt) {
-            var gl = this._gl;
-            var texture = gl.createTexture();
-
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
-            gl.generateMipmap(gl.TEXTURE_2D);
-
-            if (anistropyExt) {
-                var maxAnisotropy = gl.getParameter(anistropyExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT) || 4;
-                gl.texParameterf(gl.TEXTURE_2D, anistropyExt.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
-            }
-
-            gl.bindTexture(gl.TEXTURE_2D, null);
-
-            return texture;
-        };
-
         MeshDrawableBuilder.prototype.build = function () {
             var prototypes = this.buildPrototypeCache(this._model);
 
@@ -273,8 +252,8 @@ var RwxViewer;
                     opacity: material.Opacity,
                     ambient: material.Ambient,
                     diffuse: material.Diffuse,
-                    texture: RwxViewer.createTexture(_this._gl, material.Texture),
-                    mask: RwxViewer.createMask(_this._gl, material.Mask),
+                    texture: RwxViewer.TextureCache.getTexture(_this._gl, material.Texture, 1 /* MipMap */),
+                    mask: RwxViewer.TextureCache.getTexture(_this._gl, material.Mask, 0 /* None */),
                     drawMode: material.GeometrySampling === 1 /* Wireframe */ ? _this._gl.LINES : _this._gl.TRIANGLES
                 };
             });
@@ -815,16 +794,105 @@ var RwxViewer;
 // limitations under the License.
 var RwxViewer;
 (function (RwxViewer) {
-    function createTexture(gl, name) {
-        return null;
-    }
-    RwxViewer.createTexture = createTexture;
+    (function (TextureFilteringMode) {
+        TextureFilteringMode[TextureFilteringMode["None"] = 0] = "None";
+        TextureFilteringMode[TextureFilteringMode["MipMap"] = 1] = "MipMap";
+    })(RwxViewer.TextureFilteringMode || (RwxViewer.TextureFilteringMode = {}));
+    var TextureFilteringMode = RwxViewer.TextureFilteringMode;
 
-    function createMask(gl, name) {
-        return null;
-    }
-    RwxViewer.createMask = createMask;
+    var StaticTexture = (function () {
+        function StaticTexture(gl, imageSource) {
+        }
+        StaticTexture.prototype.bind = function (slot, sampler) {
+            var slotName = "TEXTURE" + slot;
+            var gl = this._gl;
+
+            gl.activeTexture(gl[slotName]);
+            gl.bindTexture(gl.TEXTURE_2D, this._texture);
+            gl.uniform1i(sampler, slot);
+        };
+
+        StaticTexture.prototype.update = function (frameCount) {
+            //No op on a static texture.
+        };
+        return StaticTexture;
+    })();
+
+    (function (TextureCache) {
+        var imageCache = {};
+        var textureCache = {};
+
+        function addImageToCache(name, image) {
+            if (!(name in imageCache)) {
+                imageCache[name] = image;
+            }
+        }
+        TextureCache.addImageToCache = addImageToCache;
+
+        function getTexture(gl, name, filteringMode) {
+            var textureCacheKey = buildCacheKey(name, filteringMode);
+            var texture = getFromCache(textureCacheKey);
+
+            if (texture) {
+                return texture;
+            }
+
+            texture = createTexture(gl, imageCache[name], filteringMode);
+
+            if (texture) {
+                addToCache(textureCacheKey, texture);
+            }
+
+            return texture;
+        }
+        TextureCache.getTexture = getTexture;
+
+        function createTexture(gl, imageSource, filteringMode) {
+            if (imageSource) {
+            }
+
+            return null;
+        }
+
+        function buildCacheKey(name, filteringMode) {
+            if (filteringMode === 0 /* None */) {
+                return "not-filtered-" + name;
+            } else {
+                return "filtered-" + name;
+            }
+        }
+
+        function getFromCache(name) {
+            if (name in textureCache) {
+                return textureCache[name];
+            }
+
+            return null;
+        }
+
+        function addToCache(name, texture) {
+            if (!(name in textureCache)) {
+                textureCache[name] = texture;
+            }
+        }
+    })(RwxViewer.TextureCache || (RwxViewer.TextureCache = {}));
+    var TextureCache = RwxViewer.TextureCache;
 })(RwxViewer || (RwxViewer = {}));
+//buildTextureFromImage(image: HTMLImageElement, anistropyExt): WebGLTexture {
+//    var gl = this._gl;
+//    var texture = gl.getTextureWithMipMaps();
+//    gl.bindTexture(gl.TEXTURE_2D, texture);
+//    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+//    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+//    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+//    gl.generateMipmap(gl.TEXTURE_2D);
+//    if (anistropyExt) {
+//        var maxAnisotropy = gl.getParameter(anistropyExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT) || 4;
+//        gl.texParameterf(gl.TEXTURE_2D, anistropyExt.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
+//    }
+//    gl.bindTexture(gl.TEXTURE_2D, null);
+//    return texture;
+//}
 //        private buildTextureCache(textures: IImageCollection): ITextureCache {
 //    var result: ITextureCache = {};
 //    var keys = Object.keys(textures);

@@ -13,16 +13,16 @@
 // limitations under the License.
 
 module RwxViewer {
-    //TODO: Both this and IMeshMaterialGroup need to be less glorp-tastic.
-    export interface IVertexBuffer {
+    //TODO: Both this and MeshMaterialGroup need to be less glorp-tastic.
+    export interface VertexBuffer {
         positions: WebGLBuffer;
         uvs: WebGLBuffer;
         normals: WebGLBuffer;
         count: number;
     }
 
-    export interface IMeshMaterialGroup {
-        vertexBuffer: IVertexBuffer;
+    export interface MeshMaterialGroup {
+        vertexBuffer: VertexBuffer;
         baseColor: Vec4Array;
         ambient: number;
         diffuse: number;
@@ -34,12 +34,12 @@ module RwxViewer {
 
     //TODO: Handle prelit meshes.
     export class MeshDrawable implements Drawable {
-        private _meshMaterialGroups: IMeshMaterialGroup[];
+        private _meshMaterialGroups: MeshMaterialGroup[];
         private _worldMatrix: Mat4Array;
         private _children: Drawable[];
         private _isBillboard: boolean;
 
-        constructor(meshMaterialGroups: IMeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], isBillboard?: boolean) {
+        constructor(meshMaterialGroups: MeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], isBillboard?: boolean) {
             this._meshMaterialGroups = meshMaterialGroups;
             this._worldMatrix = modelMatrix;
             this._children = children;
@@ -58,7 +58,7 @@ module RwxViewer {
         }
 
         draw(gl: WebGLRenderingContext, shader: ShaderProgram): void {
-            this._meshMaterialGroups.forEach((meshMaterialGroup: IMeshMaterialGroup) => {
+            this._meshMaterialGroups.forEach((meshMaterialGroup: MeshMaterialGroup) => {
                 this.setTransformUniforms(gl, shader, meshMaterialGroup);
                 this.setMaterialUniforms(gl, shader, meshMaterialGroup);
                 this.bindTexture(gl, shader, meshMaterialGroup);
@@ -71,13 +71,13 @@ module RwxViewer {
             this._children.forEach(child => child.draw(gl, shader));
         }
 
-        setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {
+        setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
             gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._worldMatrix);
 
             gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
         }
 
-        setMaterialUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {
+        setMaterialUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
             gl.uniform1f(shader.uniforms["u_ambientFactor"], meshMaterialGroup.ambient);
             gl.uniform1f(shader.uniforms["u_diffuseFactor"], meshMaterialGroup.diffuse);
             gl.uniform4fv(shader.uniforms["u_baseColor"], meshMaterialGroup.baseColor);
@@ -85,7 +85,7 @@ module RwxViewer {
         }
 
         //TODO: Refactor this logic off into ITexture types.
-        bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {
+        bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
             if (meshMaterialGroup.texture !== null) {
                 gl.uniform1i(shader.uniforms["u_hasTexture"], 1);
                 gl.activeTexture(gl.TEXTURE0);
@@ -100,7 +100,7 @@ module RwxViewer {
         }
 
         //TODO: Refactor this off into ITexture types.
-        bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {
+        bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
             if (meshMaterialGroup.mask !== null) {
                 gl.uniform1i(shader.uniforms["u_hasMask"], 1);
                 gl.activeTexture(gl.TEXTURE1);
@@ -115,7 +115,7 @@ module RwxViewer {
         }
 
         //TODO: Refactor this off into IVertexBuffer types.
-        bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {
+        bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
             gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
             gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
 

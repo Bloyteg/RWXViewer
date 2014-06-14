@@ -26,29 +26,6 @@ module RwxViewer {
             this._model = model;
         }
 
-        //TODO: This gets moved out into classes for manging texture resources.
-
-
-        buildTextureFromImage(image: HTMLImageElement, anistropyExt): WebGLTexture {
-            var gl = this._gl;
-            var texture = gl.createTexture();
-
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
-            gl.generateMipmap(gl.TEXTURE_2D);
-
-            if (anistropyExt) {
-                var maxAnisotropy = gl.getParameter(anistropyExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT) || 4;
-                gl.texParameterf(gl.TEXTURE_2D, anistropyExt.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
-            }
-
-            gl.bindTexture(gl.TEXTURE_2D, null);
-
-            return texture;
-        }
-
         build(): Drawable {
             var prototypes: IPrototypeCache = this.buildPrototypeCache(this._model);
 
@@ -96,7 +73,7 @@ module RwxViewer {
             return new MeshDrawable(this.buildMeshMaterialGroups(primitive), matrix, []);
         }
 
-        private buildMeshMaterialGroups(geometry: Geometry): IMeshMaterialGroup[] {
+        private buildMeshMaterialGroups(geometry: Geometry): MeshMaterialGroup[] {
             var facesByMaterial: IFace[][] = [];
 
             geometry.Faces.forEach((face: IFace) => {
@@ -116,14 +93,14 @@ module RwxViewer {
                     opacity: material.Opacity,
                     ambient: material.Ambient,
                     diffuse: material.Diffuse,
-                    texture: createTexture(this._gl, material.Texture),
-                    mask: createMask(this._gl, material.Mask),
+                    texture: TextureCache.getTexture(this._gl, material.Texture, TextureFilteringMode.MipMap),
+                    mask: TextureCache.getTexture(this._gl, material.Mask, TextureFilteringMode.None),
                     drawMode: material.GeometrySampling === GeometrySampling.Wireframe ? this._gl.LINES : this._gl.TRIANGLES
                 };
             });
         }
 
-        private buildVertexBuffer(vertices: Vertex[], faces: IFace[], material: Material): IVertexBuffer {
+        private buildVertexBuffer(vertices: Vertex[], faces: IFace[], material: Material): VertexBuffer {
             var buffers = material.GeometrySampling === GeometrySampling.Wireframe
                 ? this.buildLineBuffers(vertices, faces)
                 : this.buildTriangleBuffers(vertices, faces, material);
