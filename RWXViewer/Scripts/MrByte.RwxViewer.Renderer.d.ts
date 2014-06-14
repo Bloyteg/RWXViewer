@@ -218,3 +218,11 @@ declare module RwxViewer {
         public use(handler: (program: ShaderProgram) => void): void;
     }
 }
+declare module RwxViewer {
+    interface ITexture {
+        bind(slot: number): any;
+        update(frameCount: number): any;
+    }
+    function createTexture(gl: WebGLRenderingContext, image: HTMLImageElement): void;
+    function createMask(gl: WebGLRenderingContext, image: HTMLImageElement): void;
+}
