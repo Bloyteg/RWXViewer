@@ -66,6 +66,7 @@
     <TypeScriptCompile Include="Model.ts" />
     <TypeScriptCompile Include="Renderer.ts" />
     <TypeScriptCompile Include="ShaderProgram.ts" />
+    <TypeScriptCompile Include="Texture.ts" />
     <TypeScriptCompile Include="typings\gl-matrix\gl-matrix.d.ts" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets')" />

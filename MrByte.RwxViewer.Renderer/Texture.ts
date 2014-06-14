@@ -15,11 +15,13 @@ module RwxViewer {
         update(frameCount: number);
     }
 
-    export function createTexture(gl: WebGLRenderingContext, image: HTMLImageElement) {
+   
+
+    function createTexture(gl: WebGLRenderingContext, image: HTMLImageElement) {
         
     }
 
-    export function createMask(gl: WebGLRenderingContext, image: HTMLImageElement) {
+    function createMask(gl: WebGLRenderingContext, image: HTMLImageElement) {
         
     }
 } 

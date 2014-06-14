@@ -398,7 +398,16 @@ var RwxViewer;
     RwxViewer.makeGrid = makeGrid;
 
     var GridDrawable = (function () {
-        function GridDrawable(gl) {
+        function GridDrawable(input, vertexBuffer, vertexCount) {
+            if (input instanceof Float32Array) {
+                this._vertexBuffer = vertexBuffer;
+                this._vertexCount = vertexCount;
+                this._worldMatrix = input;
+            } else {
+                this.initializeNew(input);
+            }
+        }
+        GridDrawable.prototype.initializeNew = function (gl) {
             var vertices = [];
 
             for (var x = -1; x <= 1; x += 0.1) {
@@ -415,7 +424,20 @@ var RwxViewer;
             this._vertexBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        }
+        };
+
+        Object.defineProperty(GridDrawable.prototype, "worldMatrix", {
+            get: function () {
+                return this._worldMatrix;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        GridDrawable.prototype.cloneWithTransform = function (matrix) {
+            return new GridDrawable(mat4.multiply(mat4.create(), matrix, this.worldMatrix), this._vertexBuffer, this._vertexCount);
+        };
+
         GridDrawable.prototype.draw = function (gl, shader) {
             gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
             gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
@@ -446,16 +468,24 @@ var RwxViewer;
     var MeshDrawable = (function () {
         function MeshDrawable(meshMaterialGroups, modelMatrix, children, isBillboard) {
             this._meshMaterialGroups = meshMaterialGroups;
-            this._modelMatrix = modelMatrix;
+            this._worldMatrix = modelMatrix;
             this._children = children;
             this._isBillboard = isBillboard || false;
         }
+        Object.defineProperty(MeshDrawable.prototype, "worldMatrix", {
+            get: function () {
+                return this._worldMatrix;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
         MeshDrawable.prototype.cloneWithTransform = function (matrix) {
-            var newTransformMatrix = mat4.clone(this._modelMatrix);
+            var newTransformMatrix = mat4.clone(this._worldMatrix);
             mat4.mul(newTransformMatrix, matrix, newTransformMatrix);
 
             return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(function (child) {
-                return child instanceof MeshDrawable ? child.cloneWithTransform(matrix) : child;
+                return child.cloneWithTransform(matrix);
             }));
         };
 
@@ -477,7 +507,7 @@ var RwxViewer;
         };
 
         MeshDrawable.prototype.setTransformUniforms = function (gl, shader, meshMaterialGroup) {
-            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._modelMatrix);
+            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._worldMatrix);
 
             gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
         };
@@ -804,9 +834,7 @@ var RwxViewer;
 (function (RwxViewer) {
     function createTexture(gl, image) {
     }
-    RwxViewer.createTexture = createTexture;
 
     function createMask(gl, image) {
     }
-    RwxViewer.createMask = createMask;
 })(RwxViewer || (RwxViewer = {}));

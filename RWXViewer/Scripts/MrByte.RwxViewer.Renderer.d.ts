@@ -12,6 +12,8 @@
 }
 declare module RwxViewer {
     interface IDrawable {
+        worldMatrix: Mat4Array;
+        cloneWithTransform(matrix: Mat4Array): any;
         draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
     }
 }
@@ -23,7 +25,12 @@ declare module RwxViewer {
     class GridDrawable implements IDrawable {
         private _vertexBuffer;
         private _vertexCount;
+        private _worldMatrix;
         constructor(gl: WebGLRenderingContext);
+        constructor(worldMatrix: Mat4Array, vertexBuffer: WebGLBuffer, vertexCount: number);
+        private initializeNew(gl);
+        public worldMatrix : Mat4Array;
+        public cloneWithTransform(matrix: Mat4Array): GridDrawable;
         public draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
     }
 }
@@ -46,10 +53,11 @@ declare module RwxViewer {
     }
     class MeshDrawable implements IDrawable {
         private _meshMaterialGroups;
-        private _modelMatrix;
+        private _worldMatrix;
         private _children;
         private _isBillboard;
         constructor(meshMaterialGroups: IMeshMaterialGroup[], modelMatrix: Mat4Array, children: IDrawable[], isBillboard?: boolean);
+        public worldMatrix : Mat4Array;
         public cloneWithTransform(matrix: Mat4Array): MeshDrawable;
         public draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
         public setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup): void;
@@ -223,6 +231,4 @@ declare module RwxViewer {
         bind(slot: number): any;
         update(frameCount: number): any;
     }
-    function createTexture(gl: WebGLRenderingContext, image: HTMLImageElement): void;
-    function createMask(gl: WebGLRenderingContext, image: HTMLImageElement): void;
 }

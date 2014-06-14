@@ -14,7 +14,9 @@
 
 module RwxViewer {
     export interface IDrawable {
+        worldMatrix: Mat4Array;
+
+        cloneWithTransform(matrix: Mat4Array);
         draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
-        //TODO: Move model matrix here.
     }
 }

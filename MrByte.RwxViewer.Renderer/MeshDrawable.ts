@@ -35,22 +35,26 @@ module RwxViewer {
     //TODO: Handle prelit meshes.
     export class MeshDrawable implements IDrawable {
         private _meshMaterialGroups: IMeshMaterialGroup[];
-        private _modelMatrix: Mat4Array;
+        private _worldMatrix: Mat4Array;
         private _children: IDrawable[];
         private _isBillboard: boolean;
 
         constructor(meshMaterialGroups: IMeshMaterialGroup[], modelMatrix: Mat4Array, children: IDrawable[], isBillboard?: boolean) {
             this._meshMaterialGroups = meshMaterialGroups;
-            this._modelMatrix = modelMatrix;
+            this._worldMatrix = modelMatrix;
             this._children = children;
             this._isBillboard = isBillboard || false;
         }
 
+        get worldMatrix(): Mat4Array {
+            return this._worldMatrix;
+        }
+
         cloneWithTransform(matrix: Mat4Array) {
-            var newTransformMatrix = mat4.clone(this._modelMatrix);
+            var newTransformMatrix = mat4.clone(this._worldMatrix);
             mat4.mul(newTransformMatrix, matrix, newTransformMatrix);
 
-            return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(child => child instanceof MeshDrawable ? (<MeshDrawable>child).cloneWithTransform(matrix) : child));
+            return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(child => child.cloneWithTransform(matrix)));
         }
 
         draw(gl: WebGLRenderingContext, shader: ShaderProgram): void {
@@ -68,7 +72,7 @@ module RwxViewer {
         }
 
         setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: IMeshMaterialGroup) {
-            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._modelMatrix);
+            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._worldMatrix);
 
             gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
         }

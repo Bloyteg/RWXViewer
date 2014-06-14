@@ -17,8 +17,21 @@ module RwxViewer {
     export class GridDrawable implements IDrawable {
         private _vertexBuffer: WebGLBuffer;
         private _vertexCount: number;
+        private _worldMatrix: Mat4Array;
 
-        constructor(gl: WebGLRenderingContext) {
+        constructor(gl: WebGLRenderingContext)
+        constructor(worldMatrix: Mat4Array, vertexBuffer: WebGLBuffer, vertexCount: number)
+        constructor(input: any, vertexBuffer?, vertexCount?) {
+            if (input instanceof Float32Array) {
+                this._vertexBuffer = vertexBuffer;
+                this._vertexCount = vertexCount;
+                this._worldMatrix = <Mat4Array>input;
+            } else {
+                this.initializeNew(<WebGLRenderingContext>input);
+            }
+        }
+
+        private initializeNew(gl: WebGLRenderingContext) {
             var vertices: number[] = [];
 
             //Generate grid lines along the X-axis.
@@ -37,6 +50,14 @@ module RwxViewer {
             this._vertexBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        }
+
+        get worldMatrix(): Mat4Array {
+            return this._worldMatrix;
+        }
+
+        cloneWithTransform(matrix: Mat4Array) {
+            return new GridDrawable(mat4.multiply(mat4.create(), matrix, this.worldMatrix), this._vertexBuffer, this._vertexCount);
         }
 
         draw(gl: WebGLRenderingContext, shader: ShaderProgram): void {
