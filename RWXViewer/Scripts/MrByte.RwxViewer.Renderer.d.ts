@@ -1,5 +1,5 @@
 ﻿declare module RwxViewer {
-    interface ICamera {
+    interface Camera {
         setViewpowerSize(width: number, height: number): any;
         reset(): any;
         rotate(deltaX: number, deltaY: number): any;
@@ -8,21 +8,21 @@
         pan(deltaX: number, deltaY: number): any;
         matrix: Mat4Array;
     }
-    function makeCamera(width: number, height: number): ICamera;
+    function makeCamera(width: number, height: number): Camera;
 }
 declare module RwxViewer {
-    interface IDrawable {
+    interface Drawable {
         worldMatrix: Mat4Array;
         cloneWithTransform(matrix: Mat4Array): any;
         draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
     }
 }
 declare module RwxViewer {
-    function createDrawableFromModel(gl: WebGLRenderingContext, model: IModel, textures: IImageCollection): IDrawable;
+    function createDrawableFromModel(gl: WebGLRenderingContext, model: Model): Drawable;
 }
 declare module RwxViewer {
     function makeGrid(gl: WebGLRenderingContext): GridDrawable;
-    class GridDrawable implements IDrawable {
+    class GridDrawable implements Drawable {
         private _vertexBuffer;
         private _vertexCount;
         private _worldMatrix;
@@ -48,15 +48,15 @@ declare module RwxViewer {
         diffuse: number;
         drawMode: number;
         opacity: number;
-        texture: WebGLTexture;
-        mask: WebGLTexture;
+        texture: Texture;
+        mask: Texture;
     }
-    class MeshDrawable implements IDrawable {
+    class MeshDrawable implements Drawable {
         private _meshMaterialGroups;
         private _worldMatrix;
         private _children;
         private _isBillboard;
-        constructor(meshMaterialGroups: IMeshMaterialGroup[], modelMatrix: Mat4Array, children: IDrawable[], isBillboard?: boolean);
+        constructor(meshMaterialGroups: IMeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], isBillboard?: boolean);
         public worldMatrix : Mat4Array;
         public cloneWithTransform(matrix: Mat4Array): MeshDrawable;
         public draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
@@ -68,61 +68,58 @@ declare module RwxViewer {
     }
 }
 declare module RwxViewer {
-    interface IImageCollection {
-        [name: string]: HTMLImageElement;
-    }
-    interface IVector3 {
+    interface Vector3 {
         X: number;
         Y: number;
         Z: number;
     }
-    interface IVertex {
-        Position: IVector3;
-        UV: IUv;
-        Prelight: IColor;
-        Normal: IVector3;
+    interface Vertex {
+        Position: Vector3;
+        UV: Uv;
+        Prelight: Color;
+        Normal: Vector3;
     }
-    interface IUv {
+    interface Uv {
         U: number;
         V: number;
     }
-    interface ITriangle {
-        Normal: IVector3;
+    interface Triangle {
+        Normal: Vector3;
         Indices: number[];
     }
     interface IFace {
         Tag: number;
         MaterialId: number;
         Indices: number[];
-        Triangles: ITriangle[];
+        Triangles: Triangle[];
     }
-    interface IMatrix {
+    interface Matrix {
         Matrix: number[];
     }
-    interface ITransformable {
-        Transform: IMatrix;
+    interface Transformable {
+        Transform: Matrix;
     }
-    interface IGeometry {
-        Vertices: IVertex[];
+    interface Geometry {
+        Vertices: Vertex[];
         Faces: IFace[];
     }
-    interface IMeshGeometry extends IGeometry {
-        Children: IClump[];
-        Primitives: IPrimitiveGeometry[];
-        PrototypeInstances: IPrototypeInstance[];
+    interface MeshGeometry extends Geometry {
+        Children: Clump[];
+        Primitives: PrimitiveGeometry[];
+        PrototypeInstances: PrototypeInstance[];
         IsPrelit: boolean;
     }
-    interface IPrimitiveGeometry extends IGeometry, ITransformable {
+    interface PrimitiveGeometry extends Geometry, Transformable {
         MaterialId: number;
     }
-    interface IPrototype extends IMeshGeometry {
+    interface Prototype extends MeshGeometry {
         Name: string;
     }
-    interface IPrototypeInstance extends ITransformable {
+    interface PrototypeInstance extends Transformable {
         Name: string;
         MaterialId: number;
     }
-    interface IClump extends IMeshGeometry, ITransformable {
+    interface Clump extends MeshGeometry, Transformable {
         Tag: number;
         IsCollidable: boolean;
     }
@@ -156,13 +153,13 @@ declare module RwxViewer {
         Null = 0,
         Double = 1,
     }
-    interface IColor {
+    interface Color {
         R: number;
         G: number;
         B: number;
     }
-    interface IMaterial {
-        Color: IColor;
+    interface Material {
+        Color: Color;
         Opacity: number;
         Ambient: number;
         Diffuse: number;
@@ -177,10 +174,10 @@ declare module RwxViewer {
         GeometrySampling: GeometrySampling;
         MaterialMode: MaterialMode;
     }
-    interface IModel {
-        Prototypes: IPrototype[];
-        Materials: IMaterial[];
-        Clump: IClump;
+    interface Model {
+        Prototypes: Prototype[];
+        Materials: Material[];
+        Clump: Clump;
         HasOpacityFix: boolean;
         HasRandomUVs: boolean;
         IsSeamless: boolean;
@@ -199,15 +196,15 @@ declare module RwxViewer {
         constructor(gl: WebGLRenderingContext);
         public initialize(mainProgram: ShaderProgram, gridProgram: ShaderProgram): void;
         public draw(): void;
-        public setCurrentModel(model: IModel, textures: IImageCollection): void;
-        public camera : ICamera;
+        public setCurrentModel(model: Model): void;
+        public camera : Camera;
     }
 }
 declare module RwxViewer {
-    interface IUniformInfo {
+    interface UniformInfo {
         [name: string]: WebGLUniformLocation;
     }
-    interface IAttributeInfo {
+    interface AttributeInfo {
         [name: string]: number;
     }
     class ShaderProgram {
@@ -220,15 +217,17 @@ declare module RwxViewer {
         private initializeProgram(vertexShaderSource, fragmentShaderSource);
         private getUniforms();
         private getAttributes();
-        public attributes : IAttributeInfo;
-        public uniforms : IUniformInfo;
+        public attributes : AttributeInfo;
+        public uniforms : UniformInfo;
         private compileShader(shaderSource, type);
         public use(handler: (program: ShaderProgram) => void): void;
     }
 }
 declare module RwxViewer {
-    interface ITexture {
+    interface Texture {
         bind(slot: number): any;
         update(frameCount: number): any;
     }
+    function createTexture(gl: WebGLRenderingContext, name: string): Texture;
+    function createMask(gl: WebGLRenderingContext, name: string): Texture;
 }

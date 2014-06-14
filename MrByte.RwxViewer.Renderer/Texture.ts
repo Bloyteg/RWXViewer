@@ -10,18 +10,38 @@
 // limitations under the License.
 
 module RwxViewer {
-    export interface ITexture {
+    export interface Texture {
         bind(slot: number);
         update(frameCount: number);
     }
 
-   
-
-    function createTexture(gl: WebGLRenderingContext, image: HTMLImageElement) {
-        
+    interface ITextureCache {
+        [name: string]: Texture;
     }
 
-    function createMask(gl: WebGLRenderingContext, image: HTMLImageElement) {
-        
+    export function createTexture(gl: WebGLRenderingContext, name: string): Texture {
+        return null;
+    }
+
+    export function createMask(gl: WebGLRenderingContext, name: string): Texture {
+        return null;
     }
 } 
+
+//        private buildTextureCache(textures: IImageCollection): ITextureCache {
+//    var result: ITextureCache = {};
+
+//    var keys = Object.keys(textures);
+//    var length = keys.length;
+//    var anistropicFiltering = this._gl.getExtension("EXT_texture_filter_anisotropic")
+//        || this._gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic")
+//        || this._gl.getExtension("MOZ_EXT_texture_filter_anisotropic");
+
+//    for (var index = 0; index < length; ++index) {
+//        var key = keys[index];
+
+//        //   result[key] = this.buildTextureFromImage(textures[key], anistropicFiltering);
+//    }
+
+//    return result;
+//}

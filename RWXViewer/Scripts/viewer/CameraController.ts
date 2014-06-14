@@ -19,7 +19,7 @@ module CameraController {
         Panning
     }
 
-    export function registerCamera(camera: RwxViewer.ICamera) {
+    export function registerCamera(camera: RwxViewer.Camera) {
         var cameraState = CameraState.None;
         var lastMouseX = null;
         var lastMouseY = null;

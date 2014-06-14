@@ -15,11 +15,11 @@
 module RwxViewer {
     export class Renderer {
         private _gl: WebGLRenderingContext;
-        private _currentDrawable: IDrawable;
-        private _spatialGridDrawable: IDrawable;
+        private _currentDrawable: Drawable;
+        private _spatialGridDrawable: Drawable;
         private _gridProgram: ShaderProgram;
         private _mainProgram: ShaderProgram;
-        private _camera: ICamera;
+        private _camera: Camera;
         private _projectionMatrix: Mat4Array = mat4.create();
 
         constructor(gl: WebGLRenderingContext) {
@@ -71,15 +71,15 @@ module RwxViewer {
             }
         }
 
-        setCurrentModel(model: IModel, textures: IImageCollection): void {
+        setCurrentModel(model: Model): void {
             if (model) {
-                this._currentDrawable = createDrawableFromModel(this._gl, model, textures);
+                this._currentDrawable = createDrawableFromModel(this._gl, model);
             } else {
                 this._currentDrawable = null;
             }
         }
 
-        get camera(): ICamera {
+        get camera(): Camera {
             return this._camera;
         }
     }

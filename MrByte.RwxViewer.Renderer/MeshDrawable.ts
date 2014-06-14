@@ -28,18 +28,18 @@ module RwxViewer {
         diffuse: number;
         drawMode: number;
         opacity: number;
-        texture: WebGLTexture;
-        mask: WebGLTexture;
+        texture: Texture;
+        mask: Texture;
     }
 
     //TODO: Handle prelit meshes.
-    export class MeshDrawable implements IDrawable {
+    export class MeshDrawable implements Drawable {
         private _meshMaterialGroups: IMeshMaterialGroup[];
         private _worldMatrix: Mat4Array;
-        private _children: IDrawable[];
+        private _children: Drawable[];
         private _isBillboard: boolean;
 
-        constructor(meshMaterialGroups: IMeshMaterialGroup[], modelMatrix: Mat4Array, children: IDrawable[], isBillboard?: boolean) {
+        constructor(meshMaterialGroups: IMeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], isBillboard?: boolean) {
             this._meshMaterialGroups = meshMaterialGroups;
             this._worldMatrix = modelMatrix;
             this._children = children;

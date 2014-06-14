@@ -14,7 +14,7 @@ module RwxViewer {
         return new GridDrawable(gl);
     }
 
-    export class GridDrawable implements IDrawable {
+    export class GridDrawable implements Drawable {
         private _vertexBuffer: WebGLBuffer;
         private _vertexCount: number;
         private _worldMatrix: Mat4Array;

@@ -22,22 +22,22 @@ var RwxViewer;
     var PHI_EPS = 0.000001;
 
     function makeCamera(width, height) {
-        return new Camera(width, height);
+        return new OrbitCamera(width, height);
     }
     RwxViewer.makeCamera = makeCamera;
 
-    var Camera = (function () {
-        function Camera(viewportWidth, viewportHeight) {
+    var OrbitCamera = (function () {
+        function OrbitCamera(viewportWidth, viewportHeight) {
             this.reset();
             this.setViewpowerSize(viewportWidth, viewportHeight);
             this.update();
         }
-        Camera.prototype.setViewpowerSize = function (width, height) {
+        OrbitCamera.prototype.setViewpowerSize = function (width, height) {
             this._viewportWidth = width;
             this._viewportHeight = height;
         };
 
-        Camera.prototype.reset = function () {
+        OrbitCamera.prototype.reset = function () {
             this._cameraMatrix = mat4.create();
             this._cameraMatrixInverse = mat4.create();
 
@@ -59,26 +59,26 @@ var RwxViewer;
             this.update();
         };
 
-        Camera.prototype.rotate = function (deltaX, deltaY) {
+        OrbitCamera.prototype.rotate = function (deltaX, deltaY) {
             this._thetaDelta -= 2 * Math.PI * deltaX / this._viewportWidth * ROTATION_SPEED;
             this._phiDelta -= 2 * Math.PI * deltaY / this._viewportHeight * ROTATION_SPEED;
 
             this.update();
         };
 
-        Camera.prototype.zoomIn = function (zoomFactor) {
+        OrbitCamera.prototype.zoomIn = function (zoomFactor) {
             this._scale *= (zoomFactor || ZOOM_FACTOR);
 
             this.update();
         };
 
-        Camera.prototype.zoomOut = function (zoomFactor) {
+        OrbitCamera.prototype.zoomOut = function (zoomFactor) {
             this._scale /= (zoomFactor || ZOOM_FACTOR);
 
             this.update();
         };
 
-        Camera.prototype.pan = function (deltaX, deltaY) {
+        OrbitCamera.prototype.pan = function (deltaX, deltaY) {
             mat4.invert(this._cameraMatrixInverse, this._cameraMatrix);
             vec3.sub(this._offset, this._position, this._target);
             var distance = vec3.length(this._offset);
@@ -98,7 +98,7 @@ var RwxViewer;
             this.update();
         };
 
-        Camera.prototype.update = function () {
+        OrbitCamera.prototype.update = function () {
             vec3.sub(this._offset, this._position, this._target);
             vec3.transformQuat(this._offset, this._offset, this._upQuaternion);
 
@@ -133,14 +133,14 @@ var RwxViewer;
             mat4.lookAt(this._cameraMatrix, this._position, this._target, this._up);
         };
 
-        Object.defineProperty(Camera.prototype, "matrix", {
+        Object.defineProperty(OrbitCamera.prototype, "matrix", {
             get: function () {
                 return this._cameraMatrix;
             },
             enumerable: true,
             configurable: true
         });
-        return Camera;
+        return OrbitCamera;
     })();
 })(RwxViewer || (RwxViewer = {}));
 // Copyright 2014 Joshua R. Rodgers
@@ -172,28 +172,11 @@ var RwxViewer;
 var RwxViewer;
 (function (RwxViewer) {
     var MeshDrawableBuilder = (function () {
-        function MeshDrawableBuilder(gl, model, textures) {
+        function MeshDrawableBuilder(gl, model) {
             this._gl = gl;
             this._model = model;
-            this._textureCache = this.buildTextureCache(textures);
         }
         //TODO: This gets moved out into classes for manging texture resources.
-        MeshDrawableBuilder.prototype.buildTextureCache = function (textures) {
-            var result = {};
-
-            var keys = Object.keys(textures);
-            var length = keys.length;
-            var anistropicFiltering = this._gl.getExtension("EXT_texture_filter_anisotropic") || this._gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic") || this._gl.getExtension("MOZ_EXT_texture_filter_anisotropic");
-
-            for (var index = 0; index < length; ++index) {
-                var key = keys[index];
-
-                result[key] = this.buildTextureFromImage(textures[key], anistropicFiltering);
-            }
-
-            return result;
-        };
-
         MeshDrawableBuilder.prototype.buildTextureFromImage = function (image, anistropyExt) {
             var gl = this._gl;
             var texture = gl.createTexture();
@@ -290,8 +273,8 @@ var RwxViewer;
                     opacity: material.Opacity,
                     ambient: material.Ambient,
                     diffuse: material.Diffuse,
-                    texture: _this._textureCache[material.Texture] || null,
-                    mask: _this._textureCache[material.Mask] || null,
+                    texture: RwxViewer.createTexture(_this._gl, material.Texture),
+                    mask: RwxViewer.createMask(_this._gl, material.Mask),
                     drawMode: material.GeometrySampling === 1 /* Wireframe */ ? _this._gl.LINES : _this._gl.TRIANGLES
                 };
             });
@@ -375,8 +358,8 @@ var RwxViewer;
         return MeshDrawableBuilder;
     })();
 
-    function createDrawableFromModel(gl, model, textures) {
-        return new MeshDrawableBuilder(gl, model, textures).build();
+    function createDrawableFromModel(gl, model) {
+        return new MeshDrawableBuilder(gl, model).build();
     }
     RwxViewer.createDrawableFromModel = createDrawableFromModel;
 })(RwxViewer || (RwxViewer = {}));
@@ -687,9 +670,9 @@ var RwxViewer;
             }
         };
 
-        Renderer.prototype.setCurrentModel = function (model, textures) {
+        Renderer.prototype.setCurrentModel = function (model) {
             if (model) {
-                this._currentDrawable = RwxViewer.createDrawableFromModel(this._gl, model, textures);
+                this._currentDrawable = RwxViewer.createDrawableFromModel(this._gl, model);
             } else {
                 this._currentDrawable = null;
             }
@@ -832,9 +815,26 @@ var RwxViewer;
 // limitations under the License.
 var RwxViewer;
 (function (RwxViewer) {
-    function createTexture(gl, image) {
+    function createTexture(gl, name) {
+        return null;
     }
+    RwxViewer.createTexture = createTexture;
 
-    function createMask(gl, image) {
+    function createMask(gl, name) {
+        return null;
     }
+    RwxViewer.createMask = createMask;
 })(RwxViewer || (RwxViewer = {}));
+//        private buildTextureCache(textures: IImageCollection): ITextureCache {
+//    var result: ITextureCache = {};
+//    var keys = Object.keys(textures);
+//    var length = keys.length;
+//    var anistropicFiltering = this._gl.getExtension("EXT_texture_filter_anisotropic")
+//        || this._gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic")
+//        || this._gl.getExtension("MOZ_EXT_texture_filter_anisotropic");
+//    for (var index = 0; index < length; ++index) {
+//        var key = keys[index];
+//        //   result[key] = this.buildTextureFromImage(textures[key], anistropicFiltering);
+//    }
+//    return result;
+//}

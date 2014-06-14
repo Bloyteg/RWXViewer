@@ -55,16 +55,16 @@ class ViewModel {
 
         this.selectedModel.subscribe(model => {
             self.errorMessage(null);
-            renderer.setCurrentModel(null, null);
+            renderer.setCurrentModel(null);
 
             if (model) {
                 $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), $('#loading').fadeIn(FADE_TIME))
-                    .done((result: RwxViewer.IModel) => {
+                    .done((result: RwxViewer.Model) => {
                         ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(textures => {
-                            renderer.setCurrentModel(result, textures);
+                            renderer.setCurrentModel(result);
                             $('#loading').fadeOut(FADE_TIME);
                         }).fail(() => {
-                                renderer.setCurrentModel(result, {});
+                                renderer.setCurrentModel(result);
                                 $('#loading').fadeOut(FADE_TIME);
                                 self.errorMessage("Failed to load the textures for this object.");
                             });

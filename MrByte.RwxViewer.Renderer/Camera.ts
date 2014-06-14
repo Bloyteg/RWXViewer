@@ -21,7 +21,7 @@ module RwxViewer {
     var RADS_PER_DEGREE: number = Math.PI / 180;
     var PHI_EPS = 0.000001;
 
-    export interface ICamera {
+    export interface Camera {
         setViewpowerSize(width: number, height: number);
         reset();
         rotate(deltaX: number, deltaY: number);
@@ -31,11 +31,11 @@ module RwxViewer {
         matrix : Mat4Array;
     }
 
-    export function makeCamera(width: number, height: number): ICamera {
-        return new Camera(width, height);
+    export function makeCamera(width: number, height: number): Camera {
+        return new OrbitCamera(width, height);
     }
 
-    class Camera implements ICamera {
+    class OrbitCamera implements Camera {
         private _cameraMatrix: Mat4Array;
         private _cameraMatrixInverse: Mat4Array;
         private _offset: Vec3Array;

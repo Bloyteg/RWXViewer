@@ -14,7 +14,7 @@
 
 module ObjectPathItemLoader {
     export function loadModel(worldId: number, modelName: string) {
-        var deferred = $.Deferred<RwxViewer.IModel>();
+        var deferred = $.Deferred<RwxViewer.Model>();
 
         $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models/" + modelName)
             .done(data => deferred.resolve(data))
@@ -70,7 +70,7 @@ module ObjectPathItemLoader {
         return deferred.promise();
     }
 
-    export function loadTextures(worldId: number, materials: RwxViewer.IMaterial[]): JQueryPromise<RwxViewer.IImageCollection> {
+    export function loadTextures(worldId: number, materials: RwxViewer.Material[]): JQueryPromise<HTMLImageElement[]> {
         var deferred = $.Deferred();
 
         var images = materials.map(material => material.Texture)
@@ -79,7 +79,7 @@ module ObjectPathItemLoader {
             .map(textureName => loadTexture(worldId, textureName));
 
         $.when.apply($, images).done(() => {
-            var cache: RwxViewer.IImageCollection = {};
+            var cache = [];
             var length = arguments.length;
 
             for (var index = 0; index < length; ++index) {

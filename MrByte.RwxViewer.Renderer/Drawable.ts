@@ -13,7 +13,7 @@
 // limitations under the License.
 
 module RwxViewer {
-    export interface IDrawable {
+    export interface Drawable {
         worldMatrix: Mat4Array;
 
         cloneWithTransform(matrix: Mat4Array);
