@@ -86,14 +86,15 @@ module RwxViewer {
 
 
         bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
+            //TODO: Look at moving this into the Texture classes.
             gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
             meshMaterialGroup.texture.bind(0, shader.uniforms["u_textureSampler"]);
         }
 
         //TODO: Refactor this off into ITexture types.
         bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
-            gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
-            meshMaterialGroup.mask.bind(0, shader.uniforms["u_maskSampler"]);
+            gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.mask.isEmpty ? 0 : 1);
+            meshMaterialGroup.mask.bind(1, shader.uniforms["u_maskSampler"]);
         }
 
         //TODO: Refactor this off into IVertexBuffer types.

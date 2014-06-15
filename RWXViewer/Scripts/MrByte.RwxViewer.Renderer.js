@@ -355,6 +355,46 @@ var RwxViewer;
 // limitations under the License.
 var RwxViewer;
 (function (RwxViewer) {
+    var EmptyTexture = (function () {
+        function EmptyTexture(gl) {
+            this._gl = gl;
+        }
+        EmptyTexture.prototype.bind = function (slot, sampler) {
+            var slotName = "TEXTURE" + slot;
+            var gl = this._gl;
+
+            gl.activeTexture(gl[slotName]);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.uniform1i(sampler, slot);
+        };
+
+        EmptyTexture.prototype.update = function (frameCount) {
+            //No op on a static texture.
+        };
+
+        Object.defineProperty(EmptyTexture.prototype, "isEmpty", {
+            get: function () {
+                return true;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return EmptyTexture;
+    })();
+    RwxViewer.EmptyTexture = EmptyTexture;
+})(RwxViewer || (RwxViewer = {}));
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
     function makeGrid(gl) {
         return new GridDrawable(gl);
     }
@@ -483,14 +523,15 @@ var RwxViewer;
         };
 
         MeshDrawable.prototype.bindTexture = function (gl, shader, meshMaterialGroup) {
+            //TODO: Look at moving this into the Texture classes.
             gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
             meshMaterialGroup.texture.bind(0, shader.uniforms["u_textureSampler"]);
         };
 
         //TODO: Refactor this off into ITexture types.
         MeshDrawable.prototype.bindMask = function (gl, shader, meshMaterialGroup) {
-            gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
-            meshMaterialGroup.mask.bind(0, shader.uniforms["u_maskSampler"]);
+            gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.mask.isEmpty ? 0 : 1);
+            meshMaterialGroup.mask.bind(1, shader.uniforms["u_maskSampler"]);
         };
 
         //TODO: Refactor this off into IVertexBuffer types.
@@ -776,48 +817,11 @@ var RwxViewer;
 // limitations under the License.
 var RwxViewer;
 (function (RwxViewer) {
-    (function (TextureFilteringMode) {
-        TextureFilteringMode[TextureFilteringMode["None"] = 0] = "None";
-        TextureFilteringMode[TextureFilteringMode["MipMap"] = 1] = "MipMap";
-    })(RwxViewer.TextureFilteringMode || (RwxViewer.TextureFilteringMode = {}));
-    var TextureFilteringMode = RwxViewer.TextureFilteringMode;
-
-    var EmptyTexture = (function () {
-        function EmptyTexture(gl) {
-            this._gl = gl;
-        }
-        EmptyTexture.prototype.bind = function (slot, sampler) {
-            var slotName = "TEXTURE" + slot;
-            var gl = this._gl;
-
-            gl.activeTexture(gl[slotName]);
-            gl.bindTexture(gl.TEXTURE_2D, null);
-            gl.uniform1i(sampler, slot);
-        };
-
-        EmptyTexture.prototype.update = function (frameCount) {
-            //No op on a static texture.
-        };
-
-        Object.defineProperty(EmptyTexture.prototype, "isEmpty", {
-            get: function () {
-                return true;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return EmptyTexture;
-    })();
-
     var StaticTexture = (function () {
-        function StaticTexture(gl, imageSource) {
+        function StaticTexture(gl, imageSource, textureFactory) {
             this._gl = gl;
-            this._texture = this.buildTexture(imageSource);
+            this._texture = textureFactory.getTexture(imageSource);
         }
-        StaticTexture.prototype.buildTexture = function (imageSource) {
-            return null;
-        };
-
         StaticTexture.prototype.bind = function (slot, sampler) {
             var slotName = "TEXTURE" + slot;
             var gl = this._gl;
@@ -840,6 +844,35 @@ var RwxViewer;
         });
         return StaticTexture;
     })();
+    RwxViewer.StaticTexture = StaticTexture;
+})(RwxViewer || (RwxViewer = {}));
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    (function (TextureFilteringMode) {
+        TextureFilteringMode[TextureFilteringMode["None"] = 0] = "None";
+        TextureFilteringMode[TextureFilteringMode["MipMap"] = 1] = "MipMap";
+    })(RwxViewer.TextureFilteringMode || (RwxViewer.TextureFilteringMode = {}));
+    var TextureFilteringMode = RwxViewer.TextureFilteringMode;
 
     (function (TextureCache) {
         var imageCache = {};
@@ -856,7 +889,7 @@ var RwxViewer;
 
         function getTexture(gl, name, filteringMode) {
             if (emptyTexture === null) {
-                emptyTexture = new EmptyTexture(gl);
+                emptyTexture = new RwxViewer.EmptyTexture(gl);
             }
 
             if (!name) {
@@ -882,6 +915,12 @@ var RwxViewer;
 
         function createTexture(gl, imageSource, filteringMode) {
             if (imageSource) {
+                if (imageSource.width > imageSource.height && imageSource.height % imageSource.width === 0) {
+                    //TODO: Handle animated textures.
+                    return emptyTexture;
+                } else {
+                    return new RwxViewer.StaticTexture(gl, imageSource, RwxViewer.TextureFactory.getFactory(gl, filteringMode));
+                }
             }
 
             return emptyTexture;
@@ -900,7 +939,7 @@ var RwxViewer;
                 return textureCache[name];
             }
 
-            return emptyTexture;
+            return null;
         }
 
         function addToCache(name, texture) {
@@ -911,31 +950,74 @@ var RwxViewer;
     })(RwxViewer.TextureCache || (RwxViewer.TextureCache = {}));
     var TextureCache = RwxViewer.TextureCache;
 })(RwxViewer || (RwxViewer = {}));
-//buildTextureFromImage(image: HTMLImageElement, anistropyExt): WebGLTexture {
-//    var gl = this._gl;
-//    var texture = gl.getTextureWithMipMaps();
-//    gl.bindTexture(gl.TEXTURE_2D, texture);
-//    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-//    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-//    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
-//    gl.generateMipmap(gl.TEXTURE_2D);
-//    if (anistropyExt) {
-//        var maxAnisotropy = gl.getParameter(anistropyExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT) || 4;
-//        gl.texParameterf(gl.TEXTURE_2D, anistropyExt.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
-//    }
-//    gl.bindTexture(gl.TEXTURE_2D, null);
-//    return texture;
-//}
-//        private buildTextureCache(textures: IImageCollection): ITextureCache {
-//    var result: ITextureCache = {};
-//    var keys = Object.keys(textures);
-//    var length = keys.length;
-//    var anistropicFiltering = this._gl.getExtension("EXT_texture_filter_anisotropic")
-//        || this._gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic")
-//        || this._gl.getExtension("MOZ_EXT_texture_filter_anisotropic");
-//    for (var index = 0; index < length; ++index) {
-//        var key = keys[index];
-//        //   result[key] = this.buildTextureFromImage(textures[key], anistropicFiltering);
-//    }
-//    return result;
-//}
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    (function (TextureFactory) {
+        function getFactory(gl, filteringMode) {
+            switch (filteringMode) {
+                case 1 /* MipMap */:
+                    return new MipMapTextureFactory(gl);
+                default:
+                    return new UnfilteredTextureFactory(gl);
+            }
+        }
+        TextureFactory.getFactory = getFactory;
+    })(RwxViewer.TextureFactory || (RwxViewer.TextureFactory = {}));
+    var TextureFactory = RwxViewer.TextureFactory;
+
+    var MipMapTextureFactory = (function () {
+        function MipMapTextureFactory(gl) {
+            this._gl = gl;
+        }
+        MipMapTextureFactory.prototype.getTexture = function (source) {
+            var gl = this._gl;
+            var texture = gl.createTexture();
+
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+            gl.generateMipmap(gl.TEXTURE_2D);
+
+            if (this._anisotropicFilterExt) {
+                var maxAnisotropy = gl.getParameter(this._anisotropicFilterExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT) || 4;
+                gl.texParameterf(gl.TEXTURE_2D, this._anisotropicFilterExt.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
+            }
+
+            gl.bindTexture(gl.TEXTURE_2D, null);
+
+            return texture;
+        };
+        return MipMapTextureFactory;
+    })();
+
+    var UnfilteredTextureFactory = (function () {
+        function UnfilteredTextureFactory(gl) {
+            this._gl = gl;
+        }
+        UnfilteredTextureFactory.prototype.getTexture = function (source) {
+            var gl = this._gl;
+            var texture = gl.createTexture();
+
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+            gl.bindTexture(gl.TEXTURE_2D, null);
+
+            return texture;
+        };
+        return UnfilteredTextureFactory;
+    })();
+})(RwxViewer || (RwxViewer = {}));

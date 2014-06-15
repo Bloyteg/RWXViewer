@@ -21,6 +21,15 @@ declare module RwxViewer {
     function createDrawableFromModel(gl: WebGLRenderingContext, model: Model): Drawable;
 }
 declare module RwxViewer {
+    class EmptyTexture implements Texture {
+        private _gl;
+        constructor(gl: WebGLRenderingContext);
+        public bind(slot: number, sampler: WebGLUniformLocation): void;
+        public update(frameCount: number): void;
+        public isEmpty : boolean;
+    }
+}
+declare module RwxViewer {
     function makeGrid(gl: WebGLRenderingContext): GridDrawable;
     class GridDrawable implements Drawable {
         private _vertexBuffer;
@@ -224,11 +233,23 @@ declare module RwxViewer {
     }
 }
 declare module RwxViewer {
+    class StaticTexture implements Texture {
+        private _gl;
+        private _texture;
+        constructor(gl: WebGLRenderingContext, imageSource: HTMLImageElement, textureFactory: TextureFactory);
+        public bind(slot: number, sampler: WebGLUniformLocation): void;
+        public update(frameCount: number): void;
+        public isEmpty : boolean;
+    }
+}
+declare module RwxViewer {
     interface Texture {
         bind(slot: number, sampler: WebGLUniformLocation): any;
         update(frameCount: number): any;
         isEmpty: boolean;
     }
+}
+declare module RwxViewer {
     enum TextureFilteringMode {
         None = 0,
         MipMap = 1,
@@ -236,5 +257,14 @@ declare module RwxViewer {
     module TextureCache {
         function addImageToCache(name: string, image: HTMLImageElement): void;
         function getTexture(gl: WebGLRenderingContext, name: string, filteringMode: TextureFilteringMode): Texture;
+    }
+}
+declare module RwxViewer {
+    module TextureFactory {
+        function getFactory(gl: WebGLRenderingContext, filteringMode: TextureFilteringMode): TextureFactory;
+    }
+    interface TextureFactory {
+        getTexture(source: HTMLCanvasElement): WebGLTexture;
+        getTexture(source: HTMLImageElement): WebGLTexture;
     }
 }
