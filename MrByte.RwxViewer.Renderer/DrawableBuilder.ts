@@ -54,6 +54,7 @@ module RwxViewer {
         private buildMeshDrawableFromMeshGeometry(geometry: MeshGeometry, prototypeCache: IPrototypeCache, matrix: Mat4Array, isBillboard?: boolean): MeshDrawable {
             var children: MeshDrawable[] = [];
             children = children.concat(geometry.Children.map(child => this.buildMeshDrawableFromClump(child, prototypeCache, matrix, isBillboard)));
+
             //TODO: Handle the case where this is a prototypeinstancegeometry.
             children = children.concat(geometry.PrototypeInstances.map(prototypeInstance => {
                 var newMatrix = mat4.clone(prototypeInstance.Transform.Matrix);
@@ -61,6 +62,7 @@ module RwxViewer {
 
                 return prototypeCache[prototypeInstance.Name].cloneWithTransform(newMatrix);
             }));
+
             children = children.concat(geometry.Primitives.map(primitive => this.buildMeshDrawableFromPrimitive(primitive, matrix)));
 
             return new MeshDrawable(this.buildMeshMaterialGroups(geometry), matrix, children, isBillboard);

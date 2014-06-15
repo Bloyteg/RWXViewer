@@ -217,6 +217,7 @@ var RwxViewer;
 
                 return prototypeCache[prototypeInstance.Name].cloneWithTransform(newMatrix);
             }));
+
             children = children.concat(geometry.Primitives.map(function (primitive) {
                 return _this.buildMeshDrawableFromPrimitive(primitive, matrix);
             }));
@@ -481,34 +482,15 @@ var RwxViewer;
             gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
         };
 
-        //TODO: Refactor this logic off into ITexture types.
         MeshDrawable.prototype.bindTexture = function (gl, shader, meshMaterialGroup) {
-            if (meshMaterialGroup.texture !== null) {
-                gl.uniform1i(shader.uniforms["u_hasTexture"], 1);
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.texture);
-                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
-            } else {
-                gl.uniform1i(shader.uniforms["u_hasTexture"], 0);
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, null);
-                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
-            }
+            gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
+            meshMaterialGroup.texture.bind(0, shader.uniforms["u_textureSampler"]);
         };
 
         //TODO: Refactor this off into ITexture types.
         MeshDrawable.prototype.bindMask = function (gl, shader, meshMaterialGroup) {
-            if (meshMaterialGroup.mask !== null) {
-                gl.uniform1i(shader.uniforms["u_hasMask"], 1);
-                gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.mask);
-                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
-            } else {
-                gl.uniform1i(shader.uniforms["u_hasMask"], 0);
-                gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, null);
-                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
-            }
+            gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
+            meshMaterialGroup.mask.bind(0, shader.uniforms["u_maskSampler"]);
         };
 
         //TODO: Refactor this off into IVertexBuffer types.
@@ -800,9 +782,42 @@ var RwxViewer;
     })(RwxViewer.TextureFilteringMode || (RwxViewer.TextureFilteringMode = {}));
     var TextureFilteringMode = RwxViewer.TextureFilteringMode;
 
+    var EmptyTexture = (function () {
+        function EmptyTexture(gl) {
+            this._gl = gl;
+        }
+        EmptyTexture.prototype.bind = function (slot, sampler) {
+            var slotName = "TEXTURE" + slot;
+            var gl = this._gl;
+
+            gl.activeTexture(gl[slotName]);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.uniform1i(sampler, slot);
+        };
+
+        EmptyTexture.prototype.update = function (frameCount) {
+            //No op on a static texture.
+        };
+
+        Object.defineProperty(EmptyTexture.prototype, "isEmpty", {
+            get: function () {
+                return true;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return EmptyTexture;
+    })();
+
     var StaticTexture = (function () {
         function StaticTexture(gl, imageSource) {
+            this._gl = gl;
+            this._texture = this.buildTexture(imageSource);
         }
+        StaticTexture.prototype.buildTexture = function (imageSource) {
+            return null;
+        };
+
         StaticTexture.prototype.bind = function (slot, sampler) {
             var slotName = "TEXTURE" + slot;
             var gl = this._gl;
@@ -815,12 +830,22 @@ var RwxViewer;
         StaticTexture.prototype.update = function (frameCount) {
             //No op on a static texture.
         };
+
+        Object.defineProperty(StaticTexture.prototype, "isEmpty", {
+            get: function () {
+                return false;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return StaticTexture;
     })();
 
     (function (TextureCache) {
         var imageCache = {};
         var textureCache = {};
+
+        var emptyTexture = null;
 
         function addImageToCache(name, image) {
             if (!(name in imageCache)) {
@@ -830,6 +855,14 @@ var RwxViewer;
         TextureCache.addImageToCache = addImageToCache;
 
         function getTexture(gl, name, filteringMode) {
+            if (emptyTexture === null) {
+                emptyTexture = new EmptyTexture(gl);
+            }
+
+            if (!name) {
+                return emptyTexture;
+            }
+
             var textureCacheKey = buildCacheKey(name, filteringMode);
             var texture = getFromCache(textureCacheKey);
 
@@ -851,7 +884,7 @@ var RwxViewer;
             if (imageSource) {
             }
 
-            return null;
+            return emptyTexture;
         }
 
         function buildCacheKey(name, filteringMode) {
@@ -867,7 +900,7 @@ var RwxViewer;
                 return textureCache[name];
             }
 
-            return null;
+            return emptyTexture;
         }
 
         function addToCache(name, texture) {

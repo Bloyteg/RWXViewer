@@ -225,8 +225,9 @@ declare module RwxViewer {
 }
 declare module RwxViewer {
     interface Texture {
-        bind(slot: number, sampler: number): any;
+        bind(slot: number, sampler: WebGLUniformLocation): any;
         update(frameCount: number): any;
+        isEmpty: boolean;
     }
     enum TextureFilteringMode {
         None = 0,

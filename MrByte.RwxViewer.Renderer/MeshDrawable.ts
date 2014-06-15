@@ -84,34 +84,16 @@ module RwxViewer {
             gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
         }
 
-        //TODO: Refactor this logic off into ITexture types.
+
         bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
-            if (meshMaterialGroup.texture !== null) {
-                gl.uniform1i(shader.uniforms["u_hasTexture"], 1);
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.texture);
-                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
-            } else {
-                gl.uniform1i(shader.uniforms["u_hasTexture"], 0);
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, null);
-                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
-            }
+            gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
+            meshMaterialGroup.texture.bind(0, shader.uniforms["u_textureSampler"]);
         }
 
         //TODO: Refactor this off into ITexture types.
         bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
-            if (meshMaterialGroup.mask !== null) {
-                gl.uniform1i(shader.uniforms["u_hasMask"], 1);
-                gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.mask);
-                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
-            } else {
-                gl.uniform1i(shader.uniforms["u_hasMask"], 0);
-                gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, null);
-                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
-            }
+            gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
+            meshMaterialGroup.mask.bind(0, shader.uniforms["u_maskSampler"]);
         }
 
         //TODO: Refactor this off into IVertexBuffer types.

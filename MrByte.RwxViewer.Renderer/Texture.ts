@@ -11,8 +11,9 @@
 
 module RwxViewer {
     export interface Texture {
-        bind(slot: number, sampler: number);
+        bind(slot: number, sampler: WebGLUniformLocation);
         update(frameCount: number);
+        isEmpty: boolean;
     }
 
     export enum TextureFilteringMode {
@@ -20,15 +21,43 @@ module RwxViewer {
         MipMap
     }
 
+    class EmptyTexture implements Texture {
+        private _gl: WebGLRenderingContext;
+
+        constructor(gl: WebGLRenderingContext) {
+            this._gl = gl;
+        }
+
+        bind(slot: number, sampler: WebGLUniformLocation) {
+            var slotName = "TEXTURE" + slot;
+            var gl = this._gl;
+
+            gl.activeTexture(gl[slotName]);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.uniform1i(sampler, slot);
+        }
+
+        update(frameCount: number) {
+            //No op on a static texture.
+        }
+
+        get isEmpty() { return true; }
+    }
+
     class StaticTexture implements Texture {
         private _gl: WebGLRenderingContext;
         private _texture: WebGLTexture;
 
         constructor(gl: WebGLRenderingContext, imageSource: HTMLImageElement) {
-
+            this._gl = gl;
+            this._texture = this.buildTexture(imageSource);
         }
 
-        bind(slot: number, sampler: number) {
+        private buildTexture(imageSource: HTMLImageElement) {
+            return null;
+        }
+
+        bind(slot: number, sampler: WebGLUniformLocation) {
             var slotName = "TEXTURE" + slot;
             var gl = this._gl;
 
@@ -40,11 +69,15 @@ module RwxViewer {
         update(frameCount: number) {
             //No op on a static texture.
         }
+
+        get isEmpty() { return false; }
     }
 
     export module TextureCache {
         var imageCache = {};
         var textureCache = {};
+
+        var emptyTexture: Texture = null;
 
         export function addImageToCache(name: string, image: HTMLImageElement) {
             if (!(name in imageCache)) {
@@ -53,6 +86,14 @@ module RwxViewer {
         }
 
         export function getTexture(gl: WebGLRenderingContext, name: string, filteringMode: TextureFilteringMode): Texture {
+            if (emptyTexture === null) {
+                emptyTexture = new EmptyTexture(gl);
+            }
+
+            if (!name) {
+                return emptyTexture;
+            }
+
             var textureCacheKey = buildCacheKey(name, filteringMode);
             var texture = getFromCache(textureCacheKey);
 
@@ -74,7 +115,7 @@ module RwxViewer {
 
             }
 
-            return null;
+            return emptyTexture;
         }
 
         function buildCacheKey(name: string, filteringMode: TextureFilteringMode) {
@@ -90,7 +131,7 @@ module RwxViewer {
                 return textureCache[name];
             }
 
-            return null;
+            return emptyTexture;
         }
 
         function addToCache(name: string, texture: Texture) {
