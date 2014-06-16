@@ -99,7 +99,7 @@ module RwxViewer {
         //TODO: Refactor this off into ITexture types.
         bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
             gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.mask.isEmpty ? 0 : 1);
-            meshMaterialGroup.texture.update(this._lastUpdate);
+            meshMaterialGroup.mask.update(this._lastUpdate);
             meshMaterialGroup.mask.bind(1, shader.uniforms["u_maskSampler"]);
         }
 
