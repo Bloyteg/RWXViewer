@@ -1,4 +1,74 @@
-﻿// Copyright 2014 Joshua R. Rodgers
+﻿// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    var AnimatedTexture = (function () {
+        function AnimatedTexture(gl, imageSource, textureFactory) {
+            this._gl = gl;
+            this._imageSource = imageSource;
+
+            this._canvas = document.createElement("canvas");
+            this._canvas.width = imageSource.width;
+            this._canvas.height = imageSource.width;
+
+            this._currentFrame = 0;
+            this._totalFrames = this._imageSource.height / this._imageSource.width;
+
+            this._textureFactory = textureFactory;
+            this._texture = textureFactory.getTexture(this.getNextFrame());
+
+            this._lastUpdate = null;
+        }
+        AnimatedTexture.prototype.getNextFrame = function () {
+            var canvas = this._canvas;
+
+            var offsetY = canvas.width * (this._currentFrame % this._totalFrames);
+            var dimension = canvas.width;
+
+            var context = canvas.getContext("2d");
+            context.clearRect(0, 0, dimension, dimension);
+            context.drawImage(this._imageSource, 0, offsetY, dimension, dimension, 0, 0, dimension, dimension);
+
+            return canvas;
+        };
+
+        AnimatedTexture.prototype.bind = function (slot, sampler) {
+            var slotName = "TEXTURE" + slot;
+            var gl = this._gl;
+
+            gl.activeTexture(gl[slotName]);
+            gl.bindTexture(gl.TEXTURE_2D, this._texture);
+            gl.uniform1i(sampler, slot);
+        };
+
+        AnimatedTexture.prototype.update = function (update) {
+            if (this._lastUpdate === null || (update - this._lastUpdate) >= 160) {
+                this._textureFactory.updateTexture(this._texture, this.getNextFrame());
+                this._currentFrame++;
+                this._lastUpdate = update;
+            }
+        };
+
+        Object.defineProperty(AnimatedTexture.prototype, "isEmpty", {
+            get: function () {
+                return false;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return AnimatedTexture;
+    })();
+    RwxViewer.AnimatedTexture = AnimatedTexture;
+})(RwxViewer || (RwxViewer = {}));
+// Copyright 2014 Joshua R. Rodgers
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -494,6 +564,9 @@ var RwxViewer;
 
         MeshDrawable.prototype.draw = function (gl, shader) {
             var _this = this;
+            //TODO: Move this up.
+            this._lastUpdate = +new Date;
+
             this._meshMaterialGroups.forEach(function (meshMaterialGroup) {
                 _this.setTransformUniforms(gl, shader, meshMaterialGroup);
                 _this.setMaterialUniforms(gl, shader, meshMaterialGroup);
@@ -524,12 +597,14 @@ var RwxViewer;
 
         MeshDrawable.prototype.bindTexture = function (gl, shader, meshMaterialGroup) {
             gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
+            meshMaterialGroup.texture.update(this._lastUpdate);
             meshMaterialGroup.texture.bind(0, shader.uniforms["u_textureSampler"]);
         };
 
         //TODO: Refactor this off into ITexture types.
         MeshDrawable.prototype.bindMask = function (gl, shader, meshMaterialGroup) {
             gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.mask.isEmpty ? 0 : 1);
+            meshMaterialGroup.texture.update(this._lastUpdate);
             meshMaterialGroup.mask.bind(1, shader.uniforms["u_maskSampler"]);
         };
 
@@ -937,8 +1012,7 @@ var RwxViewer;
         function createTexture(gl, imageSource, filteringMode) {
             if (imageSource) {
                 if (imageSource.width < imageSource.height && imageSource.height % imageSource.width === 0) {
-                    //TODO: Handle animated textures.
-                    return emptyTexture;
+                    return new RwxViewer.AnimatedTexture(gl, imageSource, RwxViewer.TextureFactory.getFactory(gl, filteringMode));
                 } else {
                     return new RwxViewer.StaticTexture(gl, imageSource, RwxViewer.TextureFactory.getFactory(gl, filteringMode));
                 }
@@ -1004,6 +1078,17 @@ var RwxViewer;
             var gl = this._gl;
             var texture = gl.createTexture();
 
+            this.fillTexture(texture, source);
+
+            return texture;
+        };
+
+        MipMapTextureFactory.prototype.updateTexture = function (texture, source) {
+            this.fillTexture(texture, source);
+        };
+
+        MipMapTextureFactory.prototype.fillTexture = function (texture, source) {
+            var gl = this._gl;
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -1016,8 +1101,6 @@ var RwxViewer;
             }
 
             gl.bindTexture(gl.TEXTURE_2D, null);
-
-            return texture;
         };
         return MipMapTextureFactory;
     })();
@@ -1030,14 +1113,24 @@ var RwxViewer;
             var gl = this._gl;
             var texture = gl.createTexture();
 
+            this.fillTexture(texture, source);
+
+            return texture;
+        };
+
+        UnfilteredTextureFactory.prototype.updateTexture = function (texture, source) {
+            this.fillTexture(texture, source);
+        };
+
+        UnfilteredTextureFactory.prototype.fillTexture = function (texture, source) {
+            var gl = this._gl;
+
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 
             gl.bindTexture(gl.TEXTURE_2D, null);
-
-            return texture;
         };
         return UnfilteredTextureFactory;
     })();
