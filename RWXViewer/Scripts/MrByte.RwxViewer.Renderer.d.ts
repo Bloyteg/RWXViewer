@@ -1,4 +1,21 @@
 ﻿declare module RwxViewer {
+    class AnimatedTexture implements Texture {
+        private _gl;
+        private _texture;
+        private _imageSource;
+        private _canvas;
+        private _currentFrame;
+        private _totalFrames;
+        private _textureFactory;
+        private _lastUpdate;
+        constructor(gl: WebGLRenderingContext, imageSource: HTMLImageElement, textureFactory: TextureFactory);
+        private getNextFrame();
+        public bind(slot: number, sampler: WebGLUniformLocation): void;
+        public update(update: number): void;
+        public isEmpty : boolean;
+    }
+}
+declare module RwxViewer {
     interface Camera {
         setViewpowerSize(width: number, height: number): any;
         reset(): any;
@@ -65,6 +82,7 @@ declare module RwxViewer {
         private _worldMatrix;
         private _children;
         private _isBillboard;
+        private _lastUpdate;
         constructor(meshMaterialGroups: MeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], isBillboard?: boolean);
         public worldMatrix : Mat4Array;
         public cloneWithTransform(matrix: Mat4Array): MeshDrawable;
@@ -268,5 +286,6 @@ declare module RwxViewer {
     interface TextureFactory {
         getTexture(source: HTMLCanvasElement): WebGLTexture;
         getTexture(source: HTMLImageElement): WebGLTexture;
+        updateTexture(texture: WebGLTexture, source: HTMLCanvasElement): any;
     }
 }

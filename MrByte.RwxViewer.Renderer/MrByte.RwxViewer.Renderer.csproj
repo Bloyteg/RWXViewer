@@ -58,6 +58,7 @@
     <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
   </PropertyGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="AnimatedTexture.ts" />
     <TypeScriptCompile Include="Camera.ts" />
     <TypeScriptCompile Include="Drawable.ts" />
     <TypeScriptCompile Include="DrawableBuilder.ts" />

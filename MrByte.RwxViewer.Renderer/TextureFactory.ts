@@ -24,6 +24,7 @@ module RwxViewer {
     export interface TextureFactory {
         getTexture(source: HTMLCanvasElement): WebGLTexture
         getTexture(source: HTMLImageElement): WebGLTexture
+        updateTexture(texture: WebGLTexture, source: HTMLCanvasElement);
     }
 
     class MipMapTextureFactory implements TextureFactory {
@@ -36,10 +37,23 @@ module RwxViewer {
 
         getTexture(source: HTMLCanvasElement): WebGLTexture
         getTexture(source: HTMLImageElement): WebGLTexture
-        getTexture(source: HTMLElement) {
+        getTexture(source: any) {
             var gl = this._gl;
             var texture = gl.createTexture();
 
+            this.fillTexture(texture, source);
+
+            return texture;
+        }
+
+        updateTexture(texture: WebGLTexture, source: HTMLCanvasElement) {
+            this.fillTexture(texture, source);
+        }
+
+        private fillTexture(texture: WebGLTexture, source: HTMLCanvasElement)
+        private fillTexture(texture: WebGLTexture, source: HTMLImageElement)
+        private fillTexture(texture: WebGLTexture, source: any) {
+            var gl = this._gl;
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, <any>source);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -52,8 +66,6 @@ module RwxViewer {
             }
 
             gl.bindTexture(gl.TEXTURE_2D, null);
-
-            return texture;
         }
     }
 
@@ -66,9 +78,23 @@ module RwxViewer {
 
         getTexture(source: HTMLCanvasElement): WebGLTexture
         getTexture(source: HTMLImageElement): WebGLTexture
-        getTexture(source: HTMLElement) {
+        getTexture(source: any) {
             var gl = this._gl;
             var texture = gl.createTexture();
+
+            this.fillTexture(texture, source);
+
+            return texture;
+        }
+
+        updateTexture(texture: WebGLTexture, source: HTMLCanvasElement) {
+            this.fillTexture(texture, source);
+        }
+
+        private fillTexture(texture: WebGLTexture, source: HTMLCanvasElement)
+        private fillTexture(texture: WebGLTexture, source: HTMLImageElement)
+        private fillTexture(texture: WebGLTexture, source: any) {
+            var gl = this._gl;
 
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, <any>source);
@@ -76,8 +102,6 @@ module RwxViewer {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 
             gl.bindTexture(gl.TEXTURE_2D, null);
-
-            return texture;
         }
     }
 } 

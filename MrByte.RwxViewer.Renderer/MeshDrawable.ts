@@ -39,6 +39,8 @@ module RwxViewer {
         private _children: Drawable[];
         private _isBillboard: boolean;
 
+        private _lastUpdate: number;
+
         constructor(meshMaterialGroups: MeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], isBillboard?: boolean) {
             this._meshMaterialGroups = meshMaterialGroups;
             this._worldMatrix = modelMatrix;
@@ -58,6 +60,9 @@ module RwxViewer {
         }
 
         draw(gl: WebGLRenderingContext, shader: ShaderProgram): void {
+            //TODO: Move this up.
+            this._lastUpdate = +new Date;
+
             this._meshMaterialGroups.forEach((meshMaterialGroup: MeshMaterialGroup) => {
                 this.setTransformUniforms(gl, shader, meshMaterialGroup);
                 this.setMaterialUniforms(gl, shader, meshMaterialGroup);
@@ -87,12 +92,14 @@ module RwxViewer {
 
         bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
             gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
+            meshMaterialGroup.texture.update(this._lastUpdate);
             meshMaterialGroup.texture.bind(0, shader.uniforms["u_textureSampler"]);
         }
 
         //TODO: Refactor this off into ITexture types.
         bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
             gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.mask.isEmpty ? 0 : 1);
+            meshMaterialGroup.texture.update(this._lastUpdate);
             meshMaterialGroup.mask.bind(1, shader.uniforms["u_maskSampler"]);
         }
 
