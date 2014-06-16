@@ -21,18 +21,23 @@ var RwxViewer;
     var RADS_PER_DEGREE = Math.PI / 180;
     var PHI_EPS = 0.000001;
 
-    var Camera = (function () {
-        function Camera(viewportWidth, viewportHeight) {
+    function makeCamera(width, height) {
+        return new OrbitCamera(width, height);
+    }
+    RwxViewer.makeCamera = makeCamera;
+
+    var OrbitCamera = (function () {
+        function OrbitCamera(viewportWidth, viewportHeight) {
             this.reset();
             this.setViewpowerSize(viewportWidth, viewportHeight);
             this.update();
         }
-        Camera.prototype.setViewpowerSize = function (width, height) {
+        OrbitCamera.prototype.setViewpowerSize = function (width, height) {
             this._viewportWidth = width;
             this._viewportHeight = height;
         };
 
-        Camera.prototype.reset = function () {
+        OrbitCamera.prototype.reset = function () {
             this._cameraMatrix = mat4.create();
             this._cameraMatrixInverse = mat4.create();
 
@@ -54,26 +59,26 @@ var RwxViewer;
             this.update();
         };
 
-        Camera.prototype.rotate = function (deltaX, deltaY) {
+        OrbitCamera.prototype.rotate = function (deltaX, deltaY) {
             this._thetaDelta -= 2 * Math.PI * deltaX / this._viewportWidth * ROTATION_SPEED;
             this._phiDelta -= 2 * Math.PI * deltaY / this._viewportHeight * ROTATION_SPEED;
 
             this.update();
         };
 
-        Camera.prototype.zoomIn = function (zoomFactor) {
+        OrbitCamera.prototype.zoomIn = function (zoomFactor) {
             this._scale *= (zoomFactor || ZOOM_FACTOR);
 
             this.update();
         };
 
-        Camera.prototype.zoomOut = function (zoomFactor) {
+        OrbitCamera.prototype.zoomOut = function (zoomFactor) {
             this._scale /= (zoomFactor || ZOOM_FACTOR);
 
             this.update();
         };
 
-        Camera.prototype.pan = function (deltaX, deltaY) {
+        OrbitCamera.prototype.pan = function (deltaX, deltaY) {
             mat4.invert(this._cameraMatrixInverse, this._cameraMatrix);
             vec3.sub(this._offset, this._position, this._target);
             var distance = vec3.length(this._offset);
@@ -93,7 +98,7 @@ var RwxViewer;
             this.update();
         };
 
-        Camera.prototype.update = function () {
+        OrbitCamera.prototype.update = function () {
             vec3.sub(this._offset, this._position, this._target);
             vec3.transformQuat(this._offset, this._offset, this._upQuaternion);
 
@@ -128,16 +133,15 @@ var RwxViewer;
             mat4.lookAt(this._cameraMatrix, this._position, this._target, this._up);
         };
 
-        Object.defineProperty(Camera.prototype, "matrix", {
+        Object.defineProperty(OrbitCamera.prototype, "matrix", {
             get: function () {
                 return this._cameraMatrix;
             },
             enumerable: true,
             configurable: true
         });
-        return Camera;
+        return OrbitCamera;
     })();
-    RwxViewer.Camera = Camera;
 })(RwxViewer || (RwxViewer = {}));
 // Copyright 2014 Joshua R. Rodgers
 //
@@ -152,130 +156,6 @@ var RwxViewer;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-var RwxViewer;
-(function (RwxViewer) {
-    
-
-    var SpatialGridDrawable = (function () {
-        function SpatialGridDrawable(gl) {
-            var vertices = [];
-
-            for (var x = -1; x <= 1; x += 0.1) {
-                vertices.push(x, 0, -1);
-                vertices.push(x, 0, 1);
-            }
-
-            for (var z = -1; z <= 1; z += 0.1) {
-                vertices.push(-1, 0, z);
-                vertices.push(1, 0, z);
-            }
-
-            this._vertexCount = vertices.length / 3;
-            this._vertexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        }
-        SpatialGridDrawable.prototype.draw = function (gl, shader) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
-            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
-            gl.drawArrays(gl.LINES, 0, this._vertexCount);
-        };
-        return SpatialGridDrawable;
-    })();
-    RwxViewer.SpatialGridDrawable = SpatialGridDrawable;
-
-    var MeshDrawable = (function () {
-        function MeshDrawable(meshMaterialGroups, modelMatrix, children, isBillboard) {
-            this._meshMaterialGroups = meshMaterialGroups;
-            this._modelMatrix = modelMatrix;
-            this._children = children;
-            this._isBillboard = isBillboard || false;
-        }
-        MeshDrawable.prototype.cloneWithTransform = function (matrix) {
-            var newTransformMatrix = mat4.clone(this._modelMatrix);
-            mat4.mul(newTransformMatrix, matrix, newTransformMatrix);
-
-            return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(function (child) {
-                return child instanceof MeshDrawable ? child.cloneWithTransform(matrix) : child;
-            }));
-        };
-
-        MeshDrawable.prototype.draw = function (gl, shader) {
-            //TODO: Handle any material specific parameters such as prelit, texture bindings, etc.
-            var _this = this;
-            this._meshMaterialGroups.forEach(function (meshMaterialGroup) {
-                _this.setTransformUniforms(gl, shader, meshMaterialGroup);
-                _this.setMaterialUniforms(gl, shader, meshMaterialGroup);
-                _this.bindTexture(gl, shader, meshMaterialGroup);
-                _this.bindMask(gl, shader, meshMaterialGroup);
-                _this.bindVertexBuffers(gl, shader, meshMaterialGroup);
-
-                gl.drawArrays(meshMaterialGroup.drawMode, 0, meshMaterialGroup.vertexBuffer.count);
-            });
-
-            this._children.forEach(function (child) {
-                return child.draw(gl, shader);
-            });
-        };
-
-        MeshDrawable.prototype.setTransformUniforms = function (gl, shader, meshMaterialGroup) {
-            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._modelMatrix);
-
-            gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
-        };
-
-        MeshDrawable.prototype.setMaterialUniforms = function (gl, shader, meshMaterialGroup) {
-            gl.uniform1f(shader.uniforms["u_ambientFactor"], meshMaterialGroup.ambient);
-            gl.uniform1f(shader.uniforms["u_diffuseFactor"], meshMaterialGroup.diffuse);
-            gl.uniform4fv(shader.uniforms["u_baseColor"], meshMaterialGroup.baseColor);
-            gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
-        };
-
-        //TODO: Refactor this logic off into ITexture types.
-        MeshDrawable.prototype.bindTexture = function (gl, shader, meshMaterialGroup) {
-            if (meshMaterialGroup.texture !== null) {
-                gl.uniform1i(shader.uniforms["u_hasTexture"], 1);
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.texture);
-                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
-            } else {
-                gl.uniform1i(shader.uniforms["u_hasTexture"], 0);
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, null);
-                gl.uniform1i(shader.uniforms["u_textureSampler"], 0);
-            }
-        };
-
-        //TODO: Refactor this off into ITexture types.
-        MeshDrawable.prototype.bindMask = function (gl, shader, meshMaterialGroup) {
-            if (meshMaterialGroup.mask !== null) {
-                gl.uniform1i(shader.uniforms["u_hasMask"], 1);
-                gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, meshMaterialGroup.mask);
-                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
-            } else {
-                gl.uniform1i(shader.uniforms["u_hasMask"], 0);
-                gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, null);
-                gl.uniform1i(shader.uniforms["u_maskSampler"], 1);
-            }
-        };
-
-        //TODO: Refactor this off into IVertexBuffer types.
-        MeshDrawable.prototype.bindVertexBuffers = function (gl, shader, meshMaterialGroup) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
-            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.uvs);
-            gl.vertexAttribPointer(shader.attributes["a_vertexUV"], 2, gl.FLOAT, false, 0, 0);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.normals);
-            gl.vertexAttribPointer(shader.attributes["a_vertexNormal"], 3, gl.FLOAT, true, 0, 0);
-        };
-        return MeshDrawable;
-    })();
-    RwxViewer.MeshDrawable = MeshDrawable;
-})(RwxViewer || (RwxViewer = {}));
 // Copyright 2014 Joshua R. Rodgers
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -292,48 +172,10 @@ var RwxViewer;
 var RwxViewer;
 (function (RwxViewer) {
     var MeshDrawableBuilder = (function () {
-        function MeshDrawableBuilder(gl, model, textures) {
+        function MeshDrawableBuilder(gl, model) {
             this._gl = gl;
             this._model = model;
-            this._textureCache = this.buildTextureCache(textures);
         }
-        //TODO: This gets moved out into classes for manging texture resources.
-        MeshDrawableBuilder.prototype.buildTextureCache = function (textures) {
-            var result = {};
-
-            var keys = Object.keys(textures);
-            var length = keys.length;
-            var anistropicFiltering = this._gl.getExtension("EXT_texture_filter_anisotropic") || this._gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic") || this._gl.getExtension("MOZ_EXT_texture_filter_anisotropic");
-
-            for (var index = 0; index < length; ++index) {
-                var key = keys[index];
-
-                result[key] = this.buildTextureFromImage(textures[key], anistropicFiltering);
-            }
-
-            return result;
-        };
-
-        MeshDrawableBuilder.prototype.buildTextureFromImage = function (image, anistropyExt) {
-            var gl = this._gl;
-            var texture = gl.createTexture();
-
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
-            gl.generateMipmap(gl.TEXTURE_2D);
-
-            if (anistropyExt) {
-                var maxAnisotropy = gl.getParameter(anistropyExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT) || 4;
-                gl.texParameterf(gl.TEXTURE_2D, anistropyExt.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
-            }
-
-            gl.bindTexture(gl.TEXTURE_2D, null);
-
-            return texture;
-        };
-
         MeshDrawableBuilder.prototype.build = function () {
             var prototypes = this.buildPrototypeCache(this._model);
 
@@ -375,6 +217,7 @@ var RwxViewer;
 
                 return prototypeCache[prototypeInstance.Name].cloneWithTransform(newMatrix);
             }));
+
             children = children.concat(geometry.Primitives.map(function (primitive) {
                 return _this.buildMeshDrawableFromPrimitive(primitive, matrix);
             }));
@@ -410,8 +253,8 @@ var RwxViewer;
                     opacity: material.Opacity,
                     ambient: material.Ambient,
                     diffuse: material.Diffuse,
-                    texture: _this._textureCache[material.Texture] || null,
-                    mask: _this._textureCache[material.Mask] || null,
+                    texture: RwxViewer.TextureCache.getTexture(_this._gl, material.Texture, 1 /* MipMap */),
+                    mask: RwxViewer.TextureCache.getTexture(_this._gl, material.Mask, 0 /* None */),
                     drawMode: material.GeometrySampling === 1 /* Wireframe */ ? _this._gl.LINES : _this._gl.TRIANGLES
                 };
             });
@@ -495,10 +338,215 @@ var RwxViewer;
         return MeshDrawableBuilder;
     })();
 
-    function createDrawableFromModel(gl, model, textures) {
-        return new MeshDrawableBuilder(gl, model, textures).build();
+    function createDrawableFromModel(gl, model) {
+        return new MeshDrawableBuilder(gl, model).build();
     }
     RwxViewer.createDrawableFromModel = createDrawableFromModel;
+})(RwxViewer || (RwxViewer = {}));
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    var EmptyTexture = (function () {
+        function EmptyTexture(gl) {
+            this._gl = gl;
+        }
+        EmptyTexture.prototype.bind = function (slot, sampler) {
+            var slotName = "TEXTURE" + slot;
+            var gl = this._gl;
+
+            gl.activeTexture(gl[slotName]);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.uniform1i(sampler, slot);
+        };
+
+        EmptyTexture.prototype.update = function (frameCount) {
+            //No op on a static texture.
+        };
+
+        Object.defineProperty(EmptyTexture.prototype, "isEmpty", {
+            get: function () {
+                return true;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return EmptyTexture;
+    })();
+    RwxViewer.EmptyTexture = EmptyTexture;
+})(RwxViewer || (RwxViewer = {}));
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    function makeGrid(gl) {
+        return new GridDrawable(gl);
+    }
+    RwxViewer.makeGrid = makeGrid;
+
+    var GridDrawable = (function () {
+        function GridDrawable(input, vertexBuffer, vertexCount) {
+            if (input instanceof Float32Array) {
+                this._vertexBuffer = vertexBuffer;
+                this._vertexCount = vertexCount;
+                this._worldMatrix = input;
+            } else {
+                this.initializeNew(input);
+            }
+        }
+        GridDrawable.prototype.initializeNew = function (gl) {
+            var vertices = [];
+
+            for (var x = -1; x <= 1; x += 0.1) {
+                vertices.push(x, 0, -1);
+                vertices.push(x, 0, 1);
+            }
+
+            for (var z = -1; z <= 1; z += 0.1) {
+                vertices.push(-1, 0, z);
+                vertices.push(1, 0, z);
+            }
+
+            this._vertexCount = vertices.length / 3;
+            this._vertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        };
+
+        Object.defineProperty(GridDrawable.prototype, "worldMatrix", {
+            get: function () {
+                return this._worldMatrix;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        GridDrawable.prototype.cloneWithTransform = function (matrix) {
+            return new GridDrawable(mat4.multiply(mat4.create(), matrix, this.worldMatrix), this._vertexBuffer, this._vertexCount);
+        };
+
+        GridDrawable.prototype.draw = function (gl, shader) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
+            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.LINES, 0, this._vertexCount);
+        };
+        return GridDrawable;
+    })();
+    RwxViewer.GridDrawable = GridDrawable;
+})(RwxViewer || (RwxViewer = {}));
+// Copyright 2014 Joshua R. Rodgers
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    
+
+    //TODO: Handle prelit meshes.
+    var MeshDrawable = (function () {
+        function MeshDrawable(meshMaterialGroups, modelMatrix, children, isBillboard) {
+            this._meshMaterialGroups = meshMaterialGroups;
+            this._worldMatrix = modelMatrix;
+            this._children = children;
+            this._isBillboard = isBillboard || false;
+        }
+        Object.defineProperty(MeshDrawable.prototype, "worldMatrix", {
+            get: function () {
+                return this._worldMatrix;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        MeshDrawable.prototype.cloneWithTransform = function (matrix) {
+            var newTransformMatrix = mat4.clone(this._worldMatrix);
+            mat4.mul(newTransformMatrix, matrix, newTransformMatrix);
+
+            return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(function (child) {
+                return child.cloneWithTransform(matrix);
+            }));
+        };
+
+        MeshDrawable.prototype.draw = function (gl, shader) {
+            var _this = this;
+            this._meshMaterialGroups.forEach(function (meshMaterialGroup) {
+                _this.setTransformUniforms(gl, shader, meshMaterialGroup);
+                _this.setMaterialUniforms(gl, shader, meshMaterialGroup);
+                _this.bindTexture(gl, shader, meshMaterialGroup);
+                _this.bindMask(gl, shader, meshMaterialGroup);
+                _this.bindVertexBuffers(gl, shader, meshMaterialGroup);
+
+                gl.drawArrays(meshMaterialGroup.drawMode, 0, meshMaterialGroup.vertexBuffer.count);
+            });
+
+            this._children.forEach(function (child) {
+                return child.draw(gl, shader);
+            });
+        };
+
+        MeshDrawable.prototype.setTransformUniforms = function (gl, shader, meshMaterialGroup) {
+            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._worldMatrix);
+
+            gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
+        };
+
+        MeshDrawable.prototype.setMaterialUniforms = function (gl, shader, meshMaterialGroup) {
+            gl.uniform1f(shader.uniforms["u_ambientFactor"], meshMaterialGroup.ambient);
+            gl.uniform1f(shader.uniforms["u_diffuseFactor"], meshMaterialGroup.diffuse);
+            gl.uniform4fv(shader.uniforms["u_baseColor"], meshMaterialGroup.baseColor);
+            gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
+        };
+
+        MeshDrawable.prototype.bindTexture = function (gl, shader, meshMaterialGroup) {
+            gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
+            meshMaterialGroup.texture.bind(0, shader.uniforms["u_textureSampler"]);
+        };
+
+        //TODO: Refactor this off into ITexture types.
+        MeshDrawable.prototype.bindMask = function (gl, shader, meshMaterialGroup) {
+            gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.mask.isEmpty ? 0 : 1);
+            meshMaterialGroup.mask.bind(1, shader.uniforms["u_maskSampler"]);
+        };
+
+        //TODO: Refactor this off into IVertexBuffer types.
+        MeshDrawable.prototype.bindVertexBuffers = function (gl, shader, meshMaterialGroup) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
+            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.uvs);
+            gl.vertexAttribPointer(shader.attributes["a_vertexUV"], 2, gl.FLOAT, false, 0, 0);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.normals);
+            gl.vertexAttribPointer(shader.attributes["a_vertexNormal"], 3, gl.FLOAT, true, 0, 0);
+        };
+        return MeshDrawable;
+    })();
+    RwxViewer.MeshDrawable = MeshDrawable;
 })(RwxViewer || (RwxViewer = {}));
 // Copyright 2014 Joshua R. Rodgers
 //
@@ -581,8 +629,8 @@ var RwxViewer;
             var gl = this._gl;
 
             if (gl) {
-                this._camera = new RwxViewer.Camera(gl.drawingBufferWidth, gl.drawingBufferHeight); //TODO: Use this, but not make it.
-                this._spatialGridDrawable = new RwxViewer.SpatialGridDrawable(gl); //TODO: Use this, but not make it.
+                this._camera = RwxViewer.makeCamera(gl.drawingBufferWidth, gl.drawingBufferHeight);
+                this._spatialGridDrawable = RwxViewer.makeGrid(gl);
 
                 gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
                 gl.clearColor(0.75, 0.75, 0.75, 1.0);
@@ -593,7 +641,6 @@ var RwxViewer;
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
             }
 
-            ///TODO: Have shader programs injected.
             this._mainProgram = mainProgram;
             this._gridProgram = gridProgram;
         };
@@ -624,9 +671,9 @@ var RwxViewer;
             }
         };
 
-        Renderer.prototype.setCurrentModel = function (model, textures) {
+        Renderer.prototype.setCurrentModel = function (model) {
             if (model) {
-                this._currentDrawable = RwxViewer.createDrawableFromModel(this._gl, model, textures);
+                this._currentDrawable = RwxViewer.createDrawableFromModel(this._gl, model);
             } else {
                 this._currentDrawable = null;
             }
@@ -756,4 +803,242 @@ var RwxViewer;
         return ShaderProgram;
     })();
     RwxViewer.ShaderProgram = ShaderProgram;
+})(RwxViewer || (RwxViewer = {}));
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    var StaticTexture = (function () {
+        function StaticTexture(gl, imageSource, textureFactory) {
+            this._gl = gl;
+            this._texture = textureFactory.getTexture(this.getImageSource(imageSource));
+        }
+        StaticTexture.prototype.getImageSource = function (imageSource) {
+            var widthIsPowerOfTwo = (imageSource.width & (imageSource.width - 1)) === 0;
+            var heightIsPowerOfTwo = (imageSource.height & (imageSource.height - 1)) === 0;
+
+            if (widthIsPowerOfTwo && heightIsPowerOfTwo) {
+                return imageSource;
+            }
+
+            return this.getScaledImage(imageSource);
+        };
+
+        StaticTexture.prototype.getScaledImage = function (imageSource) {
+            var smallestDimension = imageSource.width <= imageSource.height ? imageSource.width : imageSource.height;
+            var roundedDimension = Math.pow(2, Math.floor(Math.log(smallestDimension) / Math.log(2)));
+            var canvas = document.createElement("canvas");
+
+            canvas.width = roundedDimension;
+            canvas.height = roundedDimension;
+            canvas.getContext("2d").drawImage(imageSource, 0, 0, roundedDimension, roundedDimension);
+            return canvas;
+        };
+
+        StaticTexture.prototype.bind = function (slot, sampler) {
+            var slotName = "TEXTURE" + slot;
+            var gl = this._gl;
+
+            gl.activeTexture(gl[slotName]);
+            gl.bindTexture(gl.TEXTURE_2D, this._texture);
+            gl.uniform1i(sampler, slot);
+        };
+
+        StaticTexture.prototype.update = function (frameCount) {
+            //No op on a static texture.
+        };
+
+        Object.defineProperty(StaticTexture.prototype, "isEmpty", {
+            get: function () {
+                return false;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return StaticTexture;
+    })();
+    RwxViewer.StaticTexture = StaticTexture;
+})(RwxViewer || (RwxViewer = {}));
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    (function (TextureFilteringMode) {
+        TextureFilteringMode[TextureFilteringMode["None"] = 0] = "None";
+        TextureFilteringMode[TextureFilteringMode["MipMap"] = 1] = "MipMap";
+    })(RwxViewer.TextureFilteringMode || (RwxViewer.TextureFilteringMode = {}));
+    var TextureFilteringMode = RwxViewer.TextureFilteringMode;
+
+    (function (TextureCache) {
+        var imageCache = {};
+        var textureCache = {};
+
+        var emptyTexture = null;
+
+        function addImageToCache(name, image) {
+            if (!(name in imageCache)) {
+                imageCache[name] = image;
+            }
+        }
+        TextureCache.addImageToCache = addImageToCache;
+
+        function getTexture(gl, name, filteringMode) {
+            if (emptyTexture === null) {
+                emptyTexture = new RwxViewer.EmptyTexture(gl);
+            }
+
+            if (!name) {
+                return emptyTexture;
+            }
+
+            var textureCacheKey = buildCacheKey(name, filteringMode);
+            var texture = getFromCache(textureCacheKey);
+
+            if (texture) {
+                return texture;
+            }
+
+            texture = createTexture(gl, imageCache[name], filteringMode);
+
+            if (texture) {
+                addToCache(textureCacheKey, texture);
+            }
+
+            return texture;
+        }
+        TextureCache.getTexture = getTexture;
+
+        function createTexture(gl, imageSource, filteringMode) {
+            if (imageSource) {
+                if (imageSource.width < imageSource.height && imageSource.height % imageSource.width === 0) {
+                    //TODO: Handle animated textures.
+                    return emptyTexture;
+                } else {
+                    return new RwxViewer.StaticTexture(gl, imageSource, RwxViewer.TextureFactory.getFactory(gl, filteringMode));
+                }
+            }
+
+            return emptyTexture;
+        }
+
+        function buildCacheKey(name, filteringMode) {
+            if (filteringMode === 0 /* None */) {
+                return "not-filtered-" + name;
+            } else {
+                return "filtered-" + name;
+            }
+        }
+
+        function getFromCache(name) {
+            if (name in textureCache) {
+                return textureCache[name];
+            }
+
+            return null;
+        }
+
+        function addToCache(name, texture) {
+            if (!(name in textureCache)) {
+                textureCache[name] = texture;
+            }
+        }
+    })(RwxViewer.TextureCache || (RwxViewer.TextureCache = {}));
+    var TextureCache = RwxViewer.TextureCache;
+})(RwxViewer || (RwxViewer = {}));
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    (function (TextureFactory) {
+        function getFactory(gl, filteringMode) {
+            switch (filteringMode) {
+                case 1 /* MipMap */:
+                    return new MipMapTextureFactory(gl);
+                default:
+                    return new UnfilteredTextureFactory(gl);
+            }
+        }
+        TextureFactory.getFactory = getFactory;
+    })(RwxViewer.TextureFactory || (RwxViewer.TextureFactory = {}));
+    var TextureFactory = RwxViewer.TextureFactory;
+
+    var MipMapTextureFactory = (function () {
+        function MipMapTextureFactory(gl) {
+            this._gl = gl;
+        }
+        MipMapTextureFactory.prototype.getTexture = function (source) {
+            var gl = this._gl;
+            var texture = gl.createTexture();
+
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+            gl.generateMipmap(gl.TEXTURE_2D);
+
+            if (this._anisotropicFilterExt) {
+                var maxAnisotropy = gl.getParameter(this._anisotropicFilterExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT) || 4;
+                gl.texParameterf(gl.TEXTURE_2D, this._anisotropicFilterExt.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
+            }
+
+            gl.bindTexture(gl.TEXTURE_2D, null);
+
+            return texture;
+        };
+        return MipMapTextureFactory;
+    })();
+
+    var UnfilteredTextureFactory = (function () {
+        function UnfilteredTextureFactory(gl) {
+            this._gl = gl;
+        }
+        UnfilteredTextureFactory.prototype.getTexture = function (source) {
+            var gl = this._gl;
+            var texture = gl.createTexture();
+
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+            gl.bindTexture(gl.TEXTURE_2D, null);
+
+            return texture;
+        };
+        return UnfilteredTextureFactory;
+    })();
 })(RwxViewer || (RwxViewer = {}));

@@ -194,15 +194,15 @@ var ObjectPathItemLoader;
         });
 
         $.when.apply($, images).done(function () {
-            var cache = {};
+            var textures = {};
             var length = arguments.length;
 
             for (var index = 0; index < length; ++index) {
                 var item = arguments[index];
-                cache[item.textureName] = item.image;
+                textures[item.textureName] = item.image;
             }
 
-            deferred.resolve(cache);
+            deferred.resolve(textures);
         }).fail(function () {
             return deferred.reject();
         });
@@ -261,15 +261,19 @@ var ViewModel = (function () {
 
         this.selectedModel.subscribe(function (model) {
             self.errorMessage(null);
-            renderer.setCurrentModel(null, null);
+            renderer.setCurrentModel(null);
 
             if (model) {
                 $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), $('#loading').fadeIn(FADE_TIME)).done(function (result) {
                     ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(function (textures) {
-                        renderer.setCurrentModel(result, textures);
+                        Object.keys(textures).forEach(function (imageKey) {
+                            return RwxViewer.TextureCache.addImageToCache(imageKey, textures[imageKey]);
+                        });
+
+                        renderer.setCurrentModel(result);
                         $('#loading').fadeOut(FADE_TIME);
                     }).fail(function () {
-                        renderer.setCurrentModel(result, {});
+                        renderer.setCurrentModel(result);
                         $('#loading').fadeOut(FADE_TIME);
                         self.errorMessage("Failed to load the textures for this object.");
                     });

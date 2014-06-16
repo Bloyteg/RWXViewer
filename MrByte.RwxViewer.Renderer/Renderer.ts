@@ -15,8 +15,8 @@
 module RwxViewer {
     export class Renderer {
         private _gl: WebGLRenderingContext;
-        private _currentDrawable: IDrawable;
-        private _spatialGridDrawable: IDrawable;
+        private _currentDrawable: Drawable;
+        private _spatialGridDrawable: Drawable;
         private _gridProgram: ShaderProgram;
         private _mainProgram: ShaderProgram;
         private _camera: Camera;
@@ -30,8 +30,8 @@ module RwxViewer {
             var gl = this._gl;
 
             if (gl) {
-                this._camera = new Camera(gl.drawingBufferWidth, gl.drawingBufferHeight); //TODO: Use this, but not make it.
-                this._spatialGridDrawable = new SpatialGridDrawable(gl); //TODO: Use this, but not make it.
+                this._camera = makeCamera(gl.drawingBufferWidth, gl.drawingBufferHeight);
+                this._spatialGridDrawable = makeGrid(gl);
 
                 gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
                 gl.clearColor(0.75, 0.75, 0.75, 1.0);
@@ -42,7 +42,6 @@ module RwxViewer {
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
             }
 
-            ///TODO: Have shader programs injected.
             this._mainProgram = mainProgram;
             this._gridProgram = gridProgram;
         }
@@ -72,9 +71,9 @@ module RwxViewer {
             }
         }
 
-        setCurrentModel(model: IModel, textures: IImageCollection): void {
+        setCurrentModel(model: Model): void {
             if (model) {
-                this._currentDrawable = createDrawableFromModel(this._gl, model, textures);
+                this._currentDrawable = createDrawableFromModel(this._gl, model);
             } else {
                 this._currentDrawable = null;
             }

@@ -13,11 +13,11 @@
 // limitations under the License.
 
 module RwxViewer {
-    export interface IUniformInfo {
+    export interface UniformInfo {
         [name: string]: WebGLUniformLocation;
     }
 
-    export interface IAttributeInfo {
+    export interface AttributeInfo {
         [name: string]: number;
     }
 
@@ -25,8 +25,8 @@ module RwxViewer {
         private _shaderProgram: WebGLProgram;
         private _gl: WebGLRenderingContext;
 
-        private _uniforms: IUniformInfo;
-        private _attributes: IAttributeInfo;
+        private _uniforms: UniformInfo;
+        private _attributes: AttributeInfo;
 
         private _attributeCount: number;
 
@@ -59,7 +59,7 @@ module RwxViewer {
             var gl = this._gl;
 
             var totalUniforms = gl.getProgramParameter(this._shaderProgram, gl.ACTIVE_UNIFORMS);
-            var uniforms: IUniformInfo = {};
+            var uniforms: UniformInfo = {};
 
             for (var uniformIndex = 0; uniformIndex < totalUniforms; ++uniformIndex) {
                 var uniform = gl.getActiveUniform(this._shaderProgram, uniformIndex);
@@ -72,7 +72,7 @@ module RwxViewer {
         private getAttributes() {
             var gl = this._gl;
             var attributeCount = gl.getProgramParameter(this._shaderProgram, gl.ACTIVE_ATTRIBUTES);
-            var attributes: IAttributeInfo = {};
+            var attributes: AttributeInfo = {};
             this._attributeCount = attributeCount;
 
             for (var attributeIndex = 0; attributeIndex < attributeCount; ++attributeIndex) {

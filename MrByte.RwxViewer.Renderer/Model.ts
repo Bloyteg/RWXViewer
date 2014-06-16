@@ -13,30 +13,26 @@
 // limitations under the License.
 
 module RwxViewer {
-    export interface IImageCollection {
-        [name: string]: HTMLImageElement;
-    }
-
-    export interface IVector3 {
+    export interface Vector3 {
         X: number;
         Y: number;
         Z: number;
     }
 
-    export interface IVertex {
-        Position: IVector3;
-        UV: IUv;
-        Prelight: IColor;
-        Normal: IVector3;
+    export interface Vertex {
+        Position: Vector3;
+        UV: Uv;
+        Prelight: Color;
+        Normal: Vector3;
     }
 
-    export interface IUv {
+    export interface Uv {
         U: number;
         V: number;
     }
 
-    export interface ITriangle {
-        Normal: IVector3;
+    export interface Triangle {
+        Normal: Vector3;
         Indices: number[];
     }
 
@@ -44,43 +40,43 @@ module RwxViewer {
         Tag: number;
         MaterialId: number;
         Indices: number[];
-        Triangles: ITriangle[];
+        Triangles: Triangle[];
     }
 
-    export interface IMatrix {
+    export interface Matrix {
         Matrix: number[];
     }
 
-    export interface ITransformable {
-        Transform: IMatrix;
+    export interface Transformable {
+        Transform: Matrix;
     }
 
-    export interface IGeometry {
-        Vertices: IVertex[];
+    export interface Geometry {
+        Vertices: Vertex[];
         Faces: IFace[];
     }
 
-    export interface IMeshGeometry extends IGeometry {
-        Children: IClump[];
-        Primitives: IPrimitiveGeometry[];
-        PrototypeInstances: IPrototypeInstance[];
+    export interface MeshGeometry extends Geometry {
+        Children: Clump[];
+        Primitives: PrimitiveGeometry[];
+        PrototypeInstances: PrototypeInstance[];
         IsPrelit: boolean;
     }
 
-    export interface IPrimitiveGeometry extends IGeometry, ITransformable {
+    export interface PrimitiveGeometry extends Geometry, Transformable {
         MaterialId: number;
     }
 
-    export interface IPrototype extends IMeshGeometry {
+    export interface Prototype extends MeshGeometry {
         Name: string;
     }
 
-    export interface IPrototypeInstance extends ITransformable {
+    export interface PrototypeInstance extends Transformable {
         Name: string;
         MaterialId: number;
     }
 
-    export interface IClump extends IMeshGeometry, ITransformable {
+    export interface Clump extends MeshGeometry, Transformable {
         Tag: number;
         IsCollidable: boolean;
     }
@@ -121,14 +117,14 @@ module RwxViewer {
         Double
     }
 
-    export interface IColor {
+    export interface Color {
         R: number;
         G: number;
         B: number;
     }
 
-    export interface IMaterial {
-        Color: IColor;
+    export interface Material {
+        Color: Color;
         Opacity: number;
         Ambient: number;
         Diffuse: number;
@@ -144,10 +140,10 @@ module RwxViewer {
         MaterialMode: MaterialMode;
     }
 
-    export interface IModel {
-        Prototypes: IPrototype[];
-        Materials: IMaterial[];
-        Clump: IClump;
+    export interface Model {
+        Prototypes: Prototype[];
+        Materials: Material[];
+        Clump: Clump;
 
         HasOpacityFix: boolean;
         HasRandomUVs: boolean;

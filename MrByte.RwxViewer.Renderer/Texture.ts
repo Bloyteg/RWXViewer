@@ -1,7 +1,4 @@
-﻿// Copyright 2014 Joshua R. Rodgers
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
+﻿// you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 // 
 //    http://www.apache.org/licenses/LICENSE-2.0
@@ -13,10 +10,9 @@
 // limitations under the License.
 
 module RwxViewer {
-    export interface Drawable {
-        worldMatrix: Mat4Array;
-
-        cloneWithTransform(matrix: Mat4Array);
-        draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
+    export interface Texture {
+        bind(slot: number, sampler: WebGLUniformLocation);
+        update(frameCount: number);
+        isEmpty: boolean;
     }
 }

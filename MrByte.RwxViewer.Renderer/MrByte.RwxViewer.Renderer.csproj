@@ -61,10 +61,17 @@
     <TypeScriptCompile Include="Camera.ts" />
     <TypeScriptCompile Include="Drawable.ts" />
     <TypeScriptCompile Include="DrawableBuilder.ts" />
+    <TypeScriptCompile Include="EmptyTexture.ts" />
+    <TypeScriptCompile Include="GridDrawable.ts" />
+    <TypeScriptCompile Include="MeshDrawable.ts" />
     <TypeScriptCompile Include="Model.ts" />
     <TypeScriptCompile Include="Renderer.ts" />
     <TypeScriptCompile Include="ShaderProgram.ts" />
+    <TypeScriptCompile Include="StaticTexture.ts" />
+    <TypeScriptCompile Include="Texture.ts" />
+    <TypeScriptCompile Include="TextureCache.ts" />
     <TypeScriptCompile Include="typings\gl-matrix\gl-matrix.d.ts" />
+    <TypeScriptCompile Include="TextureFactory.ts" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets')" />
 </Project>
