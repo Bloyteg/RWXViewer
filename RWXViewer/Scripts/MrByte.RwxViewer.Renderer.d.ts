@@ -237,6 +237,8 @@ declare module RwxViewer {
         private _gl;
         private _texture;
         constructor(gl: WebGLRenderingContext, imageSource: HTMLImageElement, textureFactory: TextureFactory);
+        private getImageSource(imageSource);
+        private getScaledImage(imageSource);
         public bind(slot: number, sampler: WebGLUniformLocation): void;
         public update(frameCount: number): void;
         public isEmpty : boolean;

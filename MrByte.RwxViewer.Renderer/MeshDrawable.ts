@@ -86,7 +86,6 @@ module RwxViewer {
 
 
         bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
-            //TODO: Look at moving this into the Texture classes.
             gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
             meshMaterialGroup.texture.bind(0, shader.uniforms["u_textureSampler"]);
         }

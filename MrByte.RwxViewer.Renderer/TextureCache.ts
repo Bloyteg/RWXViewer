@@ -54,7 +54,7 @@ module RwxViewer {
 
         function createTexture(gl: WebGLRenderingContext, imageSource: HTMLImageElement, filteringMode: TextureFilteringMode) {
             if (imageSource) {
-                if (imageSource.width > imageSource.height && imageSource.height % imageSource.width === 0) {
+                if (imageSource.width < imageSource.height && imageSource.height % imageSource.width === 0) {
                     //TODO: Handle animated textures.
                     return emptyTexture;
                 } else {

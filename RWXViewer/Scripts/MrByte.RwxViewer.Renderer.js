@@ -523,7 +523,6 @@ var RwxViewer;
         };
 
         MeshDrawable.prototype.bindTexture = function (gl, shader, meshMaterialGroup) {
-            //TODO: Look at moving this into the Texture classes.
             gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
             meshMaterialGroup.texture.bind(0, shader.uniforms["u_textureSampler"]);
         };
@@ -820,8 +819,30 @@ var RwxViewer;
     var StaticTexture = (function () {
         function StaticTexture(gl, imageSource, textureFactory) {
             this._gl = gl;
-            this._texture = textureFactory.getTexture(imageSource);
+            this._texture = textureFactory.getTexture(this.getImageSource(imageSource));
         }
+        StaticTexture.prototype.getImageSource = function (imageSource) {
+            var widthIsPowerOfTwo = (imageSource.width & (imageSource.width - 1)) === 0;
+            var heightIsPowerOfTwo = (imageSource.height & (imageSource.height - 1)) === 0;
+
+            if (widthIsPowerOfTwo && heightIsPowerOfTwo) {
+                return imageSource;
+            }
+
+            return this.getScaledImage(imageSource);
+        };
+
+        StaticTexture.prototype.getScaledImage = function (imageSource) {
+            var smallestDimension = imageSource.width <= imageSource.height ? imageSource.width : imageSource.height;
+            var roundedDimension = Math.pow(2, Math.floor(Math.log(smallestDimension) / Math.log(2)));
+            var canvas = document.createElement("canvas");
+
+            canvas.width = roundedDimension;
+            canvas.height = roundedDimension;
+            canvas.getContext("2d").drawImage(imageSource, 0, 0, roundedDimension, roundedDimension);
+            return canvas;
+        };
+
         StaticTexture.prototype.bind = function (slot, sampler) {
             var slotName = "TEXTURE" + slot;
             var gl = this._gl;
@@ -915,7 +936,7 @@ var RwxViewer;
 
         function createTexture(gl, imageSource, filteringMode) {
             if (imageSource) {
-                if (imageSource.width > imageSource.height && imageSource.height % imageSource.width === 0) {
+                if (imageSource.width < imageSource.height && imageSource.height % imageSource.width === 0) {
                     //TODO: Handle animated textures.
                     return emptyTexture;
                 } else {

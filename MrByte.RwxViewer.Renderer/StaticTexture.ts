@@ -16,7 +16,29 @@ module RwxViewer {
 
         constructor(gl: WebGLRenderingContext, imageSource: HTMLImageElement, textureFactory: TextureFactory) {
             this._gl = gl;
-            this._texture = textureFactory.getTexture(imageSource);
+            this._texture = textureFactory.getTexture(<any>this.getImageSource(imageSource));
+        }
+
+        private getImageSource(imageSource: HTMLImageElement): HTMLElement {
+            var widthIsPowerOfTwo = (imageSource.width & (imageSource.width - 1)) === 0;
+            var heightIsPowerOfTwo = (imageSource.height & (imageSource.height - 1)) === 0;
+
+            if (widthIsPowerOfTwo && heightIsPowerOfTwo) {
+                return imageSource;
+            }
+
+            return this.getScaledImage(imageSource);
+        }
+
+        private getScaledImage(imageSource: HTMLImageElement) {
+            var smallestDimension = imageSource.width <= imageSource.height ? imageSource.width : imageSource.height;
+            var roundedDimension = Math.pow(2, Math.floor(Math.log(smallestDimension) / Math.log(2)));
+            var canvas = document.createElement("canvas");
+
+            canvas.width = roundedDimension;
+            canvas.height = roundedDimension;
+            canvas.getContext("2d").drawImage(imageSource, 0, 0, roundedDimension, roundedDimension);
+            return canvas;
         }
 
         bind(slot: number, sampler: WebGLUniformLocation) {
