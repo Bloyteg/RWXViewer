@@ -83,6 +83,67 @@ var RwxViewer;
 // limitations under the License.
 var RwxViewer;
 (function (RwxViewer) {
+    (function (Animation) {
+        function getDefaultAnimation() {
+            return new NoAnimation();
+        }
+        Animation.getDefaultAnimation = getDefaultAnimation;
+
+        function getRotationAnimation() {
+            return new RotationAnimation(Date.now());
+        }
+        Animation.getRotationAnimation = getRotationAnimation;
+    })(RwxViewer.Animation || (RwxViewer.Animation = {}));
+    var Animation = RwxViewer.Animation;
+
+    var NoAnimation = (function () {
+        function NoAnimation() {
+            this._transform = mat4.create();
+        }
+        NoAnimation.prototype.getTransformForTime = function (joint, time) {
+            return this._transform;
+        };
+        return NoAnimation;
+    })();
+    RwxViewer.NoAnimation = NoAnimation;
+
+    var RotationAnimation = (function () {
+        function RotationAnimation(startTime) {
+            this._startTime = startTime;
+            this._framesPerSecond = 30;
+            this._transform = mat4.create();
+            this._quaternion = quat.create();
+        }
+        RotationAnimation.prototype.getTransformForTime = function (joint, time) {
+            var delta = time - this._startTime;
+            var frame = delta * (this._framesPerSecond / 1000);
+            var interpFactor = (frame % (this._framesPerSecond * 10)) / (this._framesPerSecond * 10);
+
+            quat.identity(this._quaternion);
+            quat.rotateY(this._quaternion, this._quaternion, interpFactor * (2 * Math.PI));
+            mat4.fromQuat(this._transform, this._quaternion);
+
+            return this._transform;
+        };
+        return RotationAnimation;
+    })();
+    RwxViewer.RotationAnimation = RotationAnimation;
+})(RwxViewer || (RwxViewer = {}));
+// Copyright 2014 Joshua R. Rodgers
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
     var ZOOM_FACTOR = 0.95;
     var DEFAULT_RADIUS_SCALE = 1.0;
     var DEFAULT_CAMERA_DISTANCE = 1;
@@ -472,6 +533,7 @@ var RwxViewer;
 
     var GridDrawable = (function () {
         function GridDrawable(input, vertexBuffer, vertexCount) {
+            this._animation = RwxViewer.Animation.getDefaultAnimation();
             if (input instanceof Float32Array) {
                 this._vertexBuffer = vertexBuffer;
                 this._vertexCount = vertexCount;
@@ -507,11 +569,19 @@ var RwxViewer;
             configurable: true
         });
 
+        Object.defineProperty(GridDrawable.prototype, "animation", {
+            get: function () {
+                return this._animation;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
         GridDrawable.prototype.cloneWithTransform = function (matrix) {
             return new GridDrawable(mat4.multiply(mat4.create(), matrix, this.worldMatrix), this._vertexBuffer, this._vertexCount);
         };
 
-        GridDrawable.prototype.draw = function (gl, shader) {
+        GridDrawable.prototype.draw = function (gl, shader, time) {
             gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
             gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
             gl.drawArrays(gl.LINES, 0, this._vertexCount);
@@ -540,6 +610,8 @@ var RwxViewer;
     //TODO: Handle prelit meshes.
     var MeshDrawable = (function () {
         function MeshDrawable(meshMaterialGroups, modelMatrix, children, isBillboard) {
+            //TODO: Clear this up so that it uses a factory.
+            this._animation = RwxViewer.Animation.getDefaultAnimation();
             this._meshMaterialGroups = meshMaterialGroups;
             this._worldMatrix = modelMatrix;
             this._children = children;
@@ -553,6 +625,21 @@ var RwxViewer;
             configurable: true
         });
 
+        Object.defineProperty(MeshDrawable.prototype, "animation", {
+            get: function () {
+                return this._animation;
+            },
+            set: function (animation) {
+                this._animation = animation;
+                this._children.forEach(function (child) {
+                    return child.animation = animation;
+                });
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+
         MeshDrawable.prototype.cloneWithTransform = function (matrix) {
             var newTransformMatrix = mat4.clone(this._worldMatrix);
             mat4.mul(newTransformMatrix, matrix, newTransformMatrix);
@@ -562,27 +649,25 @@ var RwxViewer;
             }));
         };
 
-        MeshDrawable.prototype.draw = function (gl, shader) {
+        MeshDrawable.prototype.draw = function (gl, shader, time) {
             var _this = this;
-            //TODO: Move this up.
-            this._lastUpdate = +new Date;
-
             this._meshMaterialGroups.forEach(function (meshMaterialGroup) {
-                _this.setTransformUniforms(gl, shader, meshMaterialGroup);
+                _this.setTransformUniforms(gl, shader, meshMaterialGroup, time);
                 _this.setMaterialUniforms(gl, shader, meshMaterialGroup);
-                _this.bindTexture(gl, shader, meshMaterialGroup);
-                _this.bindMask(gl, shader, meshMaterialGroup);
+                _this.bindTexture(gl, shader, meshMaterialGroup, time);
+                _this.bindMask(gl, shader, meshMaterialGroup, time);
                 _this.bindVertexBuffers(gl, shader, meshMaterialGroup);
 
                 gl.drawArrays(meshMaterialGroup.drawMode, 0, meshMaterialGroup.vertexBuffer.count);
             });
 
             this._children.forEach(function (child) {
-                return child.draw(gl, shader);
+                return child.draw(gl, shader, time);
             });
         };
 
-        MeshDrawable.prototype.setTransformUniforms = function (gl, shader, meshMaterialGroup) {
+        MeshDrawable.prototype.setTransformUniforms = function (gl, shader, meshMaterialGroup, time) {
+            gl.uniformMatrix4fv(shader.uniforms["u_animationMatrix"], false, this._animation.getTransformForTime(null, time));
             gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._worldMatrix);
 
             gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
@@ -595,16 +680,15 @@ var RwxViewer;
             gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
         };
 
-        MeshDrawable.prototype.bindTexture = function (gl, shader, meshMaterialGroup) {
+        MeshDrawable.prototype.bindTexture = function (gl, shader, meshMaterialGroup, time) {
             gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
-            meshMaterialGroup.texture.update(this._lastUpdate);
+            meshMaterialGroup.texture.update(time);
             meshMaterialGroup.texture.bind(0, shader.uniforms["u_textureSampler"]);
         };
 
-        //TODO: Refactor this off into ITexture types.
-        MeshDrawable.prototype.bindMask = function (gl, shader, meshMaterialGroup) {
+        MeshDrawable.prototype.bindMask = function (gl, shader, meshMaterialGroup, time) {
             gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.mask.isEmpty ? 0 : 1);
-            meshMaterialGroup.mask.update(this._lastUpdate);
+            meshMaterialGroup.mask.update(time);
             meshMaterialGroup.mask.bind(1, shader.uniforms["u_maskSampler"]);
         };
 
@@ -720,7 +804,7 @@ var RwxViewer;
             this._gridProgram = gridProgram;
         };
 
-        Renderer.prototype.draw = function () {
+        Renderer.prototype.draw = function (time) {
             var _this = this;
             var gl = this._gl;
 
@@ -733,14 +817,14 @@ var RwxViewer;
                 this._gridProgram.use(function (program) {
                     gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, _this._projectionMatrix);
                     gl.uniformMatrix4fv(program.uniforms["u_viewMatrix"], false, _this._camera.matrix);
-                    _this._spatialGridDrawable.draw(gl, program);
+                    _this._spatialGridDrawable.draw(gl, program, time);
                 });
 
                 this._mainProgram.use(function (program) {
                     if (_this._currentDrawable) {
                         gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, _this._projectionMatrix);
                         gl.uniformMatrix4fv(program.uniforms["u_viewMatrix"], false, _this._camera.matrix);
-                        _this._currentDrawable.draw(gl, program);
+                        _this._currentDrawable.draw(gl, program, time);
                     }
                 });
             }

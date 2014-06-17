@@ -310,7 +310,7 @@ $.when(ObjectPathItemLoader.getWorlds(), ShaderProgramLoader.loadShaderProgram(g
 });
 
 function tick() {
-    renderer.draw();
+    renderer.draw(Date.now());
     window.requestAnimationFrame(tick);
 }
 //# sourceMappingURL=viewer.js.map

@@ -38,8 +38,8 @@ module RwxViewer {
         private _worldMatrix: Mat4Array;
         private _children: Drawable[];
         private _isBillboard: boolean;
-
-        private _lastUpdate: number;
+        //TODO: Clear this up so that it uses a factory.
+        private _animation: Animation = Animation.getDefaultAnimation();
 
         constructor(meshMaterialGroups: MeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], isBillboard?: boolean) {
             this._meshMaterialGroups = meshMaterialGroups;
@@ -52,6 +52,15 @@ module RwxViewer {
             return this._worldMatrix;
         }
 
+        get animation(): Animation {
+            return this._animation;
+        }
+
+        set animation(animation: Animation) {
+            this._animation = animation;
+            this._children.forEach(child => child.animation = animation);
+        }
+
         cloneWithTransform(matrix: Mat4Array) {
             var newTransformMatrix = mat4.clone(this._worldMatrix);
             mat4.mul(newTransformMatrix, matrix, newTransformMatrix);
@@ -59,24 +68,22 @@ module RwxViewer {
             return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(child => child.cloneWithTransform(matrix)));
         }
 
-        draw(gl: WebGLRenderingContext, shader: ShaderProgram): void {
-            //TODO: Move this up.
-            this._lastUpdate = +new Date;
-
+        draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void {
             this._meshMaterialGroups.forEach((meshMaterialGroup: MeshMaterialGroup) => {
-                this.setTransformUniforms(gl, shader, meshMaterialGroup);
+                this.setTransformUniforms(gl, shader, meshMaterialGroup, time);
                 this.setMaterialUniforms(gl, shader, meshMaterialGroup);
-                this.bindTexture(gl, shader, meshMaterialGroup);
-                this.bindMask(gl, shader, meshMaterialGroup);
+                this.bindTexture(gl, shader, meshMaterialGroup, time);
+                this.bindMask(gl, shader, meshMaterialGroup, time);
                 this.bindVertexBuffers(gl, shader, meshMaterialGroup);
 
                 gl.drawArrays(meshMaterialGroup.drawMode, 0, meshMaterialGroup.vertexBuffer.count);
             });
 
-            this._children.forEach(child => child.draw(gl, shader));
+            this._children.forEach(child => child.draw(gl, shader, time));
         }
 
-        setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
+        setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup, time: number) {
+            gl.uniformMatrix4fv(shader.uniforms["u_animationMatrix"], false, this._animation.getTransformForTime(null, time));
             gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._worldMatrix);
 
             gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
@@ -90,16 +97,15 @@ module RwxViewer {
         }
 
 
-        bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
+        private bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup, time: number) {
             gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
-            meshMaterialGroup.texture.update(this._lastUpdate);
+            meshMaterialGroup.texture.update(time);
             meshMaterialGroup.texture.bind(0, shader.uniforms["u_textureSampler"]);
         }
 
-        //TODO: Refactor this off into ITexture types.
-        bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
+        private bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup, time: number) {
             gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.mask.isEmpty ? 0 : 1);
-            meshMaterialGroup.mask.update(this._lastUpdate);
+            meshMaterialGroup.mask.update(time);
             meshMaterialGroup.mask.bind(1, shader.uniforms["u_maskSampler"]);
         }
 

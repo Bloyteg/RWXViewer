@@ -16,6 +16,27 @@
     }
 }
 declare module RwxViewer {
+    interface Animation {
+        getTransformForTime(joint: number, time: number): Mat4Array;
+    }
+    module Animation {
+        function getDefaultAnimation(): NoAnimation;
+        function getRotationAnimation(): RotationAnimation;
+    }
+    class NoAnimation implements Animation {
+        private _transform;
+        public getTransformForTime(joint: number, time: number): Mat4Array;
+    }
+    class RotationAnimation implements Animation {
+        private _startTime;
+        private _transform;
+        private _quaternion;
+        private _framesPerSecond;
+        constructor(startTime: number);
+        public getTransformForTime(joint: number, time: number): Mat4Array;
+    }
+}
+declare module RwxViewer {
     interface Camera {
         setViewpowerSize(width: number, height: number): any;
         reset(): any;
@@ -30,8 +51,9 @@ declare module RwxViewer {
 declare module RwxViewer {
     interface Drawable {
         worldMatrix: Mat4Array;
+        animation: Animation;
         cloneWithTransform(matrix: Mat4Array): any;
-        draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
+        draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void;
     }
 }
 declare module RwxViewer {
@@ -52,12 +74,14 @@ declare module RwxViewer {
         private _vertexBuffer;
         private _vertexCount;
         private _worldMatrix;
+        private _animation;
         constructor(gl: WebGLRenderingContext);
         constructor(worldMatrix: Mat4Array, vertexBuffer: WebGLBuffer, vertexCount: number);
         private initializeNew(gl);
         public worldMatrix : Mat4Array;
+        public animation : Animation;
         public cloneWithTransform(matrix: Mat4Array): GridDrawable;
-        public draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
+        public draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void;
     }
 }
 declare module RwxViewer {
@@ -82,15 +106,16 @@ declare module RwxViewer {
         private _worldMatrix;
         private _children;
         private _isBillboard;
-        private _lastUpdate;
+        private _animation;
         constructor(meshMaterialGroups: MeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], isBillboard?: boolean);
         public worldMatrix : Mat4Array;
+        public animation : Animation;
         public cloneWithTransform(matrix: Mat4Array): MeshDrawable;
-        public draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
-        public setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;
+        public draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void;
+        public setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup, time: number): void;
         public setMaterialUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;
-        public bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;
-        public bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;
+        private bindTexture(gl, shader, meshMaterialGroup, time);
+        private bindMask(gl, shader, meshMaterialGroup, time);
         public bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;
     }
 }
@@ -222,7 +247,7 @@ declare module RwxViewer {
         private _projectionMatrix;
         constructor(gl: WebGLRenderingContext);
         public initialize(mainProgram: ShaderProgram, gridProgram: ShaderProgram): void;
-        public draw(): void;
+        public draw(time: number): void;
         public setCurrentModel(model: Model): void;
         public camera : Camera;
     }

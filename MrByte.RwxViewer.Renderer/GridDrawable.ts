@@ -18,6 +18,7 @@ module RwxViewer {
         private _vertexBuffer: WebGLBuffer;
         private _vertexCount: number;
         private _worldMatrix: Mat4Array;
+        private _animation = Animation.getDefaultAnimation();
 
         constructor(gl: WebGLRenderingContext)
         constructor(worldMatrix: Mat4Array, vertexBuffer: WebGLBuffer, vertexCount: number)
@@ -56,11 +57,15 @@ module RwxViewer {
             return this._worldMatrix;
         }
 
+        get animation(): Animation {
+            return this._animation;
+        }
+
         cloneWithTransform(matrix: Mat4Array) {
             return new GridDrawable(mat4.multiply(mat4.create(), matrix, this.worldMatrix), this._vertexBuffer, this._vertexCount);
         }
 
-        draw(gl: WebGLRenderingContext, shader: ShaderProgram): void {
+        draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void {
             gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
             gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
             gl.drawArrays(gl.LINES, 0, this._vertexCount);

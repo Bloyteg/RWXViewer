@@ -15,7 +15,8 @@
 attribute vec3 a_vertexPosition;
 attribute vec2 a_vertexUV;
 attribute vec3 a_vertexNormal;
-        
+    
+uniform mat4 u_animationMatrix;    
 uniform mat4 u_modelMatrix;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
@@ -39,6 +40,6 @@ void main(void) {
 		gl_Position = u_projectionMatrix * (vec4(a_vertexPosition, 1.0) + vec4(worldView[3].xyz, 0.0));
 	} else {
 		v_lightWeighting = u_ambientFactor + max(dot(a_vertexNormal, lightDirection), 0.0) * u_diffuseFactor;
-		gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(a_vertexPosition, 1.0);
+		gl_Position = u_projectionMatrix * u_viewMatrix * u_animationMatrix * u_modelMatrix * vec4(a_vertexPosition, 1.0);
 	}
 }

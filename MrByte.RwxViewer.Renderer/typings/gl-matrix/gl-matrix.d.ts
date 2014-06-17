@@ -212,6 +212,7 @@ interface Matrix4 {
     rotateX(out: Mat4Array, a: Mat4Array, rad: number): Mat4Array;
     rotateY(out: Mat4Array, a: Mat4Array, rad: number): Mat4Array;
     rotateZ(out: Mat4Array, a: Mat4Array, rad: number): Mat4Array;
+    fromQuat(out: Mat4Array, quat: Vec4Array): Mat4Array;
     fromRotationTranslation(out: Mat4Array, q: Vec4Array, v: Vec3Array): Mat4Array;
     frustum(out: Mat4Array, left: number, right: number, bottom: number, top: number, near: number, far: number): Mat4Array;
     perspective(out: Mat4Array, fovy: number, aspect: number, near: number, far: number): Mat4Array;

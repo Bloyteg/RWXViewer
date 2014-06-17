@@ -46,7 +46,7 @@ module RwxViewer {
             this._gridProgram = gridProgram;
         }
 
-        draw(): void {
+        draw(time: number): void {
             var gl = this._gl;
 
             if (gl) {
@@ -58,14 +58,14 @@ module RwxViewer {
                 this._gridProgram.use(program => {
                     gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, this._projectionMatrix);
                     gl.uniformMatrix4fv(program.uniforms["u_viewMatrix"], false, this._camera.matrix);
-                    this._spatialGridDrawable.draw(gl, program);
+                    this._spatialGridDrawable.draw(gl, program, time);
                 });
 
                 this._mainProgram.use(program => {
                     if (this._currentDrawable) {
                         gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, this._projectionMatrix);
                         gl.uniformMatrix4fv(program.uniforms["u_viewMatrix"], false, this._camera.matrix);
-                        this._currentDrawable.draw(gl, program);
+                        this._currentDrawable.draw(gl, program, time);
                     }
                 });
             }

@@ -107,6 +107,6 @@ $.when(ObjectPathItemLoader.getWorlds(),
     });
 
 function tick() {
-    renderer.draw();
+    renderer.draw(Date.now());
     window.requestAnimationFrame(tick);
 }
