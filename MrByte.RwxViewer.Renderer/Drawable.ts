@@ -18,6 +18,8 @@ module RwxViewer {
         animation: Animation;
 
         cloneWithTransform(matrix: Mat4Array);
+        cloneWithAnimation(animation: Animation);
+
         draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void;
     }
 }

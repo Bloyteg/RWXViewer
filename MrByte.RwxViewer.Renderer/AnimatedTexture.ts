@@ -20,7 +20,6 @@ module RwxViewer {
         private _textureFactory: TextureFactory;
         private _lastUpdate: number;
         
-
         constructor(gl: WebGLRenderingContext, imageSource: HTMLImageElement, textureFactory: TextureFactory) {
             this._gl = gl;
             this._imageSource = imageSource;

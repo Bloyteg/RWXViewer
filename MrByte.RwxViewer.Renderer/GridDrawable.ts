@@ -62,7 +62,11 @@ module RwxViewer {
         }
 
         cloneWithTransform(matrix: Mat4Array) {
-            return new GridDrawable(mat4.multiply(mat4.create(), matrix, this.worldMatrix), this._vertexBuffer, this._vertexCount);
+            return this;
+        }
+
+        cloneWithAnimation(animation: Animation) {
+            return this;
         }
 
         draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void {

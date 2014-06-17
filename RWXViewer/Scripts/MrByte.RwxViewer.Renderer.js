@@ -353,14 +353,14 @@ var RwxViewer;
                 return _this.buildMeshDrawableFromPrimitive(primitive, matrix);
             }));
 
-            return new RwxViewer.MeshDrawable(this.buildMeshMaterialGroups(geometry), matrix, children, isBillboard);
+            return new RwxViewer.MeshDrawable(this.buildMeshMaterialGroups(geometry), matrix, children, 0, isBillboard);
         };
 
         MeshDrawableBuilder.prototype.buildMeshDrawableFromPrimitive = function (primitive, parentMatrix) {
             var matrix = mat4.clone(primitive.Transform.Matrix);
             mat4.multiply(matrix, parentMatrix, matrix);
 
-            return new RwxViewer.MeshDrawable(this.buildMeshMaterialGroups(primitive), matrix, []);
+            return new RwxViewer.MeshDrawable(this.buildMeshMaterialGroups(primitive), matrix, [], 0);
         };
 
         MeshDrawableBuilder.prototype.buildMeshMaterialGroups = function (geometry) {
@@ -578,7 +578,11 @@ var RwxViewer;
         });
 
         GridDrawable.prototype.cloneWithTransform = function (matrix) {
-            return new GridDrawable(mat4.multiply(mat4.create(), matrix, this.worldMatrix), this._vertexBuffer, this._vertexCount);
+            return this;
+        };
+
+        GridDrawable.prototype.cloneWithAnimation = function (animation) {
+            return this;
         };
 
         GridDrawable.prototype.draw = function (gl, shader, time) {
@@ -605,17 +609,15 @@ var RwxViewer;
 // limitations under the License.
 var RwxViewer;
 (function (RwxViewer) {
-    
-
     //TODO: Handle prelit meshes.
     var MeshDrawable = (function () {
-        function MeshDrawable(meshMaterialGroups, modelMatrix, children, isBillboard) {
-            //TODO: Clear this up so that it uses a factory.
-            this._animation = RwxViewer.Animation.getDefaultAnimation();
+        function MeshDrawable(meshMaterialGroups, modelMatrix, children, jointTag, isBillboard, animation) {
             this._meshMaterialGroups = meshMaterialGroups;
             this._worldMatrix = modelMatrix;
             this._children = children;
             this._isBillboard = isBillboard || false;
+            this._animation = animation || RwxViewer.Animation.getDefaultAnimation();
+            this._jointTag = jointTag || 0;
         }
         Object.defineProperty(MeshDrawable.prototype, "worldMatrix", {
             get: function () {
@@ -629,16 +631,9 @@ var RwxViewer;
             get: function () {
                 return this._animation;
             },
-            set: function (animation) {
-                this._animation = animation;
-                this._children.forEach(function (child) {
-                    return child.animation = animation;
-                });
-            },
             enumerable: true,
             configurable: true
         });
-
 
         MeshDrawable.prototype.cloneWithTransform = function (matrix) {
             var newTransformMatrix = mat4.clone(this._worldMatrix);
@@ -646,13 +641,20 @@ var RwxViewer;
 
             return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(function (child) {
                 return child.cloneWithTransform(matrix);
-            }));
+            }), this._jointTag, this._isBillboard, this._animation);
+        };
+
+        MeshDrawable.prototype.cloneWithAnimation = function (animation) {
+            return new MeshDrawable(this._meshMaterialGroups, this._worldMatrix, this._children.map(function (child) {
+                return child.cloneWithAnimation(animation);
+            }), this._jointTag, this._isBillboard, animation);
         };
 
         MeshDrawable.prototype.draw = function (gl, shader, time) {
             var _this = this;
+            this.setTransformUniforms(gl, shader, time);
+
             this._meshMaterialGroups.forEach(function (meshMaterialGroup) {
-                _this.setTransformUniforms(gl, shader, meshMaterialGroup, time);
                 _this.setMaterialUniforms(gl, shader, meshMaterialGroup);
                 _this.bindTexture(gl, shader, meshMaterialGroup, time);
                 _this.bindMask(gl, shader, meshMaterialGroup, time);
@@ -666,8 +668,8 @@ var RwxViewer;
             });
         };
 
-        MeshDrawable.prototype.setTransformUniforms = function (gl, shader, meshMaterialGroup, time) {
-            gl.uniformMatrix4fv(shader.uniforms["u_animationMatrix"], false, this._animation.getTransformForTime(null, time));
+        MeshDrawable.prototype.setTransformUniforms = function (gl, shader, time) {
+            gl.uniformMatrix4fv(shader.uniforms["u_animationMatrix"], false, this._animation.getTransformForTime(this._jointTag, time));
             gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._worldMatrix);
 
             gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
@@ -692,7 +694,6 @@ var RwxViewer;
             meshMaterialGroup.mask.bind(1, shader.uniforms["u_maskSampler"]);
         };
 
-        //TODO: Refactor this off into IVertexBuffer types.
         MeshDrawable.prototype.bindVertexBuffers = function (gl, shader, meshMaterialGroup) {
             gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
             gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);

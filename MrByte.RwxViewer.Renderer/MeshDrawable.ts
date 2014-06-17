@@ -13,7 +13,6 @@
 // limitations under the License.
 
 module RwxViewer {
-    //TODO: Both this and MeshMaterialGroup need to be less glorp-tastic.
     export interface VertexBuffer {
         positions: WebGLBuffer;
         uvs: WebGLBuffer;
@@ -38,14 +37,16 @@ module RwxViewer {
         private _worldMatrix: Mat4Array;
         private _children: Drawable[];
         private _isBillboard: boolean;
-        //TODO: Clear this up so that it uses a factory.
-        private _animation: Animation = Animation.getDefaultAnimation();
+        private _animation: Animation;
+        private _jointTag: number;
 
-        constructor(meshMaterialGroups: MeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], isBillboard?: boolean) {
+        constructor(meshMaterialGroups: MeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], jointTag: number, isBillboard?: boolean, animation?: Animation) {
             this._meshMaterialGroups = meshMaterialGroups;
             this._worldMatrix = modelMatrix;
             this._children = children;
             this._isBillboard = isBillboard || false;
+            this._animation = animation || Animation.getDefaultAnimation();
+            this._jointTag = jointTag || 0;
         }
 
         get worldMatrix(): Mat4Array {
@@ -56,21 +57,21 @@ module RwxViewer {
             return this._animation;
         }
 
-        set animation(animation: Animation) {
-            this._animation = animation;
-            this._children.forEach(child => child.animation = animation);
-        }
-
         cloneWithTransform(matrix: Mat4Array) {
             var newTransformMatrix = mat4.clone(this._worldMatrix);
             mat4.mul(newTransformMatrix, matrix, newTransformMatrix);
 
-            return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(child => child.cloneWithTransform(matrix)));
+            return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(child => child.cloneWithTransform(matrix)), this._jointTag, this._isBillboard, this._animation);
+        }
+
+        cloneWithAnimation(animation: Animation) {
+            return new MeshDrawable(this._meshMaterialGroups, this._worldMatrix, this._children.map(child => child.cloneWithAnimation(animation)), this._jointTag, this._isBillboard, animation); 
         }
 
         draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void {
+            this.setTransformUniforms(gl, shader, time);
+
             this._meshMaterialGroups.forEach((meshMaterialGroup: MeshMaterialGroup) => {
-                this.setTransformUniforms(gl, shader, meshMaterialGroup, time);
                 this.setMaterialUniforms(gl, shader, meshMaterialGroup);
                 this.bindTexture(gl, shader, meshMaterialGroup, time);
                 this.bindMask(gl, shader, meshMaterialGroup, time);
@@ -82,20 +83,19 @@ module RwxViewer {
             this._children.forEach(child => child.draw(gl, shader, time));
         }
 
-        setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup, time: number) {
-            gl.uniformMatrix4fv(shader.uniforms["u_animationMatrix"], false, this._animation.getTransformForTime(null, time));
+        private setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, time: number) {
+            gl.uniformMatrix4fv(shader.uniforms["u_animationMatrix"], false, this._animation.getTransformForTime(this._jointTag, time));
             gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._worldMatrix);
 
             gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
         }
 
-        setMaterialUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
+        private setMaterialUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
             gl.uniform1f(shader.uniforms["u_ambientFactor"], meshMaterialGroup.ambient);
             gl.uniform1f(shader.uniforms["u_diffuseFactor"], meshMaterialGroup.diffuse);
             gl.uniform4fv(shader.uniforms["u_baseColor"], meshMaterialGroup.baseColor);
             gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
         }
-
 
         private bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup, time: number) {
             gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
@@ -109,7 +109,6 @@ module RwxViewer {
             meshMaterialGroup.mask.bind(1, shader.uniforms["u_maskSampler"]);
         }
 
-        //TODO: Refactor this off into IVertexBuffer types.
         bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
             gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
             gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);

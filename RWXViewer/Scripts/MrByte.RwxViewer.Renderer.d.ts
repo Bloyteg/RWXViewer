@@ -53,6 +53,7 @@ declare module RwxViewer {
         worldMatrix: Mat4Array;
         animation: Animation;
         cloneWithTransform(matrix: Mat4Array): any;
+        cloneWithAnimation(animation: Animation): any;
         draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void;
     }
 }
@@ -81,6 +82,7 @@ declare module RwxViewer {
         public worldMatrix : Mat4Array;
         public animation : Animation;
         public cloneWithTransform(matrix: Mat4Array): GridDrawable;
+        public cloneWithAnimation(animation: Animation): GridDrawable;
         public draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void;
     }
 }
@@ -107,13 +109,15 @@ declare module RwxViewer {
         private _children;
         private _isBillboard;
         private _animation;
-        constructor(meshMaterialGroups: MeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], isBillboard?: boolean);
+        private _jointTag;
+        constructor(meshMaterialGroups: MeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], jointTag: number, isBillboard?: boolean, animation?: Animation);
         public worldMatrix : Mat4Array;
         public animation : Animation;
         public cloneWithTransform(matrix: Mat4Array): MeshDrawable;
+        public cloneWithAnimation(animation: Animation): MeshDrawable;
         public draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void;
-        public setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup, time: number): void;
-        public setMaterialUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;
+        private setTransformUniforms(gl, shader, time);
+        private setMaterialUniforms(gl, shader, meshMaterialGroup);
         private bindTexture(gl, shader, meshMaterialGroup, time);
         private bindMask(gl, shader, meshMaterialGroup, time);
         public bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;

@@ -65,14 +65,14 @@ module RwxViewer {
 
             children = children.concat(geometry.Primitives.map(primitive => this.buildMeshDrawableFromPrimitive(primitive, matrix)));
 
-            return new MeshDrawable(this.buildMeshMaterialGroups(geometry), matrix, children, isBillboard);
+            return new MeshDrawable(this.buildMeshMaterialGroups(geometry), matrix, children, 0, isBillboard);
         }
 
         private buildMeshDrawableFromPrimitive(primitive: PrimitiveGeometry, parentMatrix: Mat4Array): MeshDrawable {
             var matrix = mat4.clone(primitive.Transform.Matrix);
             mat4.multiply(matrix, parentMatrix, matrix);
 
-            return new MeshDrawable(this.buildMeshMaterialGroups(primitive), matrix, []);
+            return new MeshDrawable(this.buildMeshMaterialGroups(primitive), matrix, [], 0);
         }
 
         private buildMeshMaterialGroups(geometry: Geometry): MeshMaterialGroup[] {
