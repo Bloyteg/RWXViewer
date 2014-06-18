@@ -12,59 +12,77 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-module RwxViewer {
-    interface IPrototypeCache {
-        [name: string]: MeshDrawable
+//TODO: Restore billboard mesh handling.  Still not 100% sure how to do this.
+module RwxViewer {    
+    interface PrototypeMap {
+        [name: string]: Prototype;
     }
-    
-    //TODO: Merge the geometry of prototypes and primitives into the parent (must apply transform matrix directly).
-    //TODO: Ensure that child clumps of prototypes are assigned as children to the parent clump.
+
     class MeshDrawableBuilder {
         private _gl: WebGLRenderingContext;
         private _model: Model;
+        private _prototypeMap: PrototypeMap;
 
         constructor(gl: WebGLRenderingContext, model: Model) {
             this._gl = gl;
             this._model = model;
+
+            this._prototypeMap = {};
+            model.Prototypes.forEach(prototype => this._prototypeMap[prototype.Name] = prototype);
         }
 
         build(): Drawable {
-            var prototypes: IPrototypeCache = null; //this.buildPrototypeCache(this._model);
-
-            return this.buildMeshDrawableFromClump(this._model.Clump, prototypes, mat4.create(), this._model.AxisAlignment !== AxisAlignment.None);
+            return this.buildMeshDrawableFromClump(this._model.Clump, mat4.create());
         }
 
-        //NOTE: This will create a cache of prototypes, instead of drawables (only child clumps will be drawables).
-        //When the prototype is merged with the parent, the geometry will be transformed by the matrix accordingly.
-        //private buildPrototypeCache(model: Model): IPrototypeCache {
-        //    return model.Prototypes.reduce((prototypeCache: IPrototypeCache, prototype: Prototype) => {
-        //        prototypeCache[prototype.Name] = this.buildMeshDrawableFromPrototype(model, prototype, prototypeCache);
-        //        return prototypeCache;
-        //    }, <IPrototypeCache>{});
-        //}
-
-        //private buildMeshDrawableFromPrototype(model: Model, prototype: Prototype, prototypeCache: IPrototypeCache): MeshDrawable {
-        //    return this.buildMeshDrawableFromMeshGeometry(prototype, prototypeCache, mat4.create());
-        //}
-
-        //TODO: Handle bill-boarding better.
-        private buildMeshDrawableFromClump(clump: Clump, prototypeCache: IPrototypeCache, transformMatrix, isBillboard?: boolean): MeshDrawable {
+        private buildMeshDrawableFromClump(clump: Clump, transformMatrix): MeshDrawable {
             var matrix = mat4.clone(clump.Transform.Matrix);
             mat4.multiply(matrix, transformMatrix, matrix);
+            var meshData = this.buildGeometryMeshData(clump, matrix);
 
-            var children: MeshDrawable[] = clump.Children.map(child => this.buildMeshDrawableFromClump(child, prototypeCache, matrix, isBillboard));
-
-            return new MeshDrawable(this.buildSubMeshes(matrix, clump), children, clump.Tag, isBillboard);
+            return new MeshDrawable(meshData.subMeshes, meshData.meshChildren, clump.Tag);
         }
 
-        //private buildMeshDrawableFromPrimitive(primitive: PrimitiveGeometry, parentMatrix: Mat4Array): MeshDrawable {
-        //    var matrix = mat4.clone(primitive.Transform.Matrix);
-        //    mat4.multiply(matrix, parentMatrix, matrix);
+        private buildGeometryMeshData(geometry: MeshGeometry, transformMatrix: Mat4Array) {
+            var subMeshes = this.buildSubMeshes(geometry, transformMatrix);
+            var meshChildren = geometry.Children.map(child => this.buildMeshDrawableFromClump(child, transformMatrix));
 
-        //    return new MeshDrawable(this.buildMeshMaterialGroups(primitive), matrix, [], 0);
-        //}
+            geometry.PrototypeInstances.forEach(instance => {
+                var meshData = this.buildPrototypeMeshData(instance, transformMatrix);
+                subMeshes = subMeshes.concat(meshData.subMeshes);
+                meshChildren = meshChildren.concat(meshData.meshChildren);
+            });
 
-        private buildSubMeshes(transformMatrix: Mat4Array, geometry: Geometry): SubMesh[] {
+            subMeshes = subMeshes.concat(this.buildPrimitiveSubMeshes(geometry.Primitives, transformMatrix));
+
+            return {
+                subMeshes: subMeshes,
+                meshChildren: meshChildren
+            };
+        }
+
+        private buildPrototypeMeshData(prototypeInstance: PrototypeInstance, transformMatrix: Mat4Array) {
+            var prototype = this._prototypeMap[prototypeInstance.Name];
+            var prototypeMatrix = mat4.create();
+            mat4.mul(prototypeMatrix, transformMatrix, mat4.clone(prototypeInstance.Transform.Matrix));
+
+            return this.buildGeometryMeshData(prototype, prototypeMatrix);
+        }
+
+        private buildPrimitiveSubMeshes(primitives: PrimitiveGeometry[], transformMatrix: Mat4Array) {
+            var subMeshes = [];
+
+            primitives.forEach(primitive => {
+                var primitiveMatrix = mat4.create();
+                mat4.mul(primitiveMatrix, transformMatrix, mat4.clone(primitive.Transform.Matrix));
+
+                subMeshes = subMeshes.concat(this.buildSubMeshes(primitive, primitiveMatrix));
+            });
+
+            return subMeshes;
+        }
+
+        private buildSubMeshes(geometry: Geometry, transformMatrix: Mat4Array): SubMesh[] {
             var facesByMaterial: IFace[][] = [];
 
             geometry.Faces.forEach((face: IFace) => {
