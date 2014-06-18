@@ -34,13 +34,14 @@ module RwxViewer {
         }
 
         build(): Drawable {
-            return this.buildMeshDrawableFromClump(this._model.Clump, mat4.create());
+            return this.buildMeshDrawableFromClump(this._model.Clump);
         }
 
-        private buildMeshDrawableFromClump(clump: Clump, transformMatrix): MeshDrawable {
-            var matrix = mat4.clone(clump.Transform.Matrix);
-            mat4.multiply(matrix, transformMatrix, matrix);
+        private buildMeshDrawableFromClump(clump: Clump, transformMatrix: Mat4Array): MeshDrawable {
             var meshData = this.buildGeometryMeshData(clump, this._identityMatrix);
+            var matrix = mat4.clone(clump.Transform.Matrix);
+
+            mat4.multiply(matrix, transformMatrix, matrix);
 
             return new MeshDrawable(meshData.subMeshes, meshData.meshChildren, matrix, clump.Tag);
         }
