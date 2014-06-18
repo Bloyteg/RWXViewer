@@ -21,6 +21,7 @@ module RwxViewer {
         private _mainProgram: ShaderProgram;
         private _camera: Camera;
         private _projectionMatrix: Mat4Array = mat4.create();
+        private _modelMatrix: Mat4Array = mat4.create();
 
         constructor(gl: WebGLRenderingContext) {
             this._gl = gl;
@@ -58,14 +59,14 @@ module RwxViewer {
                 this._gridProgram.use(program => {
                     gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, this._projectionMatrix);
                     gl.uniformMatrix4fv(program.uniforms["u_viewMatrix"], false, this._camera.matrix);
-                    this._spatialGridDrawable.draw(gl, program, time);
+                    this._spatialGridDrawable.draw(gl, program);
                 });
 
                 this._mainProgram.use(program => {
                     if (this._currentDrawable) {
                         gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, this._projectionMatrix);
                         gl.uniformMatrix4fv(program.uniforms["u_viewMatrix"], false, this._camera.matrix);
-                        this._currentDrawable.draw(gl, program, time);
+                        this._currentDrawable.draw(gl, program, this._modelMatrix, time);
                     }
                 });
             }
@@ -73,7 +74,7 @@ module RwxViewer {
 
         setCurrentModel(model: Model): void {
             if (model) {
-                this._currentDrawable = createDrawableFromModel(this._gl, model);
+                this._currentDrawable = createDrawableFromModel(this._gl, model).cloneWithAnimation(Animation.getRotationAnimation());
             } else {
                 this._currentDrawable = null;
             }

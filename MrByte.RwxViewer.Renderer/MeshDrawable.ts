@@ -20,8 +20,7 @@ module RwxViewer {
         count: number;
     }
 
-    export interface MeshMaterialGroup {
-        vertexBuffer: VertexBuffer;
+    export interface DrawableMaterial {
         baseColor: Vec4Array;
         ambient: number;
         diffuse: number;
@@ -31,92 +30,86 @@ module RwxViewer {
         mask: Texture;
     }
 
+    export interface SubMesh {
+        vertexBuffer: VertexBuffer;
+        material: DrawableMaterial;
+    }
+
     //TODO: Handle prelit meshes.
     export class MeshDrawable implements Drawable {
-        private _meshMaterialGroups: MeshMaterialGroup[];
-        private _worldMatrix: Mat4Array;
+        private _subMeshes: SubMesh[];
         private _children: Drawable[];
         private _isBillboard: boolean;
         private _animation: Animation;
         private _jointTag: number;
+        private _transformMatrix: Mat4Array;
 
-        constructor(meshMaterialGroups: MeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], jointTag: number, isBillboard?: boolean, animation?: Animation) {
-            this._meshMaterialGroups = meshMaterialGroups;
-            this._worldMatrix = modelMatrix;
+        constructor(subMeshes: SubMesh[], children: Drawable[], jointTag: number, isBillboard?: boolean, animation?: Animation) {
+            this._subMeshes = subMeshes;
             this._children = children;
             this._isBillboard = isBillboard || false;
             this._animation = animation || Animation.getDefaultAnimation();
             this._jointTag = jointTag || 0;
-        }
-
-        get worldMatrix(): Mat4Array {
-            return this._worldMatrix;
+            this._transformMatrix = mat4.create();
         }
 
         get animation(): Animation {
             return this._animation;
         }
 
-        cloneWithTransform(matrix: Mat4Array) {
-            var newTransformMatrix = mat4.clone(this._worldMatrix);
-            mat4.mul(newTransformMatrix, matrix, newTransformMatrix);
-
-            return new MeshDrawable(this._meshMaterialGroups, newTransformMatrix, this._children.map(child => child.cloneWithTransform(matrix)), this._jointTag, this._isBillboard, this._animation);
-        }
-
         cloneWithAnimation(animation: Animation) {
-            return new MeshDrawable(this._meshMaterialGroups, this._worldMatrix, this._children.map(child => child.cloneWithAnimation(animation)), this._jointTag, this._isBillboard, animation); 
+            return new MeshDrawable(this._subMeshes, this._children.map(child => child.cloneWithAnimation(animation)), this._jointTag, this._isBillboard, animation); 
         }
 
-        draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void {
-            this.setTransformUniforms(gl, shader, time);
+        draw(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix: Mat4Array, time: number): void {
+            this.setTransformUniforms(gl, shader, transformMatrix, time);
 
-            this._meshMaterialGroups.forEach((meshMaterialGroup: MeshMaterialGroup) => {
-                this.setMaterialUniforms(gl, shader, meshMaterialGroup);
-                this.bindTexture(gl, shader, meshMaterialGroup, time);
-                this.bindMask(gl, shader, meshMaterialGroup, time);
-                this.bindVertexBuffers(gl, shader, meshMaterialGroup);
+            this._subMeshes.forEach((subMesh: SubMesh) => {
+                this.setMaterialUniforms(gl, shader, subMesh.material);
+                this.bindTexture(gl, shader, subMesh.material, time);
+                this.bindMask(gl, shader, subMesh.material, time);
+                this.bindVertexBuffers(gl, shader, subMesh.vertexBuffer);
 
-                gl.drawArrays(meshMaterialGroup.drawMode, 0, meshMaterialGroup.vertexBuffer.count);
+                gl.drawArrays(subMesh.material.drawMode, 0, subMesh.vertexBuffer.count);
             });
 
-            this._children.forEach(child => child.draw(gl, shader, time));
+            this._children.forEach(child => child.draw(gl, shader, this._transformMatrix, time));
         }
 
-        private setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, time: number) {
-            gl.uniformMatrix4fv(shader.uniforms["u_animationMatrix"], false, this._animation.getTransformForTime(this._jointTag, time));
-            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._worldMatrix);
+        private setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix: Mat4Array, time: number) {
+            mat4.multiply(this._transformMatrix, transformMatrix, this._animation.getTransformForTime(this._jointTag, time));
 
+            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._transformMatrix);
             gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
         }
 
-        private setMaterialUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
-            gl.uniform1f(shader.uniforms["u_ambientFactor"], meshMaterialGroup.ambient);
-            gl.uniform1f(shader.uniforms["u_diffuseFactor"], meshMaterialGroup.diffuse);
-            gl.uniform4fv(shader.uniforms["u_baseColor"], meshMaterialGroup.baseColor);
-            gl.uniform1f(shader.uniforms["u_opacity"], meshMaterialGroup.opacity);
+        private setMaterialUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, material: DrawableMaterial) {
+            gl.uniform1f(shader.uniforms["u_ambientFactor"], material.ambient);
+            gl.uniform1f(shader.uniforms["u_diffuseFactor"], material.diffuse);
+            gl.uniform4fv(shader.uniforms["u_baseColor"], material.baseColor);
+            gl.uniform1f(shader.uniforms["u_opacity"], material.opacity);
         }
 
-        private bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup, time: number) {
-            gl.uniform1i(shader.uniforms["u_hasTexture"], meshMaterialGroup.texture.isEmpty ? 0 : 1);
-            meshMaterialGroup.texture.update(time);
-            meshMaterialGroup.texture.bind(0, shader.uniforms["u_textureSampler"]);
+        private bindTexture(gl: WebGLRenderingContext, shader: ShaderProgram, material: DrawableMaterial, time: number) {
+            gl.uniform1i(shader.uniforms["u_hasTexture"], material.texture.isEmpty ? 0 : 1);
+            material.texture.update(time);
+            material.texture.bind(0, shader.uniforms["u_textureSampler"]);
         }
 
-        private bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup, time: number) {
-            gl.uniform1i(shader.uniforms["u_hasMask"], meshMaterialGroup.mask.isEmpty ? 0 : 1);
-            meshMaterialGroup.mask.update(time);
-            meshMaterialGroup.mask.bind(1, shader.uniforms["u_maskSampler"]);
+        private bindMask(gl: WebGLRenderingContext, shader: ShaderProgram, material: DrawableMaterial, time: number) {
+            gl.uniform1i(shader.uniforms["u_hasMask"], material.mask.isEmpty ? 0 : 1);
+            material.mask.update(time);
+            material.mask.bind(1, shader.uniforms["u_maskSampler"]);
         }
 
-        bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.positions);
+        bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram, vertexBuffer: VertexBuffer) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer.positions);
             gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.uvs);
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer.uvs);
             gl.vertexAttribPointer(shader.attributes["a_vertexUV"], 2, gl.FLOAT, false, 0, 0);
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshMaterialGroup.vertexBuffer.normals);
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer.normals);
             gl.vertexAttribPointer(shader.attributes["a_vertexNormal"], 3, gl.FLOAT, true, 0, 0);
         }
     }

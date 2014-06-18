@@ -37,6 +37,7 @@ module RwxViewer {
 
     export class RotationAnimation implements Animation {
         private _startTime: number;
+        private _identityTransform: Mat4Array;
         private _transform: Mat4Array;
         private _quaternion: Vec4Array;
         private _framesPerSecond: number;
@@ -44,20 +45,25 @@ module RwxViewer {
         constructor(startTime: number) {
             this._startTime = startTime;
             this._framesPerSecond = 30;
+            this._identityTransform = mat4.create();
             this._transform = mat4.create();
             this._quaternion = quat.create();
         }
 
         getTransformForTime(joint: number, time: number): Mat4Array {
-            var delta = time - this._startTime;
-            var frame = delta * (this._framesPerSecond / 1000);
-            var interpFactor = (frame % (this._framesPerSecond * 10)) / (this._framesPerSecond * 10);
+            if (joint === 1) {
+                var delta = time - this._startTime;
+                var frame = delta * (this._framesPerSecond / 1000);
+                var interpFactor = (frame % (this._framesPerSecond * 10)) / (this._framesPerSecond * 10);
 
-            quat.identity(this._quaternion);
-            quat.rotateY(this._quaternion, this._quaternion, interpFactor * (2 * Math.PI));
-            mat4.fromQuat(this._transform, this._quaternion);
+                quat.identity(this._quaternion);
+                quat.rotateY(this._quaternion, this._quaternion, interpFactor * (2 * Math.PI));
+                mat4.fromQuat(this._transform, this._quaternion);
 
-            return this._transform;
+                return this._transform;
+            } else {
+                return this._identityTransform;
+            }
         }
     }
 }

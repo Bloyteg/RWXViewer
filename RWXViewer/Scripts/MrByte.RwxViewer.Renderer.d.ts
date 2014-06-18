@@ -29,6 +29,7 @@ declare module RwxViewer {
     }
     class RotationAnimation implements Animation {
         private _startTime;
+        private _identityTransform;
         private _transform;
         private _quaternion;
         private _framesPerSecond;
@@ -50,11 +51,9 @@ declare module RwxViewer {
 }
 declare module RwxViewer {
     interface Drawable {
-        worldMatrix: Mat4Array;
         animation: Animation;
-        cloneWithTransform(matrix: Mat4Array): any;
         cloneWithAnimation(animation: Animation): any;
-        draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void;
+        draw(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix?: Mat4Array, time?: number): void;
     }
 }
 declare module RwxViewer {
@@ -74,16 +73,12 @@ declare module RwxViewer {
     class GridDrawable implements Drawable {
         private _vertexBuffer;
         private _vertexCount;
-        private _worldMatrix;
         private _animation;
         constructor(gl: WebGLRenderingContext);
-        constructor(worldMatrix: Mat4Array, vertexBuffer: WebGLBuffer, vertexCount: number);
         private initializeNew(gl);
-        public worldMatrix : Mat4Array;
         public animation : Animation;
-        public cloneWithTransform(matrix: Mat4Array): GridDrawable;
         public cloneWithAnimation(animation: Animation): GridDrawable;
-        public draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void;
+        public draw(gl: WebGLRenderingContext, shader: ShaderProgram): void;
     }
 }
 declare module RwxViewer {
@@ -93,8 +88,7 @@ declare module RwxViewer {
         normals: WebGLBuffer;
         count: number;
     }
-    interface MeshMaterialGroup {
-        vertexBuffer: VertexBuffer;
+    interface DrawableMaterial {
         baseColor: Vec4Array;
         ambient: number;
         diffuse: number;
@@ -103,24 +97,26 @@ declare module RwxViewer {
         texture: Texture;
         mask: Texture;
     }
+    interface SubMesh {
+        vertexBuffer: VertexBuffer;
+        material: DrawableMaterial;
+    }
     class MeshDrawable implements Drawable {
-        private _meshMaterialGroups;
-        private _worldMatrix;
+        private _subMeshes;
         private _children;
         private _isBillboard;
         private _animation;
         private _jointTag;
-        constructor(meshMaterialGroups: MeshMaterialGroup[], modelMatrix: Mat4Array, children: Drawable[], jointTag: number, isBillboard?: boolean, animation?: Animation);
-        public worldMatrix : Mat4Array;
+        private _transformMatrix;
+        constructor(subMeshes: SubMesh[], children: Drawable[], jointTag: number, isBillboard?: boolean, animation?: Animation);
         public animation : Animation;
-        public cloneWithTransform(matrix: Mat4Array): MeshDrawable;
         public cloneWithAnimation(animation: Animation): MeshDrawable;
-        public draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void;
-        private setTransformUniforms(gl, shader, time);
-        private setMaterialUniforms(gl, shader, meshMaterialGroup);
-        private bindTexture(gl, shader, meshMaterialGroup, time);
-        private bindMask(gl, shader, meshMaterialGroup, time);
-        public bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram, meshMaterialGroup: MeshMaterialGroup): void;
+        public draw(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix: Mat4Array, time: number): void;
+        private setTransformUniforms(gl, shader, transformMatrix, time);
+        private setMaterialUniforms(gl, shader, material);
+        private bindTexture(gl, shader, material, time);
+        private bindMask(gl, shader, material, time);
+        public bindVertexBuffers(gl: WebGLRenderingContext, shader: ShaderProgram, vertexBuffer: VertexBuffer): void;
     }
 }
 declare module RwxViewer {
@@ -249,6 +245,7 @@ declare module RwxViewer {
         private _mainProgram;
         private _camera;
         private _projectionMatrix;
+        private _modelMatrix;
         constructor(gl: WebGLRenderingContext);
         public initialize(mainProgram: ShaderProgram, gridProgram: ShaderProgram): void;
         public draw(time: number): void;

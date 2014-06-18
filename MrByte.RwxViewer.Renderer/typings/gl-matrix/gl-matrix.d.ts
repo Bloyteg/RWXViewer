@@ -83,6 +83,7 @@ interface Vector3 {
     cross(out: Vec3Array, a: Vec3Array, b: Vec3Array): Vec3Array;
     lerp(out: Vec3Array, a: Vec3Array, b: Vec3Array, t: number): Vec3Array;
     transformMat4(out: Vec3Array, a: Vec3Array, m: Mat4Array): Vec3Array;
+    transformMat4(out: number[], a: number[], m: Mat4Array): Vec3Array;
     transformQuat(out: Vec3Array, a: Vec3Array, q: Vec4Array): Vec3Array;
     str(a: Vec3Array): string;
 }

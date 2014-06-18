@@ -14,12 +14,8 @@
 
 module RwxViewer {
     export interface Drawable {
-        worldMatrix: Mat4Array;
         animation: Animation;
-
-        cloneWithTransform(matrix: Mat4Array);
         cloneWithAnimation(animation: Animation);
-
-        draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void;
+        draw(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix?: Mat4Array, time?: number): void;
     }
 }

@@ -1,4 +1,4 @@
-﻿ // you may not use this file except in compliance with the License.
+﻿// you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 // 
 //    http://www.apache.org/licenses/LICENSE-2.0
@@ -17,19 +17,10 @@ module RwxViewer {
     export class GridDrawable implements Drawable {
         private _vertexBuffer: WebGLBuffer;
         private _vertexCount: number;
-        private _worldMatrix: Mat4Array;
         private _animation = Animation.getDefaultAnimation();
 
-        constructor(gl: WebGLRenderingContext)
-        constructor(worldMatrix: Mat4Array, vertexBuffer: WebGLBuffer, vertexCount: number)
-        constructor(input: any, vertexBuffer?, vertexCount?) {
-            if (input instanceof Float32Array) {
-                this._vertexBuffer = vertexBuffer;
-                this._vertexCount = vertexCount;
-                this._worldMatrix = <Mat4Array>input;
-            } else {
-                this.initializeNew(<WebGLRenderingContext>input);
-            }
+        constructor(gl: WebGLRenderingContext) {
+            this.initializeNew(gl);
         }
 
         private initializeNew(gl: WebGLRenderingContext) {
@@ -53,23 +44,15 @@ module RwxViewer {
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         }
 
-        get worldMatrix(): Mat4Array {
-            return this._worldMatrix;
-        }
-
         get animation(): Animation {
             return this._animation;
-        }
-
-        cloneWithTransform(matrix: Mat4Array) {
-            return this;
         }
 
         cloneWithAnimation(animation: Animation) {
             return this;
         }
 
-        draw(gl: WebGLRenderingContext, shader: ShaderProgram, time: number): void {
+        draw(gl: WebGLRenderingContext, shader: ShaderProgram): void {
             gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
             gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
             gl.drawArrays(gl.LINES, 0, this._vertexCount);

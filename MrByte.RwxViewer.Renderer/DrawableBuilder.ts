@@ -16,7 +16,9 @@ module RwxViewer {
     interface IPrototypeCache {
         [name: string]: MeshDrawable
     }
-
+    
+    //TODO: Merge the geometry of prototypes and primitives into the parent (must apply transform matrix directly).
+    //TODO: Ensure that child clumps of prototypes are assigned as children to the parent clump.
     class MeshDrawableBuilder {
         private _gl: WebGLRenderingContext;
         private _model: Model;
@@ -27,55 +29,42 @@ module RwxViewer {
         }
 
         build(): Drawable {
-            var prototypes: IPrototypeCache = this.buildPrototypeCache(this._model);
+            var prototypes: IPrototypeCache = null; //this.buildPrototypeCache(this._model);
 
             return this.buildMeshDrawableFromClump(this._model.Clump, prototypes, mat4.create(), this._model.AxisAlignment !== AxisAlignment.None);
         }
 
-        private buildPrototypeCache(model: Model): IPrototypeCache {
-            return model.Prototypes.reduce((prototypeCache: IPrototypeCache, prototype: Prototype) => {
-                prototypeCache[prototype.Name] = this.buildMeshDrawableFromPrototype(model, prototype, prototypeCache);
-                return prototypeCache;
-            }, <IPrototypeCache>{});
-        }
+        //NOTE: This will create a cache of prototypes, instead of drawables (only child clumps will be drawables).
+        //When the prototype is merged with the parent, the geometry will be transformed by the matrix accordingly.
+        //private buildPrototypeCache(model: Model): IPrototypeCache {
+        //    return model.Prototypes.reduce((prototypeCache: IPrototypeCache, prototype: Prototype) => {
+        //        prototypeCache[prototype.Name] = this.buildMeshDrawableFromPrototype(model, prototype, prototypeCache);
+        //        return prototypeCache;
+        //    }, <IPrototypeCache>{});
+        //}
 
-        private buildMeshDrawableFromPrototype(model: Model, prototype: Prototype, prototypeCache: IPrototypeCache): MeshDrawable {
-            return this.buildMeshDrawableFromMeshGeometry(prototype, prototypeCache, mat4.create());
-        }
+        //private buildMeshDrawableFromPrototype(model: Model, prototype: Prototype, prototypeCache: IPrototypeCache): MeshDrawable {
+        //    return this.buildMeshDrawableFromMeshGeometry(prototype, prototypeCache, mat4.create());
+        //}
 
         //TODO: Handle bill-boarding better.
-        private buildMeshDrawableFromClump(clump: Clump, prototypeCache: IPrototypeCache, parentMatrix = mat4.create(), isBillboard?: boolean): MeshDrawable {
+        private buildMeshDrawableFromClump(clump: Clump, prototypeCache: IPrototypeCache, transformMatrix, isBillboard?: boolean): MeshDrawable {
             var matrix = mat4.clone(clump.Transform.Matrix);
-            mat4.multiply(matrix, parentMatrix, matrix);
+            mat4.multiply(matrix, transformMatrix, matrix);
 
-            return this.buildMeshDrawableFromMeshGeometry(clump, prototypeCache, matrix, isBillboard);
+            var children: MeshDrawable[] = clump.Children.map(child => this.buildMeshDrawableFromClump(child, prototypeCache, matrix, isBillboard));
+
+            return new MeshDrawable(this.buildSubMeshes(matrix, clump), children, clump.Tag, isBillboard);
         }
 
-        private buildMeshDrawableFromMeshGeometry(geometry: MeshGeometry, prototypeCache: IPrototypeCache, matrix: Mat4Array, isBillboard?: boolean): MeshDrawable {
-            var children: MeshDrawable[] = [];
-            children = children.concat(geometry.Children.map(child => this.buildMeshDrawableFromClump(child, prototypeCache, matrix, isBillboard)));
+        //private buildMeshDrawableFromPrimitive(primitive: PrimitiveGeometry, parentMatrix: Mat4Array): MeshDrawable {
+        //    var matrix = mat4.clone(primitive.Transform.Matrix);
+        //    mat4.multiply(matrix, parentMatrix, matrix);
 
-            //TODO: Handle the case where this is a prototypeinstancegeometry.
-            children = children.concat(geometry.PrototypeInstances.map(prototypeInstance => {
-                var newMatrix = mat4.clone(prototypeInstance.Transform.Matrix);
-                newMatrix = mat4.multiply(newMatrix, matrix, newMatrix);
+        //    return new MeshDrawable(this.buildMeshMaterialGroups(primitive), matrix, [], 0);
+        //}
 
-                return prototypeCache[prototypeInstance.Name].cloneWithTransform(newMatrix);
-            }));
-
-            children = children.concat(geometry.Primitives.map(primitive => this.buildMeshDrawableFromPrimitive(primitive, matrix)));
-
-            return new MeshDrawable(this.buildMeshMaterialGroups(geometry), matrix, children, 0, isBillboard);
-        }
-
-        private buildMeshDrawableFromPrimitive(primitive: PrimitiveGeometry, parentMatrix: Mat4Array): MeshDrawable {
-            var matrix = mat4.clone(primitive.Transform.Matrix);
-            mat4.multiply(matrix, parentMatrix, matrix);
-
-            return new MeshDrawable(this.buildMeshMaterialGroups(primitive), matrix, [], 0);
-        }
-
-        private buildMeshMaterialGroups(geometry: Geometry): MeshMaterialGroup[] {
+        private buildSubMeshes(transformMatrix: Mat4Array, geometry: Geometry): SubMesh[] {
             var facesByMaterial: IFace[][] = [];
 
             geometry.Faces.forEach((face: IFace) => {
@@ -86,26 +75,29 @@ module RwxViewer {
                 }
             });
 
-            return facesByMaterial.map((faces: IFace[], materialId) => {
-                var material = this._model.Materials[materialId];
+            return facesByMaterial.map((faces: IFace[], materialId): SubMesh => {
+                var sourceMaterial = this._model.Materials[materialId];
+                var resultMaterial = {
+                    baseColor: vec4.fromValues(sourceMaterial.Color.R, sourceMaterial.Color.G, sourceMaterial.Color.B, 1.0),
+                    opacity: sourceMaterial.Opacity,
+                    ambient: sourceMaterial.Ambient,
+                    diffuse: sourceMaterial.Diffuse,
+                    texture: TextureCache.getTexture(this._gl, sourceMaterial.Texture, TextureFilteringMode.MipMap),
+                    mask: TextureCache.getTexture(this._gl, sourceMaterial.Mask, TextureFilteringMode.None),
+                    drawMode: sourceMaterial.GeometrySampling === GeometrySampling.Wireframe ? this._gl.LINES : this._gl.TRIANGLES
+                };
 
                 return {
-                    vertexBuffer: this.buildVertexBuffer(geometry.Vertices, faces, material),
-                    baseColor: vec4.fromValues(material.Color.R, material.Color.G, material.Color.B, 1.0),
-                    opacity: material.Opacity,
-                    ambient: material.Ambient,
-                    diffuse: material.Diffuse,
-                    texture: TextureCache.getTexture(this._gl, material.Texture, TextureFilteringMode.MipMap),
-                    mask: TextureCache.getTexture(this._gl, material.Mask, TextureFilteringMode.None),
-                    drawMode: material.GeometrySampling === GeometrySampling.Wireframe ? this._gl.LINES : this._gl.TRIANGLES
+                    vertexBuffer: this.buildVertexBuffer(transformMatrix, geometry.Vertices, faces, sourceMaterial),
+                    material: resultMaterial
                 };
             });
         }
 
-        private buildVertexBuffer(vertices: Vertex[], faces: IFace[], material: Material): VertexBuffer {
+        private buildVertexBuffer(transformMatrix: Mat4Array, vertices: Vertex[], faces: IFace[], material: Material): VertexBuffer {
             var buffers = material.GeometrySampling === GeometrySampling.Wireframe
-                ? this.buildLineBuffers(vertices, faces)
-                : this.buildTriangleBuffers(vertices, faces, material);
+                ? this.buildLineBuffers(transformMatrix, vertices, faces)
+                : this.buildTriangleBuffers(transformMatrix, vertices, faces, material);
 
             var gl = this._gl;
             var positionBuffer = gl.createBuffer();
@@ -128,7 +120,7 @@ module RwxViewer {
             };
         }
 
-        private buildLineBuffers(vertices: Vertex[], faces: IFace[]) {
+        private buildLineBuffers(transformMatrix: Mat4Array, vertices: Vertex[], faces: IFace[]) {
             var positions: number[] = [];
             var uvs: number[] = [];
             var normals: number[] = [];
@@ -141,7 +133,7 @@ module RwxViewer {
                     indices.forEach(vertexIndex => {
                         var vertex = vertices[vertexIndex];
 
-                        positions.push(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
+                        Array.prototype.push.apply(positions, this.computeVertexPosition(transformMatrix, vertex));
                         uvs.push((<any>(vertex.UV) || {}).U || 0, (<any>(vertex.UV) || {}).V || 0);
                         normals.push(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
                     });
@@ -155,7 +147,8 @@ module RwxViewer {
             };
         }
 
-        private buildTriangleBuffers(vertices: Vertex[], faces: IFace[], material: Material) {
+        //TODO: Will need to transform normals.
+        private buildTriangleBuffers(transformMatrix: Mat4Array, vertices: Vertex[], faces: IFace[], material: Material) {
             var positions: number[] = [];
             var uvs: number[] = [];
             var normals: number[] = [];
@@ -166,7 +159,7 @@ module RwxViewer {
                         var vertex = vertices[index];
                         var normal = material.LightSampling == LightSampling.Vertex ? vertex.Normal : triangle.Normal;
 
-                        positions.push(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
+                        Array.prototype.push.apply(positions, this.computeVertexPosition(transformMatrix, vertex));
                         uvs.push((<any>(vertex.UV) || {}).U || 0, (<any>(vertex.UV) || {}).V || 0);
                         normals.push(normal.X, normal.Y, normal.Z);
                     });
@@ -178,6 +171,11 @@ module RwxViewer {
                 uvs: new Float32Array(uvs),
                 normals: new Float32Array(normals)
             };
+        }
+
+        private computeVertexPosition(transformMatrix: Mat4Array, vertex: Vertex) {
+            var vertexVector = [vertex.Position.X, vertex.Position.Y, vertex.Position.Z];
+            return vec3.transformMat4(vertexVector, vertexVector, transformMatrix);
         }
     }
 
