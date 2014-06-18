@@ -116,13 +116,13 @@ var RwxViewer;
             this._quaternion = quat.create();
         }
         RotationAnimation.prototype.getTransformForTime = function (joint, time) {
-            if (joint === 1) {
+            if (joint === 6 || joint == 7) {
                 var delta = time - this._startTime;
                 var frame = delta * (this._framesPerSecond / 1000);
                 var interpFactor = (frame % (this._framesPerSecond * 10)) / (this._framesPerSecond * 10);
 
                 quat.identity(this._quaternion);
-                quat.rotateY(this._quaternion, this._quaternion, interpFactor * (2 * Math.PI));
+                quat.rotateX(this._quaternion, this._quaternion, interpFactor * (2 * Math.PI));
                 mat4.fromQuat(this._transform, this._quaternion);
 
                 return this._transform;
@@ -313,6 +313,7 @@ var RwxViewer;
             var _this = this;
             this._gl = gl;
             this._model = model;
+            this._identityMatrix = mat4.create();
 
             this._prototypeMap = {};
             model.Prototypes.forEach(function (prototype) {
@@ -326,9 +327,9 @@ var RwxViewer;
         MeshDrawableBuilder.prototype.buildMeshDrawableFromClump = function (clump, transformMatrix) {
             var matrix = mat4.clone(clump.Transform.Matrix);
             mat4.multiply(matrix, transformMatrix, matrix);
-            var meshData = this.buildGeometryMeshData(clump, matrix);
+            var meshData = this.buildGeometryMeshData(clump, this._identityMatrix);
 
-            return new RwxViewer.MeshDrawable(meshData.subMeshes, meshData.meshChildren, clump.Tag);
+            return new RwxViewer.MeshDrawable(meshData.subMeshes, meshData.meshChildren, matrix, clump.Tag);
         };
 
         MeshDrawableBuilder.prototype.buildGeometryMeshData = function (geometry, transformMatrix) {
@@ -615,12 +616,13 @@ var RwxViewer;
 (function (RwxViewer) {
     //TODO: Handle prelit meshes.
     var MeshDrawable = (function () {
-        function MeshDrawable(subMeshes, children, jointTag, isBillboard, animation) {
+        function MeshDrawable(subMeshes, children, modelMatrix, jointTag, isBillboard, animation) {
             this._subMeshes = subMeshes;
             this._children = children;
             this._isBillboard = isBillboard || false;
             this._animation = animation || RwxViewer.Animation.getDefaultAnimation();
             this._jointTag = jointTag || 0;
+            this._modelMatrix = modelMatrix;
             this._transformMatrix = mat4.create();
         }
         Object.defineProperty(MeshDrawable.prototype, "animation", {
@@ -634,7 +636,7 @@ var RwxViewer;
         MeshDrawable.prototype.cloneWithAnimation = function (animation) {
             return new MeshDrawable(this._subMeshes, this._children.map(function (child) {
                 return child.cloneWithAnimation(animation);
-            }), this._jointTag, this._isBillboard, animation);
+            }), this._modelMatrix, this._jointTag, this._isBillboard, animation);
         };
 
         MeshDrawable.prototype.draw = function (gl, shader, transformMatrix, time) {
@@ -656,7 +658,8 @@ var RwxViewer;
         };
 
         MeshDrawable.prototype.setTransformUniforms = function (gl, shader, transformMatrix, time) {
-            mat4.multiply(this._transformMatrix, transformMatrix, this._animation.getTransformForTime(this._jointTag, time));
+            mat4.multiply(this._transformMatrix, this._modelMatrix, this._animation.getTransformForTime(this._jointTag, time));
+            mat4.multiply(this._transformMatrix, transformMatrix, this._transformMatrix);
 
             gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._transformMatrix);
             gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);

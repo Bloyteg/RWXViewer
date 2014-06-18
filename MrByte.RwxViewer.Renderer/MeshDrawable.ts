@@ -42,14 +42,16 @@ module RwxViewer {
         private _isBillboard: boolean;
         private _animation: Animation;
         private _jointTag: number;
+        private _modelMatrix: Mat4Array;
         private _transformMatrix: Mat4Array;
 
-        constructor(subMeshes: SubMesh[], children: Drawable[], jointTag: number, isBillboard?: boolean, animation?: Animation) {
+        constructor(subMeshes: SubMesh[], children: Drawable[], modelMatrix: Mat4Array, jointTag: number, isBillboard?: boolean, animation?: Animation) {
             this._subMeshes = subMeshes;
             this._children = children;
             this._isBillboard = isBillboard || false;
             this._animation = animation || Animation.getDefaultAnimation();
             this._jointTag = jointTag || 0;
+            this._modelMatrix = modelMatrix;
             this._transformMatrix = mat4.create();
         }
 
@@ -58,7 +60,7 @@ module RwxViewer {
         }
 
         cloneWithAnimation(animation: Animation) {
-            return new MeshDrawable(this._subMeshes, this._children.map(child => child.cloneWithAnimation(animation)), this._jointTag, this._isBillboard, animation); 
+            return new MeshDrawable(this._subMeshes, this._children.map(child => child.cloneWithAnimation(animation)), this._modelMatrix, this._jointTag, this._isBillboard, animation); 
         }
 
         draw(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix: Mat4Array, time: number): void {
@@ -77,7 +79,8 @@ module RwxViewer {
         }
 
         private setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix: Mat4Array, time: number) {
-            mat4.multiply(this._transformMatrix, transformMatrix, this._animation.getTransformForTime(this._jointTag, time));
+            mat4.multiply(this._transformMatrix, this._modelMatrix, this._animation.getTransformForTime(this._jointTag, time));
+            mat4.multiply(this._transformMatrix, transformMatrix, this._transformMatrix);
 
             gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._transformMatrix);
             gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);

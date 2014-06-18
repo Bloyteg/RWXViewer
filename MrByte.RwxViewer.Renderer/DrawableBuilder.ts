@@ -22,10 +22,12 @@ module RwxViewer {
         private _gl: WebGLRenderingContext;
         private _model: Model;
         private _prototypeMap: PrototypeMap;
+        private _identityMatrix: Mat4Array;
 
         constructor(gl: WebGLRenderingContext, model: Model) {
             this._gl = gl;
             this._model = model;
+            this._identityMatrix = mat4.create();
 
             this._prototypeMap = {};
             model.Prototypes.forEach(prototype => this._prototypeMap[prototype.Name] = prototype);
@@ -38,9 +40,9 @@ module RwxViewer {
         private buildMeshDrawableFromClump(clump: Clump, transformMatrix): MeshDrawable {
             var matrix = mat4.clone(clump.Transform.Matrix);
             mat4.multiply(matrix, transformMatrix, matrix);
-            var meshData = this.buildGeometryMeshData(clump, matrix);
+            var meshData = this.buildGeometryMeshData(clump, this._identityMatrix);
 
-            return new MeshDrawable(meshData.subMeshes, meshData.meshChildren, clump.Tag);
+            return new MeshDrawable(meshData.subMeshes, meshData.meshChildren, matrix, clump.Tag);
         }
 
         private buildGeometryMeshData(geometry: MeshGeometry, transformMatrix: Mat4Array) {

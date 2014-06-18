@@ -51,13 +51,13 @@ module RwxViewer {
         }
 
         getTransformForTime(joint: number, time: number): Mat4Array {
-            if (joint === 1) {
+            if (joint === 6 || joint == 7) {
                 var delta = time - this._startTime;
                 var frame = delta * (this._framesPerSecond / 1000);
                 var interpFactor = (frame % (this._framesPerSecond * 10)) / (this._framesPerSecond * 10);
 
                 quat.identity(this._quaternion);
-                quat.rotateY(this._quaternion, this._quaternion, interpFactor * (2 * Math.PI));
+                quat.rotateX(this._quaternion, this._quaternion, interpFactor * (2 * Math.PI));
                 mat4.fromQuat(this._transform, this._quaternion);
 
                 return this._transform;

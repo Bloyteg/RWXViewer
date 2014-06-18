@@ -107,8 +107,9 @@ declare module RwxViewer {
         private _isBillboard;
         private _animation;
         private _jointTag;
+        private _modelMatrix;
         private _transformMatrix;
-        constructor(subMeshes: SubMesh[], children: Drawable[], jointTag: number, isBillboard?: boolean, animation?: Animation);
+        constructor(subMeshes: SubMesh[], children: Drawable[], modelMatrix: Mat4Array, jointTag: number, isBillboard?: boolean, animation?: Animation);
         public animation : Animation;
         public cloneWithAnimation(animation: Animation): MeshDrawable;
         public draw(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix: Mat4Array, time: number): void;

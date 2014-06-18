@@ -74,7 +74,7 @@ module RwxViewer {
 
         setCurrentModel(model: Model): void {
             if (model) {
-                this._currentDrawable = createDrawableFromModel(this._gl, model);
+                this._currentDrawable = createDrawableFromModel(this._gl, model).cloneWithAnimation(Animation.getRotationAnimation());
             } else {
                 this._currentDrawable = null;
             }
