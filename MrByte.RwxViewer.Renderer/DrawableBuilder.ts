@@ -39,7 +39,7 @@ module RwxViewer {
 
         private buildMeshDrawableFromClump(clump: Clump, transformMatrix): MeshDrawable {
             var matrix = mat4.clone(clump.Transform.Matrix);
-            //mat4.multiply(matrix, transformMatrix, matrix);
+            mat4.multiply(matrix, transformMatrix, matrix);
             var meshData = this.buildGeometryMeshData(clump, this._identityMatrix);
 
             return new MeshDrawable(meshData.subMeshes, meshData.meshChildren, matrix, clump.Tag);
