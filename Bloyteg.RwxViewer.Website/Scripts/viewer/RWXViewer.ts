@@ -18,22 +18,33 @@ var canvas = <HTMLCanvasElement>document.getElementById("viewport");
 var glOptions: any = { preserveDrawingBuffer: true };
 var gl = <WebGLRenderingContext>(canvas.getContext("webgl", glOptions) || canvas.getContext("experimental-webgl", glOptions));
 var renderer: RwxViewer.Renderer = new RwxViewer.Renderer(gl);
+var types = [{ name: "Model", type: 0 }, { name: "Avatar", type: 1 }];
 
 class ViewModel {
     worlds: KnockoutObservableArray<ObjectPathItemLoader.IObjectPathWorld>;
     models: KnockoutObservableArray<ObjectPathItemLoader.IObjectPathModel>;
+    types: KnockoutObservableArray<{name: string; type: number}>;
+    modelsByType: KnockoutComputed<ObjectPathItemLoader.IObjectPathModel[]>;
 
     selectedWorld: KnockoutObservable<ObjectPathItemLoader.IObjectPathWorld>;
     selectedModel: KnockoutObservable<ObjectPathItemLoader.IObjectPathModel>;
+    selectedType: KnockoutObservable<{name: string; type: number}>;
 
     errorMessage: KnockoutObservable<string>;
 
     constructor() {
         this.worlds = ko.observableArray([]);
         this.models = ko.observableArray([]);
+        this.types = ko.observableArray(types);
+
         this.selectedWorld = ko.observable(null);
         this.selectedModel = ko.observable(null);
+        this.selectedType = ko.observable(types[0]);
         this.errorMessage = ko.observable(null);
+
+        this.modelsByType = ko.computed(() => {
+            return this.models().filter(model => model.type === this.selectedType().type);
+        });
 
         var self = this;
 

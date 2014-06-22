@@ -20,9 +20,12 @@
     <div id="modelSelector" class="infoBar">
         <label for="selectWorld">World:</label>
         <select class="uiSelect" id="selectWorld" data-bind="options: worlds, optionsText: 'name', optionsCaption: '(None)', value: selectedWorld, enabled: worlds().length > 0"></select>
+        
+        <label for="selecteType">Type:</label>
+        <select class="uiSelect" id="selectType" data-bind="options: types, optionsText: 'name', value: selectedType, enable: models().length > 0"></select>
 
         <label for="selectModel">Object:</label>
-        <select class="uiSelect" id="selectModel" data-bind="options: models, optionsText: 'name', optionsCaption: '(None)', value: selectedModel, enable: models().length > 0"></select>
+        <select class="uiSelect" id="selectModel" data-bind="options: modelsByType, optionsText: 'name', optionsCaption: '(None)', value: selectedModel, enable: models().length > 0"></select>
     </div>
 
     <div class="viewport">

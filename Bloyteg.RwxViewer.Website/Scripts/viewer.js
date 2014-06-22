@@ -256,14 +256,25 @@ var canvas = document.getElementById("viewport");
 var glOptions = { preserveDrawingBuffer: true };
 var gl = (canvas.getContext("webgl", glOptions) || canvas.getContext("experimental-webgl", glOptions));
 var renderer = new RwxViewer.Renderer(gl);
+var types = [{ name: "Model", type: 0 }, { name: "Avatar", type: 1 }];
 
 var ViewModel = (function () {
     function ViewModel() {
+        var _this = this;
         this.worlds = ko.observableArray([]);
         this.models = ko.observableArray([]);
+        this.types = ko.observableArray(types);
+
         this.selectedWorld = ko.observable(null);
         this.selectedModel = ko.observable(null);
+        this.selectedType = ko.observable(types[0]);
         this.errorMessage = ko.observable(null);
+
+        this.modelsByType = ko.computed(function () {
+            return _this.models().filter(function (model) {
+                return model.type === _this.selectedType().type;
+            });
+        });
 
         var self = this;
 
