@@ -184,6 +184,12 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201406220225242_InitialCreate.cs" />
+    <Compile Include="Migrations\201406220225242_InitialCreate.Designer.cs">
+      <DependentUpon>201406220225242_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\DAL\Animation.cs" />
     <Compile Include="Models\DAL\ObjectPathItem.cs" />
     <Compile Include="Models\DAL\Texture.cs" />
     <Compile Include="Models\IObjectPathItemLoader.cs" />
@@ -249,6 +255,11 @@
     <TypeScriptCompile Include="Scripts\viewer\ObjectPathItemLoader.ts" />
     <TypeScriptCompile Include="Scripts\viewer\RWXViewer.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201406220225242_InitialCreate.resx">
+      <DependentUpon>201406220225242_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

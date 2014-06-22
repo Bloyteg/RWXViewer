@@ -150,4 +150,28 @@ module RwxViewer {
         IsSeamless: boolean;
         AxisAlignment: AxisAlignment;
     }
+
+    export interface Quaternion {
+        W: number;
+        X: number;
+        Y: number;
+        Z: number;
+    }
+
+    export interface Keyframe {
+        Keyframe: number;
+        Rotation: Quaternion;
+        Translation: Vector3;
+    }
+
+    export interface Joint {
+        Name: string;
+        Keyframes: Keyframe[];
+    }
+
+    export interface ModelAnimation {
+        FramesPerSecond: number;
+        FrameCount: number;
+        Joints: Joint[];
+    }
 }

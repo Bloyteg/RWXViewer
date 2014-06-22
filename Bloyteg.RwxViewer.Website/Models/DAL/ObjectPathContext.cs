@@ -25,5 +25,6 @@ namespace Bloyteg.RwxViewer.Website.Models.DAL
         public DbSet<World> Worlds { get; set; }
         public DbSet<Model> Models { get; set; }
         public DbSet<Texture> Textures { get; set; }
+        public DbSet<Animation> Animations { get; set; }
     }
 }

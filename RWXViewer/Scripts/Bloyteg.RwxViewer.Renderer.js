@@ -116,13 +116,13 @@ var RwxViewer;
             this._quaternion = quat.create();
         }
         RotationAnimation.prototype.getTransformForTime = function (joint, time) {
-            if (joint === 6 || joint == 7) {
+            if (joint === 1) {
                 var delta = time - this._startTime;
                 var frame = delta * (this._framesPerSecond / 1000);
                 var interpFactor = (frame % (this._framesPerSecond * 10)) / (this._framesPerSecond * 10);
 
                 quat.identity(this._quaternion);
-                quat.rotateX(this._quaternion, this._quaternion, interpFactor * (2 * Math.PI));
+                quat.rotateY(this._quaternion, this._quaternion, interpFactor * (2 * Math.PI));
                 mat4.fromQuat(this._transform, this._quaternion);
 
                 return this._transform;
@@ -133,6 +133,16 @@ var RwxViewer;
         return RotationAnimation;
     })();
     RwxViewer.RotationAnimation = RotationAnimation;
+
+    var SequenceAnimation = (function () {
+        function SequenceAnimation() {
+        }
+        SequenceAnimation.prototype.getTransformForTime = function (joint, time) {
+            return null;
+        };
+        return SequenceAnimation;
+    })();
+    RwxViewer.SequenceAnimation = SequenceAnimation;
 })(RwxViewer || (RwxViewer = {}));
 // Copyright 2014 Joshua R. Rodgers
 //

@@ -36,6 +36,9 @@ declare module RwxViewer {
         constructor(startTime: number);
         public getTransformForTime(joint: number, time: number): Mat4Array;
     }
+    class SequenceAnimation implements Animation {
+        public getTransformForTime(joint: number, time: number): Mat4Array;
+    }
 }
 declare module RwxViewer {
     interface Camera {
@@ -235,6 +238,26 @@ declare module RwxViewer {
         HasRandomUVs: boolean;
         IsSeamless: boolean;
         AxisAlignment: AxisAlignment;
+    }
+    interface Quaternion {
+        W: number;
+        X: number;
+        Y: number;
+        Z: number;
+    }
+    interface Keyframe {
+        Keyframe: number;
+        Rotation: Quaternion;
+        Translation: Vector3;
+    }
+    interface Joint {
+        Name: string;
+        Keyframes: Keyframe[];
+    }
+    interface ModelAnimation {
+        FramesPerSecond: number;
+        FrameCount: number;
+        Joints: Joint[];
     }
 }
 declare module RwxViewer {
