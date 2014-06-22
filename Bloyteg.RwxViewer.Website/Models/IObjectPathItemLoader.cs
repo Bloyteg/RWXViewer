@@ -1,4 +1,4 @@
-// Copyright 2014 Joshua R. Rodgers
+﻿// Copyright 2014 Joshua R. Rodgers
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Web.Http;
-using Bloyeg.RwxViewer.Website.Models;
-using Microsoft.Practices.Unity;
-using Unity.WebApi;
+using System.Threading.Tasks;
+using MrByte.RWX.Model;
 
-namespace Bloyeg.RwxViewer.Website
+namespace Bloyteg.RwxViewer.Website.Models
 {
-    public static class UnityConfig
+    public interface IObjectPathItemLoader
     {
-        public static void RegisterComponents()
-        {
-			var container = new UnityContainer();
-
-            container.RegisterInstance<IObjectPathItemLoader>(new ObjectPathItemLoader());
-
-            GlobalConfiguration.Configuration.DependencyResolver = new UnityDependencyResolver(container);
-        }
+        Task<Model> GetModelAsync(int worldId, string modelName);
+        Task<byte[]> GetTextureAsync(int worldId, string textureName);
     }
 }

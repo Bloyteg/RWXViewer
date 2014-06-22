@@ -17,7 +17,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
-namespace Bloyeg.RwxViewer.Website.Models.DAL
+namespace Bloyteg.RwxViewer.Website.Models.DAL
 {
     [DataContract]
     public class World

@@ -19,10 +19,10 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Bloyeg.RwxViewer.Website.Models;
-using Bloyeg.RwxViewer.Website.Models.DAL;
+using Bloyteg.RwxViewer.Website.Models;
+using Bloyteg.RwxViewer.Website.Models.DAL;
 
-namespace Bloyeg.RwxViewer.Website.Controllers
+namespace Bloyteg.RwxViewer.Website.Controllers
 {
     public class ObjectPathController : ApiController
     {

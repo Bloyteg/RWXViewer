@@ -6,9 +6,9 @@ using System.IO;
 using System.Net;
 using System.Runtime.Caching;
 using System.Threading.Tasks;
-using Bloyeg.RwxViewer.Website.Models.DAL;
+using Bloyteg.RwxViewer.Website.Models.DAL;
 
-namespace Bloyeg.RwxViewer.Website.Models
+namespace Bloyteg.RwxViewer.Website.Models
 {
     public class TextureLoader
     {

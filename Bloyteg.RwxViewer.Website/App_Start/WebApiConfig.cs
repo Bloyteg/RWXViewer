@@ -12,23 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Threading.Tasks;
+using System.Web.Http;
 
-namespace Bloyeg.RwxViewer.Website.Models
+namespace Bloyteg.RwxViewer.Website
 {
-    public class ObjectPathItemLoader : IObjectPathItemLoader
+    public static class WebApiConfig
     {
-        private readonly ModelLoader _modelLoader = new ModelLoader();
-        private readonly TextureLoader _textureLoader = new TextureLoader();
-
-        public async Task<MrByte.RWX.Model.Model> GetModelAsync(int worldId, string modelName)
+        public static void Register(HttpConfiguration config)
         {
-            return await _modelLoader.GetAsync(worldId, modelName);
-        }
+            // Web API configuration and services
 
-        public async Task<byte[]> GetTextureAsync(int worldId, string textureName)
-        {
-            return await _textureLoader.GetTextureAsync(worldId, textureName);
+            // Web API routes
+            config.MapHttpAttributeRoutes();
+
+            config.Routes.MapHttpRoute("DefaultApi", "api/{controller}/{id}", new {id = RouteParameter.Optional});
+
+            config.Formatters.Remove(config.Formatters.XmlFormatter);
         }
     }
 }

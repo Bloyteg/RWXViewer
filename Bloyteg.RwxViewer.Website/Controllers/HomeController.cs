@@ -13,19 +13,14 @@
 // limitations under the License.
 
 using System.Web.Mvc;
-using System.Web.Routing;
 
-namespace Bloyeg.RwxViewer.Website
+namespace Bloyteg.RwxViewer.Website.Controllers
 {
-    public class RouteConfig
+    public class HomeController : Controller
     {
-        public static void RegisterRoutes(RouteCollection routes)
+        public ActionResult Index()
         {
-            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-
-            routes.MapRoute("Default", "{controller}/{action}/{id}",
-                new {controller = "Home", action = "Index", id = UrlParameter.Optional}
-                );
+            return View();
         }
     }
 }

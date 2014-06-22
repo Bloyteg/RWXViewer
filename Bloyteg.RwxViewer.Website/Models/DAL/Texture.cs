@@ -1,4 +1,4 @@
-﻿namespace Bloyeg.RwxViewer.Website.Models.DAL
+﻿namespace Bloyteg.RwxViewer.Website.Models.DAL
 {
     public class Texture : ObjectPathItem
     {

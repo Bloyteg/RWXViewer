@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Data.Entity;
+using System.Web.Mvc;
+using System.Web.Routing;
 
-namespace Bloyeg.RwxViewer.Website.Models.DAL
+namespace Bloyteg.RwxViewer.Website
 {
-    public class ObjectPathContext : DbContext
+    public class RouteConfig
     {
-        public ObjectPathContext() : base("ObjectPathDb")
+        public static void RegisterRoutes(RouteCollection routes)
         {
-        }
+            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
-        public DbSet<World> Worlds { get; set; }
-        public DbSet<Model> Models { get; set; }
-        public DbSet<Texture> Textures { get; set; }
+            routes.MapRoute("Default", "{controller}/{action}/{id}",
+                new {controller = "Home", action = "Index", id = UrlParameter.Optional}
+                );
+        }
     }
 }

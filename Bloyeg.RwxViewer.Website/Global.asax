@@ -1,1 +1,0 @@
-﻿<%@ Application Codebehind="Global.asax.cs" Inherits="Bloyeg.RwxViewer.Website.MvcApplication" Language="C#" %>

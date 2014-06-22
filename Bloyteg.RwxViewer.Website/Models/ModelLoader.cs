@@ -4,10 +4,10 @@ using System.Data.Entity;
 using System.Net;
 using System.Runtime.Caching;
 using System.Threading.Tasks;
-using Bloyeg.RwxViewer.Website.Models.DAL;
+using Bloyteg.RwxViewer.Website.Models.DAL;
 using MrByte.RWX;
 
-namespace Bloyeg.RwxViewer.Website.Models
+namespace Bloyteg.RwxViewer.Website.Models
 {
     public class ModelLoader
     {

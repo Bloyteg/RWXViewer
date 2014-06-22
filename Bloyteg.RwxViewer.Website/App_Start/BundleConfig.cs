@@ -14,7 +14,7 @@
 
 using System.Web.Optimization;
 
-namespace Bloyeg.RwxViewer.Website
+namespace Bloyteg.RwxViewer.Website
 {
     public class BundleConfig
     {

@@ -15,7 +15,7 @@
 using System.ComponentModel;
 using Newtonsoft.Json;
 
-namespace Bloyeg.RwxViewer.Website.Models.DAL
+namespace Bloyteg.RwxViewer.Website.Models.DAL
 {
     public enum ModelType
     {

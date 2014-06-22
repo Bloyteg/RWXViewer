@@ -12,15 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Web.Mvc;
+using System.Threading.Tasks;
 
-namespace Bloyeg.RwxViewer.Website
+namespace Bloyteg.RwxViewer.Website.Models
 {
-    public class FilterConfig
+    public class ObjectPathItemLoader : IObjectPathItemLoader
     {
-        public static void RegisterGlobalFilters(GlobalFilterCollection filters)
+        private readonly ModelLoader _modelLoader = new ModelLoader();
+        private readonly TextureLoader _textureLoader = new TextureLoader();
+
+        public async Task<MrByte.RWX.Model.Model> GetModelAsync(int worldId, string modelName)
         {
-            filters.Add(new HandleErrorAttribute());
+            return await _modelLoader.GetAsync(worldId, modelName);
+        }
+
+        public async Task<byte[]> GetTextureAsync(int worldId, string textureName)
+        {
+            return await _textureLoader.GetTextureAsync(worldId, textureName);
         }
     }
 }

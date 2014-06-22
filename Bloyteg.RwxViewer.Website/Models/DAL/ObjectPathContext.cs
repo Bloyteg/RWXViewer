@@ -12,22 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Web.Http;
+using System.Data.Entity;
 
-namespace Bloyeg.RwxViewer.Website
+namespace Bloyteg.RwxViewer.Website.Models.DAL
 {
-    public static class WebApiConfig
+    public class ObjectPathContext : DbContext
     {
-        public static void Register(HttpConfiguration config)
+        public ObjectPathContext() : base("ObjectPathDb")
         {
-            // Web API configuration and services
-
-            // Web API routes
-            config.MapHttpAttributeRoutes();
-
-            config.Routes.MapHttpRoute("DefaultApi", "api/{controller}/{id}", new {id = RouteParameter.Optional});
-
-            config.Formatters.Remove(config.Formatters.XmlFormatter);
         }
+
+        public DbSet<World> Worlds { get; set; }
+        public DbSet<Model> Models { get; set; }
+        public DbSet<Texture> Textures { get; set; }
     }
 }

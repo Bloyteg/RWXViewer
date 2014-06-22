@@ -12,15 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Web;
+using System.Web.Http;
 using System.Web.Mvc;
+using System.Web.Optimization;
+using System.Web.Routing;
 
-namespace Bloyeg.RwxViewer.Website.Controllers
+namespace Bloyteg.RwxViewer.Website
 {
-    public class HomeController : Controller
+    public class MvcApplication : HttpApplication
     {
-        public ActionResult Index()
+        protected void Application_Start()
         {
-            return View();
+            AreaRegistration.RegisterAllAreas();
+            GlobalConfiguration.Configure(WebApiConfig.Register);
+
+            UnityConfig.RegisterComponents();
+
+            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+            RouteConfig.RegisterRoutes(RouteTable.Routes);
+            BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
     }
 }
