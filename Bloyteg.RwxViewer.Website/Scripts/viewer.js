@@ -264,10 +264,12 @@ var ViewModel = (function () {
         this.worlds = ko.observableArray([]);
         this.models = ko.observableArray([]);
         this.types = ko.observableArray(types);
+        this.animations = ko.observableArray([]);
 
         this.selectedWorld = ko.observable(null);
         this.selectedModel = ko.observable(null);
         this.selectedType = ko.observable(types[0]);
+        this.selectedAnimation = ko.observable(null);
         this.errorMessage = ko.observable(null);
 
         this.modelsByType = ko.computed(function () {
@@ -283,8 +285,12 @@ var ViewModel = (function () {
                 ObjectPathItemLoader.getModels(world.worldId).done(function (models) {
                     return self.models(models);
                 });
+                ObjectPathItemLoader.getAnimations(world.worldId).done(function (animations) {
+                    return self.animations(animations);
+                });
             } else {
                 self.models([]);
+                self.animations([]);
             }
         });
 
@@ -296,20 +302,35 @@ var ViewModel = (function () {
             }
         });
 
+        this.selectedAnimation.subscribe(function (animation) {
+            self.errorMessage(null);
+            renderer.setCurrentAnimation(null);
+
+            if (animation) {
+                $.when(ObjectPathItemLoader.loadAnimation(animation.worldId, animation.name), $('#loading').fadeIn(FADE_TIME)).done(function (modelAnimation) {
+                    renderer.setCurrentAnimation(modelAnimation);
+                    $('#loading').fadeOut(FADE_TIME);
+                }).fail(function () {
+                    renderer.setCurrentAnimation(null);
+                    self.errorMessage("Failed to load the selected animation.");
+                    $('#loading').fadeOut(FADE_TIME);
+                });
+            }
+        });
+
         this.selectedModel.subscribe(function (model) {
             self.errorMessage(null);
+            self.selectedAnimation(null);
             renderer.setCurrentModel(null);
 
             if (model) {
-                $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), ObjectPathItemLoader.loadAnimation(model.worldId, "hawalk"), $('#loading').fadeIn(FADE_TIME)).done(function (result, animation) {
+                $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), $('#loading').fadeIn(FADE_TIME)).done(function (result) {
                     ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(function (textures) {
                         Object.keys(textures).forEach(function (imageKey) {
                             return RwxViewer.TextureCache.addImageToCache(imageKey, textures[imageKey]);
                         });
 
                         renderer.setCurrentModel(result);
-                        renderer.setCurrentAnimation(animation);
-
                         $('#loading').fadeOut(FADE_TIME);
                     }).fail(function () {
                         renderer.setCurrentModel(result);

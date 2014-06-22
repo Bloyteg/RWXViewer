@@ -26,6 +26,9 @@
 
         <label for="selectModel">Object:</label>
         <select class="uiSelect" id="selectModel" data-bind="options: modelsByType, optionsText: 'name', optionsCaption: '(None)', value: selectedModel, enable: models().length > 0"></select>
+        
+        <label for="selectAnimation">Animation:</label>
+        <select class="uiSelect" id="selectAnimation" data-bind="options: animations, optionsText: 'name', optionsCaption: '(None)', value: selectedAnimation, enable: selectedModel() && selectedType().type === 1"></select>
     </div>
 
     <div class="viewport">

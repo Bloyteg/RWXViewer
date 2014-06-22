@@ -23,12 +23,14 @@ var types = [{ name: "Model", type: 0 }, { name: "Avatar", type: 1 }];
 class ViewModel {
     worlds: KnockoutObservableArray<ObjectPathItemLoader.IObjectPathWorld>;
     models: KnockoutObservableArray<ObjectPathItemLoader.IObjectPathModel>;
-    types: KnockoutObservableArray<{name: string; type: number}>;
+    types: KnockoutObservableArray<{ name: string; type: number }>;
+    animations: KnockoutObservableArray<ObjectPathItemLoader.IObjectPathAnimation>;
     modelsByType: KnockoutComputed<ObjectPathItemLoader.IObjectPathModel[]>;
 
     selectedWorld: KnockoutObservable<ObjectPathItemLoader.IObjectPathWorld>;
     selectedModel: KnockoutObservable<ObjectPathItemLoader.IObjectPathModel>;
-    selectedType: KnockoutObservable<{name: string; type: number}>;
+    selectedType: KnockoutObservable<{ name: string; type: number }>;
+    selectedAnimation: KnockoutObservable<ObjectPathItemLoader.IObjectPathAnimation>;
 
     errorMessage: KnockoutObservable<string>;
 
@@ -36,10 +38,12 @@ class ViewModel {
         this.worlds = ko.observableArray([]);
         this.models = ko.observableArray([]);
         this.types = ko.observableArray(types);
+        this.animations = ko.observableArray([]);
 
         this.selectedWorld = ko.observable(null);
         this.selectedModel = ko.observable(null);
         this.selectedType = ko.observable(types[0]);
+        this.selectedAnimation = ko.observable(null);
         this.errorMessage = ko.observable(null);
 
         this.modelsByType = ko.computed(() => {
@@ -51,8 +55,10 @@ class ViewModel {
         this.selectedWorld.subscribe(world => {
             if (world) {
                 ObjectPathItemLoader.getModels(world.worldId).done(models => self.models(models));
+                ObjectPathItemLoader.getAnimations(world.worldId).done(animations => self.animations(animations));
             } else {
                 self.models([]);
+                self.animations([]);
             }
         });
 
@@ -64,20 +70,36 @@ class ViewModel {
             }
         });
 
+        this.selectedAnimation.subscribe(animation => {
+            self.errorMessage(null);
+            renderer.setCurrentAnimation(null);
+
+            if (animation) {
+                $.when(ObjectPathItemLoader.loadAnimation(animation.worldId, animation.name), $('#loading').fadeIn(FADE_TIME))
+                    .done((modelAnimation: RwxViewer.ModelAnimation) => {
+                        renderer.setCurrentAnimation(modelAnimation);
+                        $('#loading').fadeOut(FADE_TIME);
+                    }).fail(() => {
+                        renderer.setCurrentAnimation(null);
+                        self.errorMessage("Failed to load the selected animation.");
+                        $('#loading').fadeOut(FADE_TIME);
+                    });
+            }
+        });
+
         this.selectedModel.subscribe(model => {
             self.errorMessage(null);
+            self.selectedAnimation(null);
             renderer.setCurrentModel(null);
 
             if (model) {
-                $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), ObjectPathItemLoader.loadAnimation(model.worldId, "hawalk"), $('#loading').fadeIn(FADE_TIME))
-                    .done((result: RwxViewer.Model, animation: RwxViewer.ModelAnimation) => {
+                $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), $('#loading').fadeIn(FADE_TIME))
+                    .done((result: RwxViewer.Model) => {
                         ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(textures => {
 
                             Object.keys(textures).forEach(imageKey => RwxViewer.TextureCache.addImageToCache(imageKey, textures[imageKey]));
-                            
-                            renderer.setCurrentModel(result);
-                            renderer.setCurrentAnimation(animation);
 
+                            renderer.setCurrentModel(result);
                             $('#loading').fadeOut(FADE_TIME);
                         }).fail(() => {
                                 renderer.setCurrentModel(result);
@@ -106,8 +128,8 @@ var viewModel = new ViewModel();
 $('#error').css('visibility', 'visible').hide();
 
 $.when(ObjectPathItemLoader.getWorlds(),
-       ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl"),
-       ShaderProgramLoader.loadShaderProgram(gl, "SpatialGridVertexShader.glsl", "SpatialGridFragmentShader.glsl"))
+    ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl"),
+    ShaderProgramLoader.loadShaderProgram(gl, "SpatialGridVertexShader.glsl", "SpatialGridFragmentShader.glsl"))
     .done((worlds: ObjectPathItemLoader.IObjectPathWorld[], mainProgram: RwxViewer.ShaderProgram, gridProgram: RwxViewer.ShaderProgram) => {
         viewModel.worlds(worlds);
         ko.applyBindings(viewModel);
