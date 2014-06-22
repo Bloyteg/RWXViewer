@@ -31,7 +31,6 @@ declare module RwxViewer {
         private _startTime;
         private _framesPerMS;
         private _totalFrames;
-        private _jointTags;
         private _identity;
         private _transform;
         private _quaternion;
@@ -40,7 +39,6 @@ declare module RwxViewer {
         private buildKeyframesByJoint(animation);
         private getJointTagFromName(name);
         public getTransformForTime(joint: number, time: number): Mat4Array;
-        private buildJointTags();
     }
 }
 declare module RwxViewer {
