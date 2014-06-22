@@ -13,7 +13,8 @@
 // limitations under the License.
 
 using System.Threading.Tasks;
-using MrByte.RWX.Model;
+using Animation = Bloyteg.AW.Animation.Seq.Animation;
+using Model = MrByte.RWX.Model.Model;
 
 namespace Bloyteg.RwxViewer.Website.Models
 {
@@ -21,5 +22,6 @@ namespace Bloyteg.RwxViewer.Website.Models
     {
         Task<Model> GetModelAsync(int worldId, string modelName);
         Task<byte[]> GetTextureAsync(int worldId, string textureName);
+        Task<Animation> GetAnimationAsync(int id, string animationName);
     }
 }

@@ -13,16 +13,6 @@
 // limitations under the License.
 
 module ObjectPathItemLoader {
-    export function loadModel(worldId: number, modelName: string) {
-        var deferred = $.Deferred<RwxViewer.Model>();
-
-        $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models/" + modelName)
-            .done(data => deferred.resolve(data))
-            .fail(() => deferred.reject());
-
-        return deferred.promise();
-    }
-
     export interface IObjectPathWorld {
         worldId: number;
         name: string;
@@ -35,25 +25,32 @@ module ObjectPathItemLoader {
         type: number;
     }
 
-    export function getWorlds() {
-        var deferred = $.Deferred<IObjectPathWorld>();
+    export interface IObjectPathAnimation {
+        worldId: number;
+        name: string;
+        fileName: string;
+    }
 
-        $.getJSON("/api/ObjectPath/Worlds")
+    export function loadModel(worldId: number, modelName: string) {
+        var deferred = $.Deferred<RwxViewer.Model>();
+
+        $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models/" + modelName)
             .done(data => deferred.resolve(data))
             .fail(() => deferred.reject());
 
         return deferred.promise();
     }
 
-    export function getModels(worldId: number) {
-        var deferred = $.Deferred<IObjectPathModel>();
+    export function loadAnimation(worldId: number, animationName: string) {
+        var deferred = $.Deferred<RwxViewer.Model>();
 
-        $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models")
+        $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Animations/" + animationName)
             .done(data => deferred.resolve(data))
             .fail(() => deferred.reject());
 
-        return deferred.promise();
+        return deferred.promise();  
     }
+
 
     function loadTexture(worldId: number, textureName: string) {
         var deferred = $.Deferred();
@@ -91,5 +88,35 @@ module ObjectPathItemLoader {
         }).fail(() => deferred.reject());
 
         return deferred.promise();
+    }
+
+    export function getWorlds() {
+        var deferred = $.Deferred<IObjectPathWorld>();
+
+        $.getJSON("/api/ObjectPath/Worlds")
+            .done(data => deferred.resolve(data))
+            .fail(() => deferred.reject());
+
+        return deferred.promise();
+    }
+
+    export function getModels(worldId: number) {
+        var deferred = $.Deferred<IObjectPathModel>();
+
+        $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models")
+            .done(data => deferred.resolve(data))
+            .fail(() => deferred.reject());
+
+        return deferred.promise();
+    }
+
+    export function getAnimations(worldId: number) {
+        var deferred = $.Deferred<IObjectPathModel>();
+
+        $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Animations")
+            .done(data => deferred.resolve(data))
+            .fail(() => deferred.reject());
+
+        return deferred.promise();       
     }
 }

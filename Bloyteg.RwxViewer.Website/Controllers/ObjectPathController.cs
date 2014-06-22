@@ -91,5 +91,23 @@ namespace Bloyteg.RwxViewer.Website.Controllers
             var model = await _objectPathItemLoader.GetModelAsync(id, modelName);
             return model == null ? (IHttpActionResult)NotFound() : Ok(model);
         }
+
+        [Route("api/ObjectPath/Worlds/{id}/Animations")]
+        public async Task<IEnumerable<Animation>> GetWorldAnimations(int id)
+        {
+            using (var context = new ObjectPathContext())
+            {
+                var world = await context.Worlds.FindAsync(id);
+
+                return world == null ? Enumerable.Empty<Animation>() : world.Animations;
+            }
+        }
+
+        [Route("api/ObjectPath/Worlds/{id}/Animations/{animationlName}")]
+        public async Task<IHttpActionResult> GetWorldAnimation(int id, string animationlName)
+        {
+            var model = await _objectPathItemLoader.GetAnimationAsync(id, animationlName);
+            return model == null ? (IHttpActionResult)NotFound() : Ok(model);
+        }
     }
 }

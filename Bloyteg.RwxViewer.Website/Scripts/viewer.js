@@ -137,10 +137,10 @@ var ObjectPathItemLoader;
     }
     ObjectPathItemLoader.loadModel = loadModel;
 
-    function getWorlds() {
+    function loadAnimation(worldId, animationName) {
         var deferred = $.Deferred();
 
-        $.getJSON("/api/ObjectPath/Worlds").done(function (data) {
+        $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Animations/" + animationName).done(function (data) {
             return deferred.resolve(data);
         }).fail(function () {
             return deferred.reject();
@@ -148,20 +148,7 @@ var ObjectPathItemLoader;
 
         return deferred.promise();
     }
-    ObjectPathItemLoader.getWorlds = getWorlds;
-
-    function getModels(worldId) {
-        var deferred = $.Deferred();
-
-        $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models").done(function (data) {
-            return deferred.resolve(data);
-        }).fail(function () {
-            return deferred.reject();
-        });
-
-        return deferred.promise();
-    }
-    ObjectPathItemLoader.getModels = getModels;
+    ObjectPathItemLoader.loadAnimation = loadAnimation;
 
     function loadTexture(worldId, textureName) {
         var deferred = $.Deferred();
@@ -210,6 +197,45 @@ var ObjectPathItemLoader;
         return deferred.promise();
     }
     ObjectPathItemLoader.loadTextures = loadTextures;
+
+    function getWorlds() {
+        var deferred = $.Deferred();
+
+        $.getJSON("/api/ObjectPath/Worlds").done(function (data) {
+            return deferred.resolve(data);
+        }).fail(function () {
+            return deferred.reject();
+        });
+
+        return deferred.promise();
+    }
+    ObjectPathItemLoader.getWorlds = getWorlds;
+
+    function getModels(worldId) {
+        var deferred = $.Deferred();
+
+        $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Models").done(function (data) {
+            return deferred.resolve(data);
+        }).fail(function () {
+            return deferred.reject();
+        });
+
+        return deferred.promise();
+    }
+    ObjectPathItemLoader.getModels = getModels;
+
+    function getAnimations(worldId) {
+        var deferred = $.Deferred();
+
+        $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Animations").done(function (data) {
+            return deferred.resolve(data);
+        }).fail(function () {
+            return deferred.reject();
+        });
+
+        return deferred.promise();
+    }
+    ObjectPathItemLoader.getAnimations = getAnimations;
 })(ObjectPathItemLoader || (ObjectPathItemLoader = {}));
 // Copyright 2014 Joshua R. Rodgers
 //

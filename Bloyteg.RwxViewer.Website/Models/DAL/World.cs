@@ -37,5 +37,8 @@ namespace Bloyteg.RwxViewer.Website.Models.DAL
 
         [JsonIgnore]
         public virtual ICollection<Texture> Textures { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<Animation> Animations { get; set; } 
     }
 }
