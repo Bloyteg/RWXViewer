@@ -197,13 +197,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Bloyteg.RwxViewer.Renderer.js" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Content\Shaders\SpatialGridVertexShader.glsl" />
     <Content Include="Content\Shaders\SpatialGridFragmentShader.glsl" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
+    <Content Include="Scripts\Bloyteg.RwxViewer.Renderer.js" />
     <Content Include="Scripts\gl-matrix-min.js" />
     <Content Include="Scripts\gl-matrix.js" />
     <Content Include="Scripts\jquery-2.1.1.js" />
@@ -241,7 +241,7 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Bloyteg.RwxViewer.Renderer.d.ts" />
+    <TypeScriptCompile Include="Scripts\Bloyteg.RwxViewer.Renderer.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\gl-matrix\gl-matrix.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\knockout\knockout.d.ts" />
     <TypeScriptCompile Include="Scripts\viewer\CameraController.ts" />
