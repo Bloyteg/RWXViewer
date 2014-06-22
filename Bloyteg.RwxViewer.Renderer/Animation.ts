@@ -22,8 +22,8 @@ module RwxViewer {
             return new NoAnimation();
         }
 
-        export function getRotationAnimation() {
-            return new RotationAnimation(Date.now());
+        export function getSequenceAnimation(animation: ModelAnimation) {
+            return new SequenceAnimation(animation, Date.now());
         }
     }
 
@@ -35,41 +35,122 @@ module RwxViewer {
         }
     }
 
-    export class RotationAnimation implements Animation {
+    export class SequenceAnimation implements Animation {
         private _startTime: number;
-        private _identityTransform: Mat4Array;
+        private _framesPerMS: number;
+        private _totalFrames: number;
+
+        private _jointTags: { [name: string]: number };
+
+        private _identity: Mat4Array;
         private _transform: Mat4Array;
         private _quaternion: Vec4Array;
-        private _framesPerSecond: number;
 
-        constructor(startTime: number) {
+        private _keyframesByJoint: { [tag: number]: { keyframe: number; rotation: Vec4Array; translation: Vec4Array }[] };
+
+        constructor(animation: ModelAnimation, startTime: number) {
             this._startTime = startTime;
-            this._framesPerSecond = 30;
-            this._identityTransform = mat4.create();
+            this._framesPerMS = animation.FramesPerSecond / 1000;
+            this._totalFrames = animation.FrameCount;
+
             this._transform = mat4.create();
-            this._quaternion = quat.create();
+            this._quaternion = quat.identity(quat.create());
+            this._identity = mat4.create();
+
+            this.buildJointTags();
+
+            this._keyframesByJoint = this.buildKeyframesByJoint(animation);
         }
 
+        private buildKeyframesByJoint(animation: RwxViewer.ModelAnimation) {
+            var result: any = {};
+
+            animation.Joints.forEach(joint => {
+                var tag = this.getJointTagFromName(joint.Name);
+
+                result[tag] = joint.Keyframes.map(frame => {
+                    return {
+                        keyframe: frame.Keyframe,
+                        rotation: quat.fromValues(frame.Rotation.X, frame.Rotation.Y, -frame.Rotation.Z, frame.Rotation.W),
+                        translation: vec3.fromValues(frame.Translation.X, frame.Translation.Y, frame.Translation.Z)
+                    }
+                });
+            });
+
+            return result;
+        }
+
+        private getJointTagFromName(name: string) {
+            return this._jointTags[name] || null;
+        }
+
+        //TODO: Handle animation wrapping better.
         getTransformForTime(joint: number, time: number): Mat4Array {
-            if (joint === 1) {
-                var delta = time - this._startTime;
-                var frame = delta * (this._framesPerSecond / 1000);
-                var interpFactor = (frame % (this._framesPerSecond * 10)) / (this._framesPerSecond * 10);
+            var frame = ((time - this._startTime) * this._framesPerMS) % this._totalFrames;
 
-                quat.identity(this._quaternion);
-                quat.rotateY(this._quaternion, this._quaternion, interpFactor * (2 * Math.PI));
-                mat4.fromQuat(this._transform, this._quaternion);
+            if (joint in this._keyframesByJoint) {
+                //TODO: This is a naive approach.  Add memoization or pre-baking of keyframes in the future.
+                var keyframes = this._keyframesByJoint[joint];
+                var length = keyframes.length;
 
-                return this._transform;
-            } else {
-                return this._identityTransform;
+                for (var index = 0; index < (length - 1); ++index) {
+                    if (keyframes[index].keyframe <= frame && keyframes[index + 1].keyframe > frame) {
+                        var interpFactor = (frame - keyframes[index].keyframe) / (keyframes[index + 1].keyframe - keyframes[index].keyframe);
+
+                        quat.slerp(this._quaternion, keyframes[index].rotation, keyframes[index + 1].rotation, interpFactor);
+                        quat.invert(this._quaternion, this._quaternion);
+                        return mat4.fromQuat(this._transform, this._quaternion);
+                    }
+                }
             }
-        }
-    }
 
-    export class SequenceAnimation implements Animation {
-        getTransformForTime(joint: number, time: number): Mat4Array {
-            return null;
+            return this._identity;
+        }
+
+        private buildJointTags() {
+            this._jointTags = {};
+            this._jointTags["pelvis"] = 1;
+            this._jointTags["back"] = 2;
+            this._jointTags["neck"] = 3;
+            this._jointTags["head"] = 4;
+            this._jointTags["rtsternum"] = 5;
+            this._jointTags["rtshoulder"] = 6;
+            this._jointTags["rtelbow"] = 7;
+            this._jointTags["rtwrist"] = 8;
+            this._jointTags["rtfingers"] = 9;
+            this._jointTags["lfsternum"] = 10;
+            this._jointTags["lfshoulder"] = 11;
+            this._jointTags["lfelbow"] = 12;
+            this._jointTags["lfwrist"] = 13;
+            this._jointTags["lffingers"] = 14;
+            this._jointTags["rthip"] = 15;
+            this._jointTags["rtknee"] = 16;
+            this._jointTags["rtankle"] = 17;
+            this._jointTags["rttoes"] = 18;
+            this._jointTags["lfhip"] = 19;
+            this._jointTags["lfknee"] = 20;
+            this._jointTags["lfankle"] = 21;
+            this._jointTags["lftoes"] = 22;
+            this._jointTags["neck2"] = 23;
+            this._jointTags["tail"] = 24;
+            this._jointTags["tail2"] = 25;
+            this._jointTags["tail3"] = 26;
+            this._jointTags["tail4"] = 27;
+            this._jointTags["obj1"] = 28;
+            this._jointTags["obj2"] = 29;
+            this._jointTags["obj3"] = 30;
+            this._jointTags["hair"] = 31;
+            this._jointTags["hair2"] = 32;
+            this._jointTags["hair3"] = 33;
+            this._jointTags["hair4"] = 34;
+            this._jointTags["rtbreast"] = 35;
+            this._jointTags["lfbreast"] = 36;
+            this._jointTags["rteye"] = 37;
+            this._jointTags["lfeye"] = 38;
+            this._jointTags["lips"] = 39;
+            this._jointTags["nose"] = 40;
+            this._jointTags["rtear"] = 41;
+            this._jointTags["lfear"] = 42;
         }
     }
 }

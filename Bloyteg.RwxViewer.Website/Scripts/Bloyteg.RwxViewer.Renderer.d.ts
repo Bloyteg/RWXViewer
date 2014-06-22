@@ -21,20 +21,26 @@ declare module RwxViewer {
     }
     module Animation {
         function getDefaultAnimation(): NoAnimation;
-        function getRotationAnimation(): RotationAnimation;
+        function getSequenceAnimation(animation: ModelAnimation): SequenceAnimation;
     }
     class NoAnimation implements Animation {
         private _transform;
         public getTransformForTime(joint: number, time: number): Mat4Array;
     }
-    class RotationAnimation implements Animation {
+    class SequenceAnimation implements Animation {
         private _startTime;
-        private _identityTransform;
+        private _framesPerMS;
+        private _totalFrames;
+        private _jointTags;
+        private _identity;
         private _transform;
         private _quaternion;
-        private _framesPerSecond;
-        constructor(startTime: number);
+        private _keyframesByJoint;
+        constructor(animation: ModelAnimation, startTime: number);
+        private buildKeyframesByJoint(animation);
+        private getJointTagFromName(name);
         public getTransformForTime(joint: number, time: number): Mat4Array;
+        private buildJointTags();
     }
 }
 declare module RwxViewer {
@@ -236,6 +242,26 @@ declare module RwxViewer {
         IsSeamless: boolean;
         AxisAlignment: AxisAlignment;
     }
+    interface Quaternion {
+        W: number;
+        X: number;
+        Y: number;
+        Z: number;
+    }
+    interface Keyframe {
+        Keyframe: number;
+        Rotation: Quaternion;
+        Translation: Vector3;
+    }
+    interface Joint {
+        Name: string;
+        Keyframes: Keyframe[];
+    }
+    interface ModelAnimation {
+        FramesPerSecond: number;
+        FrameCount: number;
+        Joints: Joint[];
+    }
 }
 declare module RwxViewer {
     class Renderer {
@@ -251,6 +277,7 @@ declare module RwxViewer {
         public initialize(mainProgram: ShaderProgram, gridProgram: ShaderProgram): void;
         public draw(time: number): void;
         public setCurrentModel(model: Model): void;
+        public setCurrentAnimation(animation: ModelAnimation): void;
         public camera : Camera;
     }
 }

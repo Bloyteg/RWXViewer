@@ -58,13 +58,15 @@ class ViewModel {
             renderer.setCurrentModel(null);
 
             if (model) {
-                $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), $('#loading').fadeIn(FADE_TIME))
-                    .done((result: RwxViewer.Model) => {
+                $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), ObjectPathItemLoader.loadAnimation(model.worldId, "hawalk"), $('#loading').fadeIn(FADE_TIME))
+                    .done((result: RwxViewer.Model, animation: RwxViewer.ModelAnimation) => {
                         ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(textures => {
 
                             Object.keys(textures).forEach(imageKey => RwxViewer.TextureCache.addImageToCache(imageKey, textures[imageKey]));
                             
                             renderer.setCurrentModel(result);
+                            renderer.setCurrentAnimation(animation);
+
                             $('#loading').fadeOut(FADE_TIME);
                         }).fail(() => {
                                 renderer.setCurrentModel(result);

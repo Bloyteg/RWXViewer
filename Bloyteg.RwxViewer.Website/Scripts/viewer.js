@@ -290,13 +290,15 @@ var ViewModel = (function () {
             renderer.setCurrentModel(null);
 
             if (model) {
-                $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), $('#loading').fadeIn(FADE_TIME)).done(function (result) {
+                $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), ObjectPathItemLoader.loadAnimation(model.worldId, "hawalk"), $('#loading').fadeIn(FADE_TIME)).done(function (result, animation) {
                     ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(function (textures) {
                         Object.keys(textures).forEach(function (imageKey) {
                             return RwxViewer.TextureCache.addImageToCache(imageKey, textures[imageKey]);
                         });
 
                         renderer.setCurrentModel(result);
+                        renderer.setCurrentAnimation(animation);
+
                         $('#loading').fadeOut(FADE_TIME);
                     }).fail(function () {
                         renderer.setCurrentModel(result);

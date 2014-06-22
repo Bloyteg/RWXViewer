@@ -42,7 +42,7 @@ module ObjectPathItemLoader {
     }
 
     export function loadAnimation(worldId: number, animationName: string) {
-        var deferred = $.Deferred<RwxViewer.Model>();
+        var deferred = $.Deferred<RwxViewer.ModelAnimation>();
 
         $.getJSON("/api/ObjectPath/Worlds/" + worldId + "/Animations/" + animationName)
             .done(data => deferred.resolve(data))

@@ -89,10 +89,10 @@ var RwxViewer;
         }
         Animation.getDefaultAnimation = getDefaultAnimation;
 
-        function getRotationAnimation() {
-            return new RotationAnimation(Date.now());
+        function getSequenceAnimation(animation) {
+            return new SequenceAnimation(animation, Date.now());
         }
-        Animation.getRotationAnimation = getRotationAnimation;
+        Animation.getSequenceAnimation = getSequenceAnimation;
     })(RwxViewer.Animation || (RwxViewer.Animation = {}));
     var Animation = RwxViewer.Animation;
 
@@ -107,32 +107,114 @@ var RwxViewer;
     })();
     RwxViewer.NoAnimation = NoAnimation;
 
-    var RotationAnimation = (function () {
-        function RotationAnimation(startTime) {
+    var SequenceAnimation = (function () {
+        function SequenceAnimation(animation, startTime) {
             this._startTime = startTime;
-            this._framesPerSecond = 30;
-            this._identityTransform = mat4.create();
+            this._framesPerMS = animation.FramesPerSecond / 1000;
+            this._totalFrames = animation.FrameCount;
+
             this._transform = mat4.create();
-            this._quaternion = quat.create();
+            this._quaternion = quat.identity(quat.create());
+            this._identity = mat4.create();
+
+            this.buildJointTags();
+
+            this._keyframesByJoint = this.buildKeyframesByJoint(animation);
         }
-        RotationAnimation.prototype.getTransformForTime = function (joint, time) {
-            if (joint === 6 || joint == 7) {
-                var delta = time - this._startTime;
-                var frame = delta * (this._framesPerSecond / 1000);
-                var interpFactor = (frame % (this._framesPerSecond * 10)) / (this._framesPerSecond * 10);
+        SequenceAnimation.prototype.buildKeyframesByJoint = function (animation) {
+            var _this = this;
+            var result = {};
 
-                quat.identity(this._quaternion);
-                quat.rotateX(this._quaternion, this._quaternion, interpFactor * (2 * Math.PI));
-                mat4.fromQuat(this._transform, this._quaternion);
+            animation.Joints.forEach(function (joint) {
+                var tag = _this.getJointTagFromName(joint.Name);
 
-                return this._transform;
-            } else {
-                return this._identityTransform;
-            }
+                result[tag] = joint.Keyframes.map(function (frame) {
+                    return {
+                        keyframe: frame.Keyframe,
+                        rotation: quat.fromValues(frame.Rotation.X, frame.Rotation.Y, -frame.Rotation.Z, frame.Rotation.W),
+                        translation: vec3.fromValues(frame.Translation.X, frame.Translation.Y, frame.Translation.Z)
+                    };
+                });
+            });
+
+            return result;
         };
-        return RotationAnimation;
+
+        SequenceAnimation.prototype.getJointTagFromName = function (name) {
+            return this._jointTags[name] || null;
+        };
+
+        //TODO: Handle animation wrapping better.
+        SequenceAnimation.prototype.getTransformForTime = function (joint, time) {
+            var frame = ((time - this._startTime) * this._framesPerMS) % this._totalFrames;
+
+            if (joint in this._keyframesByJoint) {
+                //TODO: This is a naive approach.  Add memoization or pre-baking of keyframes in the future.
+                var keyframes = this._keyframesByJoint[joint];
+                var length = keyframes.length;
+
+                for (var index = 0; index < (length - 1); ++index) {
+                    if (keyframes[index].keyframe <= frame && keyframes[index + 1].keyframe > frame) {
+                        var interpFactor = (frame - keyframes[index].keyframe) / (keyframes[index + 1].keyframe - keyframes[index].keyframe);
+
+                        quat.slerp(this._quaternion, keyframes[index].rotation, keyframes[index + 1].rotation, interpFactor);
+                        quat.invert(this._quaternion, this._quaternion);
+                        return mat4.fromQuat(this._transform, this._quaternion);
+                    }
+                }
+            }
+
+            return this._identity;
+        };
+
+        SequenceAnimation.prototype.buildJointTags = function () {
+            this._jointTags = {};
+            this._jointTags["pelvis"] = 1;
+            this._jointTags["back"] = 2;
+            this._jointTags["neck"] = 3;
+            this._jointTags["head"] = 4;
+            this._jointTags["rtsternum"] = 5;
+            this._jointTags["rtshoulder"] = 6;
+            this._jointTags["rtelbow"] = 7;
+            this._jointTags["rtwrist"] = 8;
+            this._jointTags["rtfingers"] = 9;
+            this._jointTags["lfsternum"] = 10;
+            this._jointTags["lfshoulder"] = 11;
+            this._jointTags["lfelbow"] = 12;
+            this._jointTags["lfwrist"] = 13;
+            this._jointTags["lffingers"] = 14;
+            this._jointTags["rthip"] = 15;
+            this._jointTags["rtknee"] = 16;
+            this._jointTags["rtankle"] = 17;
+            this._jointTags["rttoes"] = 18;
+            this._jointTags["lfhip"] = 19;
+            this._jointTags["lfknee"] = 20;
+            this._jointTags["lfankle"] = 21;
+            this._jointTags["lftoes"] = 22;
+            this._jointTags["neck2"] = 23;
+            this._jointTags["tail"] = 24;
+            this._jointTags["tail2"] = 25;
+            this._jointTags["tail3"] = 26;
+            this._jointTags["tail4"] = 27;
+            this._jointTags["obj1"] = 28;
+            this._jointTags["obj2"] = 29;
+            this._jointTags["obj3"] = 30;
+            this._jointTags["hair"] = 31;
+            this._jointTags["hair2"] = 32;
+            this._jointTags["hair3"] = 33;
+            this._jointTags["hair4"] = 34;
+            this._jointTags["rtbreast"] = 35;
+            this._jointTags["lfbreast"] = 36;
+            this._jointTags["rteye"] = 37;
+            this._jointTags["lfeye"] = 38;
+            this._jointTags["lips"] = 39;
+            this._jointTags["nose"] = 40;
+            this._jointTags["rtear"] = 41;
+            this._jointTags["lfear"] = 42;
+        };
+        return SequenceAnimation;
     })();
-    RwxViewer.RotationAnimation = RotationAnimation;
+    RwxViewer.SequenceAnimation = SequenceAnimation;
 })(RwxViewer || (RwxViewer = {}));
 // Copyright 2014 Joshua R. Rodgers
 //
@@ -825,9 +907,19 @@ var RwxViewer;
 
         Renderer.prototype.setCurrentModel = function (model) {
             if (model) {
-                this._currentDrawable = RwxViewer.createDrawableFromModel(this._gl, model).cloneWithAnimation(RwxViewer.Animation.getRotationAnimation());
+                this._currentDrawable = RwxViewer.createDrawableFromModel(this._gl, model);
             } else {
                 this._currentDrawable = null;
+            }
+        };
+
+        Renderer.prototype.setCurrentAnimation = function (animation) {
+            if (this._currentDrawable) {
+                if (animation) {
+                    this._currentDrawable = this._currentDrawable.cloneWithAnimation(RwxViewer.Animation.getSequenceAnimation(animation));
+                } else {
+                    this._currentDrawable = this._currentDrawable.cloneWithAnimation(RwxViewer.Animation.getDefaultAnimation());
+                }
             }
         };
 

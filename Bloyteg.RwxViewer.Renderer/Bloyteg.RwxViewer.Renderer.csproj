@@ -48,7 +48,7 @@
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
     <TypeScriptSourceMap>False</TypeScriptSourceMap>
     <TypeScriptModuleKind>none</TypeScriptModuleKind>
-    <TypeScriptOutFile>../RWXViewer/Scripts/Bloyteg.RwxViewer.Renderer.js</TypeScriptOutFile>
+    <TypeScriptOutFile>../Bloyteg.RwxViewer.Website/Scripts/Bloyteg.RwxViewer.Renderer.js</TypeScriptOutFile>
     <TypeScriptGeneratesDeclarations>True</TypeScriptGeneratesDeclarations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
