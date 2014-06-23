@@ -3,12 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RWXViewer", "RWXViewer\RWXViewer.csproj", "{B230DB46-CB59-4D9F-AAC1-A3563C5AF403}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bloyteg.RwxViewer.Website", "Bloyteg.RwxViewer.Website\Bloyteg.RwxViewer.Website.csproj", "{B230DB46-CB59-4D9F-AAC1-A3563C5AF403}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A37F42E3-E68C-4955-AB70-F1C20EF8E9B7} = {A37F42E3-E68C-4955-AB70-F1C20EF8E9B7}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MrByte.RwxViewer.Renderer", "MrByte.RwxViewer.Renderer\MrByte.RwxViewer.Renderer.csproj", "{A37F42E3-E68C-4955-AB70-F1C20EF8E9B7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bloyteg.RwxViewer.Renderer", "Bloyteg.RwxViewer.Renderer\Bloyteg.RwxViewer.Renderer.csproj", "{A37F42E3-E68C-4955-AB70-F1C20EF8E9B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
