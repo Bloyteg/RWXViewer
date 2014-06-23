@@ -60,6 +60,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="AnimatedTexture.ts" />
     <TypeScriptCompile Include="Animation.ts" />
+    <TypeScriptCompile Include="BoundingBox.ts" />
     <TypeScriptCompile Include="Camera.ts" />
     <TypeScriptCompile Include="Drawable.ts" />
     <TypeScriptCompile Include="DrawableBuilder.ts" />

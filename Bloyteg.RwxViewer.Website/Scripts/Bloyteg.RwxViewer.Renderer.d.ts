@@ -42,6 +42,19 @@ declare module RwxViewer {
     }
 }
 declare module RwxViewer {
+    interface BoundingBox {
+        minimumX: number;
+        minimumY: number;
+        minimumZ: number;
+        maximumX: number;
+        maximumY: number;
+        maximumZ: number;
+    }
+    module BoundingBox {
+        function computeBoundingBox(model: Model): BoundingBox;
+    }
+}
+declare module RwxViewer {
     interface Camera {
         setViewpowerSize(width: number, height: number): any;
         reset(): any;

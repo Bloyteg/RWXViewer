@@ -54,7 +54,7 @@ module RwxViewer {
                 gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
                 gl.enable(gl.CULL_FACE);
-                mat4.perspective(this._projectionMatrix, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.01, 100.0);
+                mat4.perspective(this._projectionMatrix, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.01, 1000.0);
 
                 this._gridProgram.use(program => {
                     gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, this._projectionMatrix);
@@ -75,6 +75,10 @@ module RwxViewer {
         setCurrentModel(model: Model): void {
             if (model) {
                 this._currentDrawable = createDrawableFromModel(this._gl, model);
+
+                var boundingBox = BoundingBox.computeBoundingBox(model);
+                mat4.translate(this._modelMatrix, mat4.create(), [0, -boundingBox.minimumY, 0]);
+
             } else {
                 this._currentDrawable = null;
             }
