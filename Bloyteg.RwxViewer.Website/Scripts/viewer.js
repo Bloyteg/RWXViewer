@@ -354,11 +354,23 @@ var ViewModel = (function () {
     return ViewModel;
 })();
 
+function resizeViewport() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+
+    if (renderer) {
+        renderer.updateViewport(canvas.clientWidth, canvas.clientHeight);
+    }
+}
+
+$(window).resize(resizeViewport);
+
 var viewModel = new ViewModel();
 
 $('#error').css('visibility', 'visible').hide();
 
 $.when(ObjectPathItemLoader.getWorlds(), ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl"), ShaderProgramLoader.loadShaderProgram(gl, "SpatialGridVertexShader.glsl", "SpatialGridFragmentShader.glsl")).done(function (worlds, mainProgram, gridProgram) {
+    resizeViewport();
     viewModel.worlds(worlds);
     ko.applyBindings(viewModel);
     renderer.initialize(mainProgram, gridProgram);

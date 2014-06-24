@@ -56,7 +56,7 @@ declare module RwxViewer {
 }
 declare module RwxViewer {
     interface Camera {
-        setViewpowerSize(width: number, height: number): any;
+        setViewportSize(width: number, height: number): any;
         reset(): any;
         rotate(deltaX: number, deltaY: number): any;
         zoomIn(zoomFactor?: number): any;
@@ -284,12 +284,15 @@ declare module RwxViewer {
         private _camera;
         private _projectionMatrix;
         private _modelMatrix;
+        private _viewportWidth;
+        private _viewportHeight;
         constructor(gl: WebGLRenderingContext);
         public initialize(mainProgram: ShaderProgram, gridProgram: ShaderProgram): void;
         public draw(time: number): void;
         public setCurrentModel(model: Model): void;
         public setCurrentAnimation(animation: ModelAnimation): void;
         public camera : Camera;
+        public updateViewport(width: number, height: number): void;
     }
 }
 declare module RwxViewer {

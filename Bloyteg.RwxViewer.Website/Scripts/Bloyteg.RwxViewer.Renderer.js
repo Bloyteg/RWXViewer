@@ -344,10 +344,10 @@ var RwxViewer;
     var OrbitCamera = (function () {
         function OrbitCamera(viewportWidth, viewportHeight) {
             this.reset();
-            this.setViewpowerSize(viewportWidth, viewportHeight);
+            this.setViewportSize(viewportWidth, viewportHeight);
             this.update();
         }
-        OrbitCamera.prototype.setViewpowerSize = function (width, height) {
+        OrbitCamera.prototype.setViewportSize = function (width, height) {
             this._viewportWidth = width;
             this._viewportHeight = height;
         };
@@ -963,7 +963,6 @@ var RwxViewer;
                 this._camera = RwxViewer.makeCamera(gl.drawingBufferWidth, gl.drawingBufferHeight);
                 this._spatialGridDrawable = RwxViewer.makeGrid(gl);
 
-                gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
                 gl.clearColor(0.75, 0.75, 0.75, 1.0);
                 gl.clearDepth(1.0);
                 gl.enable(gl.DEPTH_TEST);
@@ -981,10 +980,10 @@ var RwxViewer;
             var gl = this._gl;
 
             if (gl) {
-                gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+                gl.viewport(0, 0, this._viewportWidth, this._viewportHeight);
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
                 gl.enable(gl.CULL_FACE);
-                mat4.perspective(this._projectionMatrix, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.01, 1000.0);
+                mat4.perspective(this._projectionMatrix, 45, this._viewportWidth / this._viewportHeight, 0.01, 1000.0);
 
                 this._gridProgram.use(function (program) {
                     gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, _this._projectionMatrix);
@@ -1030,6 +1029,15 @@ var RwxViewer;
             enumerable: true,
             configurable: true
         });
+
+        Renderer.prototype.updateViewport = function (width, height) {
+            this._viewportWidth = width;
+            this._viewportHeight = height;
+
+            if (this._camera) {
+                this._camera.setViewportSize(width, height);
+            }
+        };
         return Renderer;
     })();
     RwxViewer.Renderer = Renderer;

@@ -22,6 +22,8 @@ module RwxViewer {
         private _camera: Camera;
         private _projectionMatrix: Mat4Array = mat4.create();
         private _modelMatrix: Mat4Array = mat4.create();
+        private _viewportWidth: number;
+        private _viewportHeight: number;
 
         constructor(gl: WebGLRenderingContext) {
             this._gl = gl;
@@ -34,7 +36,6 @@ module RwxViewer {
                 this._camera = makeCamera(gl.drawingBufferWidth, gl.drawingBufferHeight);
                 this._spatialGridDrawable = makeGrid(gl);
 
-                gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
                 gl.clearColor(0.75, 0.75, 0.75, 1.0);
                 gl.clearDepth(1.0);
                 gl.enable(gl.DEPTH_TEST);
@@ -51,10 +52,10 @@ module RwxViewer {
             var gl = this._gl;
 
             if (gl) {
-                gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+                gl.viewport(0, 0, this._viewportWidth, this._viewportHeight);
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
                 gl.enable(gl.CULL_FACE);
-                mat4.perspective(this._projectionMatrix, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.01, 1000.0);
+                mat4.perspective(this._projectionMatrix, 45, this._viewportWidth / this._viewportHeight, 0.01, 1000.0);
 
                 this._gridProgram.use(program => {
                     gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, this._projectionMatrix);
@@ -96,6 +97,15 @@ module RwxViewer {
 
         get camera(): Camera {
             return this._camera;
+        }
+
+        updateViewport(width: number, height: number) {
+            this._viewportWidth = width;
+            this._viewportHeight = height;
+
+            if (this._camera) {
+                this._camera.setViewportSize(width, height);
+            }
         }
     }
 }

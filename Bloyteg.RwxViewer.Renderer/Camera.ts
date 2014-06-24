@@ -22,7 +22,7 @@ module RwxViewer {
     var PHI_EPS = 0.000001;
 
     export interface Camera {
-        setViewpowerSize(width: number, height: number);
+        setViewportSize(width: number, height: number);
         reset();
         rotate(deltaX: number, deltaY: number);
         zoomIn(zoomFactor?: number);
@@ -57,11 +57,11 @@ module RwxViewer {
 
         constructor(viewportWidth: number, viewportHeight: number) {
             this.reset();
-            this.setViewpowerSize(viewportWidth, viewportHeight);
+            this.setViewportSize(viewportWidth, viewportHeight);
             this.update();
         }
 
-        setViewpowerSize(width: number, height: number) {
+        setViewportSize(width: number, height: number) {
             this._viewportWidth = width;
             this._viewportHeight = height;
         }
