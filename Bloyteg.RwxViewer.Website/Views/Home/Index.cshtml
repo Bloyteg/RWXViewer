@@ -10,45 +10,54 @@
     <script src="@Url.Content("~/Scripts/Bloyteg.RwxViewer.Renderer.js")"></script>
 }
 
-<div id="header">
-    <h1>RWX Viewer by Byte</h1>
-</div>
+<div id="sidebar">
+    <fieldset id="modelSelection">
+        <legend>Model Selection</legend>
+        <div class="content">
+            <div>
+                <label for="selectWorld">World:</label>
+                <select class="uiSelect" id="selectWorld" data-bind="options: worlds, optionsText: 'name', optionsCaption: '(None)', value: selectedWorld, enabled: worlds().length > 0"></select>
+            </div>
 
-<div id="content">
-    <div id="sidebar">
-        <div>
-            <label for="selectWorld">World:</label>
-            <select class="uiSelect" id="selectWorld" data-bind="options: worlds, optionsText: 'name', optionsCaption: '(None)', value: selectedWorld, enabled: worlds().length > 0"></select>
-            <br/>
-            <label for="selectType">Type:</label>
-            <select class="uiSelect" id="selectType" data-bind="options: types, optionsText: 'name', value: selectedType, enable: models().length > 0"></select>
-            <br/>
-            <label for="selectModel">Object:</label>
-            <select class="uiSelect" id="selectModel" data-bind="options: modelsByType, optionsText: 'name', optionsCaption: '(None)', value: selectedModel, enable: models().length > 0"></select>
-            <br/>
-            <label for="selectAnimation">Animation:</label>
-            <select class="uiSelect" id="selectAnimation" data-bind="options: animations, optionsText: 'name', optionsCaption: '(None)', value: selectedAnimation, enable: selectedModel() && selectedType().type === 1"></select>
+            <div>
+                <label for="selectType">Type:</label>
+                <select class="uiSelect" id="selectType" data-bind="options: types, optionsText: 'name', value: selectedType, enable: models().length > 0"></select>
+            </div>
+
+            <div>
+                <label for="selectModel">Object:</label>
+                <select class="uiSelect" id="selectModel" data-bind="options: modelsByType, optionsText: 'name', optionsCaption: '(None)', value: selectedModel, enable: models().length > 0"></select>
+            </div>
+
+            <div data-bind="visible: selectedModel() && selectedType().type === 1">
+                <label for="selectAnimation">Animation:</label>
+                <select class="uiSelect" id="selectAnimation" data-bind="options: animations, optionsText: 'name', optionsCaption: '(None)', value: selectedAnimation"></select>
+            </div>
         </div>
-        <div>
+    </fieldset>
+
+    <fieldset id="controls">
+        <legend>Controls</legend>
+        <div class="content">
             Left Mouse: Rotate<br />
             Right Mouse: Pan<br />
             Mouse Wheel: Zoom
         </div>
-    </div>
+    </fieldset>
+</div>
 
-    <div class="renderArea">
-        <canvas id="viewport">
-            Your browser does not support the HTML 5 Canvas element.
-        </canvas>
+<div id="renderArea">
+    <canvas id="viewport">
+        Your browser does not support the HTML 5 Canvas element.
+    </canvas>
 
-        <button id="resetCamera" data-bind="click: resetCamera">Reset Camera</button>
+    <button id="resetCamera" data-bind="click: resetCamera">Reset Camera</button>
 
-        <h1 id="loading">Loading...</h1>
+    <h1 id="loading">Loading...</h1>
 
-        <div id="error">
-            <span id="errorText" data-bind="text: errorMessage"></span><br />
-            <a href="http://github.com/Bloyteg/RWXViewer/issues">Report an Issue</a> / <a href="#" data-bind="click: hideError">Close</a>
-        </div>
+    <div id="error">
+        <span id="errorText" data-bind="text: errorMessage"></span><br />
+        <a href="http://github.com/Bloyteg/RWXViewer/issues">Report an Issue</a> / <a href="#" data-bind="click: hideError">Close</a>
     </div>
 </div>
 

@@ -5,30 +5,20 @@
     padding: 0 0 0 0;
     border: none;
     font-family: "Segoe UI Light", "Segoe UI", "Tahoma Light", "Arial Light", Helvetica, sans-serif;
+
+    background-color: black;
+    color: white;
 }
 
-#header {
-    background-color: #f0f0f0;
-    width: 100%;
-    height: 60px;
-    padding: 0 0 0 0;
-    text-align: center;
-}
+#renderArea {
+    position: absolute;
+    padding: 0;
+    margin: 0;
 
-#header h1 {
-    padding: 0 0 0 0;
-    margin: 0 0 0 0;
-    color: #3f3f3f;
-    font-weight: bold;
-}
-
-
-#content {
-    width: 960px;
-    height: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 0;
+    left: 240px;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }
 
 #viewport {
@@ -40,40 +30,25 @@
     display: block;
 }
 
-.uiSelect {
-    width: 120px;
-}
-
-.renderArea {
+#renderArea #resetCamera {
     position: absolute;
-    padding: 0;
-    margin: 0;
-
-    left: 200px;
-    top: 60px;
-    right: 0;
-    bottom: 0;
-}
-
-.renderArea #resetCamera {
-    position: absolute;
-    left: 8px;
-    top: 8px;
+    right: 8px;
+    bottom: 8px;
     border: none;
     height: 2em;
 
     padding: 4px;
     margin: 0;
 
-    background: #7b4f9d;
+    background: #5d00a5;
     color: #fff;
 }
 
-.renderArea #resetCamera:hover {
-    background: #5d00a5;
+#renderArea #resetCamera:hover {
+    background: #390066;
 }
 
-.renderArea #loading {
+#renderArea #loading {
     margin: auto;
     padding: 0;
     position: absolute;
@@ -86,7 +61,7 @@
 /*    visibility: hidden; */
 }
 
-.renderArea #error {
+#renderArea #error {
     position: absolute;
     left: 300px;
     right: 300px;
@@ -102,18 +77,64 @@
     visibility: hidden;
 }
 
-.renderArea #error a {
+#renderArea #error a {
     color: white;
 }
 
-.renderArea #error a:visited {
+#renderArea #error a:visited {
     color: white;
 }
 
 #sidebar {
     position: absolute;
     left: 0;
-    right: 200px;
-    top: 60px;
+    top: 0;
+    width: 240px;
     bottom: 0;
+}
+
+#sidebar fieldset {
+    position: relative;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    padding-top: 32px;
+
+    background-color: #1F1F1F;
+
+    border: none;
+    border-bottom: 1px solid #5F5F5F;
+}
+
+#sidebar fieldset legend {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+
+    font-weight: bold;
+    font-size: 1.2em;
+
+    color: white;
+}
+
+#sidebar .content {
+    padding-left: 8px;
+    padding-bottom: 8px;
+    padding-right: 8px;
+}
+
+#sidebar .content div {
+    clear: both;
+}
+
+fieldset#modelSelection {
+    border-right: 4px solid #5d00a5;
+}
+
+fieldset#controls {
+   border-right: 4px solid red; 
+}
+
+.uiSelect {
+    width: 120px;
+    float: right;
 }
