@@ -11,20 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+using System.Threading.Tasks;
+using Bloyteg.AW.Animation.Seq;
+using MrByte.RWX.Model;
 
-using System.Data.Entity;
-
-namespace Bloyteg.RwxViewer.Website.Models.DAL
+namespace Bloyteg.RwxViewer.Resources
 {
-    public class ObjectPathContext : DbContext
+    public interface IObjectPathItemLoader
     {
-        public ObjectPathContext() : base("ObjectPathDb")
-        {
-        }
-
-        public DbSet<World> Worlds { get; set; }
-        public DbSet<Model> Models { get; set; }
-        public DbSet<Texture> Textures { get; set; }
-        public DbSet<Animation> Animations { get; set; }
+        Task<Model> GetModelAsync(int worldId, string modelName);
+        Task<byte[]> GetTextureAsync(int worldId, string textureName);
+        Task<Animation> GetAnimationAsync(int id, string animationName);
     }
 }

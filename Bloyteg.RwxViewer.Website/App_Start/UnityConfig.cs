@@ -13,8 +13,10 @@
 // limitations under the License.
 
 using System.Web.Http;
-using Bloyteg.RwxViewer.Website.Models;
+using Bloyteg.AW.Animation.Seq;
+using Bloyteg.RwxViewer.Resources;
 using Microsoft.Practices.Unity;
+using MrByte.RWX.Model;
 using Unity.WebApi;
 
 namespace Bloyteg.RwxViewer.Website
@@ -25,7 +27,16 @@ namespace Bloyteg.RwxViewer.Website
         {
 			var container = new UnityContainer();
 
-            container.RegisterInstance<IObjectPathItemLoader>(new ObjectPathItemLoader());
+            container.RegisterType<IResourceDownloader<Model>, ModelDownloader>();
+            container.RegisterType<IResourceDownloader<byte[]>, TextureDownloader>();
+            container.RegisterType<IResourceDownloader<Animation>, AnimationDownloader>();
+
+            container.RegisterType<IResourceLocator<Model>, ResourceLocator<Model>>();
+            container.RegisterType<IResourceLocator<byte[]>, ResourceLocator<byte[]>>();
+            container.RegisterType<IResourceLocator<Animation>, ResourceLocator<Animation>>();
+
+
+            container.RegisterType<IObjectPathItemLoader, ObjectPathItemLoader>(new ContainerControlledLifetimeManager());
 
             GlobalConfiguration.Configuration.DependencyResolver = new UnityDependencyResolver(container);
         }

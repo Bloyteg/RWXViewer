@@ -11,15 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
-namespace Bloyteg.RwxViewer.Website.Models.DAL
+namespace Bloyteg.RwxViewer.Resources.DAL
 {
-    [DataContract]
     public class World
     {
         [Key]

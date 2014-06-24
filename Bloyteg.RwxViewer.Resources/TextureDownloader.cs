@@ -1,56 +1,31 @@
-﻿using System;
+﻿// Copyright 2014 Joshua R. Rodgers
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//    http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 using System.Data.Entity;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
-using System.Runtime.Caching;
 using System.Threading.Tasks;
-using Bloyteg.RwxViewer.Website.Models.DAL;
+using Bloyteg.RwxViewer.Resources.DAL;
 
-namespace Bloyteg.RwxViewer.Website.Models
+namespace Bloyteg.RwxViewer.Resources
 {
-    public class TextureLoader
+    public class TextureDownloader : IResourceDownloader<byte[]>
     {
-        public async Task<byte[]> GetTextureAsync(int worldId, string textureName)
-        {
-            var image = LoadFromCache(worldId, textureName);
-
-            if (image != null)
-            {
-                return image;
-            }
-
-            image = await LoadAsync(worldId, textureName);
-
-            if (image != null)
-            {
-                AddToCache(worldId, textureName, image);
-            }
-
-            return image;
-        }
-
-        private byte[] LoadFromCache(int worldId, string textureName)
-        {
-            var cache = MemoryCache.Default;
-            var key = BuildCacheKey(worldId, textureName);
-            return cache[key] as byte[];
-        }
-
-        private void AddToCache(int worldId, string textureName, byte[] image)
-        {
-            var cache = MemoryCache.Default;
-            var key = BuildCacheKey(worldId, textureName);
-            cache.Add(key, image, DateTimeOffset.Now + TimeSpan.FromHours(24));
-        }
-
-        private string BuildCacheKey(int worldId, string textureName)
-        {
-            return string.Format("texture-{0}/{1}", worldId, textureName);
-        }
-
-        private async Task<byte[]> LoadAsync(int worldId, string textureName)
+        public async Task<byte[]> DownloadResourceAsync(int worldId, string textureName)
         {
             using (var context = new ObjectPathContext())
             using (var webClient = new WebClient())

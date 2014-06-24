@@ -195,18 +195,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\AnimationLoader.cs" />
-    <Compile Include="Models\DAL\Animation.cs" />
-    <Compile Include="Models\DAL\ObjectPathItem.cs" />
-    <Compile Include="Models\DAL\Texture.cs" />
-    <Compile Include="Models\IObjectPathItemLoader.cs" />
-    <Compile Include="Models\DAL\ObjectPathContext.cs" />
-    <Compile Include="Models\DAL\Model.cs" />
-    <Compile Include="Models\ModelLoader.cs" />
-    <Compile Include="Models\ObjectPathItemLoader.cs" />
-    <Compile Include="Models\DAL\World.cs" />
-    <Compile Include="Models\TextureLoader.cs" />
-    <Compile Include="Models\ArchiveFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -262,6 +250,12 @@
     <TypeScriptCompile Include="Scripts\viewer\ShaderProgramLoader.ts" />
     <TypeScriptCompile Include="Scripts\viewer\ObjectPathItemLoader.ts" />
     <TypeScriptCompile Include="Scripts\viewer\RWXViewer.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Bloyteg.RwxViewer.Resources\Bloyteg.RwxViewer.Resources.csproj">
+      <Project>{43DBEAD6-5E85-447B-8AB9-3D4AB29A3689}</Project>
+      <Name>Bloyteg.RwxViewer.Resources</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

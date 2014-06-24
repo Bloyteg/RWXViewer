@@ -11,60 +11,25 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
 using System.Data.Entity;
 using System.IO;
 using System.Net;
-using System.Runtime.Caching;
 using System.Threading.Tasks;
 using Bloyteg.AW.Animation.Seq;
-using Bloyteg.RwxViewer.Website.Models.DAL;
+using Bloyteg.RwxViewer.Resources.DAL;
 using Animation = Bloyteg.AW.Animation.Seq.Animation;
 
-namespace Bloyteg.RwxViewer.Website.Models
+namespace Bloyteg.RwxViewer.Resources
 {
-    internal class AnimationLoader
+    public interface IResourceDownloader<T>
     {
-        public async Task<Animation> GetAnimationAsync(int id, string animationName)
-        {
-            var animation = LoadFromCache(id, animationName);
+        Task<T> DownloadResourceAsync(int worldId, string animationName);
+    }
 
-            if (animation != null)
-            {
-                return animation;
-            }
-
-            animation = await LoadAsync(id, animationName);
-
-            if (animation != null)
-            {
-                AddToCache(id, animationName, animation);
-            }
-
-            return animation;
-        }
-
-        private Animation LoadFromCache(int worldId, string textureName)
-        {
-            var cache = MemoryCache.Default;
-            var key = BuildCacheKey(worldId, textureName);
-            return cache[key] as Animation;
-        }
-
-        private void AddToCache(int worldId, string animationName, Animation animation)
-        {
-            var cache = MemoryCache.Default;
-            var key = BuildCacheKey(worldId, animationName);
-            cache.Add(key, animation, DateTimeOffset.Now + TimeSpan.FromHours(24));
-        }
-
-        private string BuildCacheKey(int worldId, string textureName)
-        {
-            return string.Format("animation-{0}/{1}", worldId, textureName);
-        }
-
-        private async Task<Animation> LoadAsync(int worldId, string animationName)
+    public class AnimationDownloader : IResourceDownloader<Animation>
+    {
+        public async Task<Animation> DownloadResourceAsync(int worldId, string animationName)
         {
             using (var context = new ObjectPathContext())
             using (var webClient = new WebClient())
@@ -95,7 +60,6 @@ namespace Bloyteg.RwxViewer.Website.Models
 
         private Stream OpenTextureStream(byte[] resultData)
         {
-
             return ArchiveFile.OpenArchiveStream(resultData);
         }
 

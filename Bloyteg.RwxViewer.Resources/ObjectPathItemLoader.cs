@@ -11,31 +11,39 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System.Threading.Tasks;
-using Animation = Bloyteg.AW.Animation.Seq.Animation;
+using Bloyteg.AW.Animation.Seq;
+using MrByte.RWX.Model;
 
-namespace Bloyteg.RwxViewer.Website.Models
+
+namespace Bloyteg.RwxViewer.Resources
 {
     public class ObjectPathItemLoader : IObjectPathItemLoader
     {
-        private readonly ModelLoader _modelLoader = new ModelLoader();
-        private readonly TextureLoader _textureLoader = new TextureLoader();
-        private readonly AnimationLoader _animationLoader = new AnimationLoader();
+        private readonly IResourceLocator<Model> _modelLoader;
+        private readonly IResourceLocator<byte[]> _textureLoader;
+        private readonly IResourceLocator<Animation> _animationLocator;
 
-        public async Task<MrByte.RWX.Model.Model> GetModelAsync(int worldId, string modelName)
+        public ObjectPathItemLoader(IResourceLocator<Model> modelLoader, IResourceLocator<byte[]> textureLoader, IResourceLocator<Animation> animationLocator)
         {
-            return await _modelLoader.GetAsync(worldId, modelName);
+            _textureLoader = textureLoader;
+            _modelLoader = modelLoader;
+            _animationLocator = animationLocator;
+        }
+
+        public async Task<Model> GetModelAsync(int worldId, string modelName)
+        {
+            return await _modelLoader.GetResourceAsync(worldId, modelName);
         }
 
         public async Task<byte[]> GetTextureAsync(int worldId, string textureName)
         {
-            return await _textureLoader.GetTextureAsync(worldId, textureName);
+            return await _textureLoader.GetResourceAsync(worldId, textureName);
         }
 
         public async Task<Animation> GetAnimationAsync(int id, string animationName)
         {
-            return await _animationLoader.GetAnimationAsync(id, animationName);
+            return await _animationLocator.GetResourceAsync(id, animationName);
         }
     }
 }
