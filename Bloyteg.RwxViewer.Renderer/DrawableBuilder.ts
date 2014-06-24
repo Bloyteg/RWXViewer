@@ -43,7 +43,7 @@ module RwxViewer {
 
             mat4.multiply(matrix, transformMatrix, matrix);
 
-            return new MeshDrawable(meshData.subMeshes, meshData.meshChildren, matrix, clump.Tag);
+            return new MeshDrawable(meshData.subMeshes, meshData.meshChildren, matrix, clump.Tag, this._model.AxisAlignment !== AxisAlignment.None);
         }
 
         private buildGeometryMeshData(geometry: MeshGeometry, transformMatrix: Mat4Array) {

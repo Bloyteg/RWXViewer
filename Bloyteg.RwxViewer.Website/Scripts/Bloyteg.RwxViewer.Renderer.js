@@ -509,7 +509,7 @@ var RwxViewer;
 
             mat4.multiply(matrix, transformMatrix, matrix);
 
-            return new RwxViewer.MeshDrawable(meshData.subMeshes, meshData.meshChildren, matrix, clump.Tag);
+            return new RwxViewer.MeshDrawable(meshData.subMeshes, meshData.meshChildren, matrix, clump.Tag, this._model.AxisAlignment !== 0 /* None */);
         };
 
         MeshDrawableBuilder.prototype.buildGeometryMeshData = function (geometry, transformMatrix) {
