@@ -11,9 +11,9 @@
 }
 
 <div id="sidebar">
-    <fieldset id="modelSelection">
-        <legend>Model Selection</legend>
-        <div class="content">
+    <div id="modelSelection" class="optionGroup">
+        <div class="optionHeader">Model Selection</div>
+        <div class="optionContent">
             <div>
                 <label for="selectWorld">World:</label>
                 <select class="uiSelect" id="selectWorld" data-bind="options: worlds, optionsText: 'name', optionsCaption: '(None)', value: selectedWorld, enabled: worlds().length > 0"></select>
@@ -34,16 +34,16 @@
                 <select class="uiSelect" id="selectAnimation" data-bind="options: animations, optionsText: 'name', optionsCaption: '(None)', value: selectedAnimation"></select>
             </div>
         </div>
-    </fieldset>
+    </div>
 
-    <fieldset id="controls">
-        <legend>Controls</legend>
-        <div class="content">
+    <div id="controls" class="optionGroup">
+        <div class="optionHeader">Controls</div>
+        <div class="optionContent">
             Left Mouse: Rotate<br />
             Right Mouse: Pan<br />
             Mouse Wheel: Zoom
         </div>
-    </fieldset>
+    </div>
 </div>
 
 <div id="renderArea">

@@ -93,11 +93,10 @@
     bottom: 0;
 }
 
-#sidebar fieldset {
+#sidebar .optionGroup {
     position: relative;
     margin: 0 0 0 0;
-    padding: 0 0 0 0;
-    padding-top: 32px;
+    padding: 4px 4px 8px 4px;
 
     background-color: #1F1F1F;
 
@@ -105,36 +104,30 @@
     border-bottom: 1px solid #5F5F5F;
 }
 
-#sidebar fieldset legend {
-    position: absolute;
-    top: 4px;
-    left: 4px;
-
+.optionGroup .optionHeader {
     font-weight: bold;
     font-size: 1.2em;
 
     color: white;
 }
 
-#sidebar .content {
+.optionGroup .optionContent {
     padding-left: 8px;
-    padding-bottom: 8px;
-    padding-right: 8px;
 }
 
-#sidebar .content div {
+.optionGroup .optionContent div {
     clear: both;
 }
 
-fieldset#modelSelection {
-    border-right: 4px solid #5d00a5;
+.optionGroup#modelSelection {
+    border-right: 4px solid #ba61ff;
 }
 
-fieldset#controls {
+.optionGroup#controls {
    border-right: 4px solid red; 
 }
 
 .uiSelect {
-    width: 120px;
+    width: 140px;
     float: right;
 }
