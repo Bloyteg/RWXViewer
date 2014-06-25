@@ -200,7 +200,7 @@ module RwxViewer {
                 mat4.fromQuat(this._rotationMatrix, this._quaternion);
                 mat4.translate(this._translationMatrix, this._identityMatrix, this._translation);
 
-                return mat4.mul(this._transformMatrix, this._rotationMatrix, this._translationMatrix);
+                return mat4.mul(this._transformMatrix, this._translationMatrix, this._rotationMatrix);
             }
 
             for (var index = 0; index < length; ++index) {
