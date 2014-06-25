@@ -154,13 +154,9 @@ module RwxViewer {
                 }
             }
 
-            var xPositions = animation.GlobalXPositions.map(computePositionKeyframe);
             var yPositions = animation.GlobalYPositions.map(computePositionKeyframe);
-            var zPositions = animation.GlobalZPositions.map(computePositionKeyframe);
 
-            return vec3.fromValues(this.interpolatePosition(xPositions, keyframe),
-                                   this.interpolatePosition(yPositions, keyframe),
-                                   -this.interpolatePosition(zPositions, keyframe));
+            return vec3.fromValues(0, this.interpolatePosition(yPositions, keyframe), 0);
         }
 
         private interpolatePosition(positions: { keyframe: number; value: number }[], keyframe: number) {
