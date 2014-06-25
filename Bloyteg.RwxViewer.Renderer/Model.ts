@@ -158,6 +158,11 @@ module RwxViewer {
         Z: number;
     }
 
+    export interface GlobalPositionKeyframe {
+        Keyframe: number;
+        Value: number;
+    } 
+
     export interface Keyframe {
         Keyframe: number;
         Rotation: Quaternion;
@@ -173,5 +178,8 @@ module RwxViewer {
         FramesPerSecond: number;
         FrameCount: number;
         Joints: Joint[];
+        GlobalXPositions: GlobalPositionKeyframe[];
+        GlobalYPositions: GlobalPositionKeyframe[];
+        GlobalZPositions: GlobalPositionKeyframe[];
     }
 }

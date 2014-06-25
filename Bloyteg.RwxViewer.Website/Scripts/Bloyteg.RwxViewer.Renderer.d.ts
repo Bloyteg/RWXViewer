@@ -31,13 +31,18 @@ declare module RwxViewer {
         private _startTime;
         private _framesPerMS;
         private _totalFrames;
-        private _identity;
-        private _transform;
+        private _identityMatrix;
+        private _rotationMatrix;
+        private _translationMatrix;
+        private _transformMatrix;
         private _quaternion;
+        private _translation;
         private _keyframesByJoint;
         constructor(animation: ModelAnimation, startTime: number);
         private buildKeyframesByJoint(animation);
         private getJointTagFromName(name);
+        private buildGlobalTranslationForKeyframe(animation, keyframe);
+        private interpolatePosition(positions, keyframe);
         public getTransformForTime(joint: number, time: number): Mat4Array;
     }
 }
@@ -260,6 +265,10 @@ declare module RwxViewer {
         Y: number;
         Z: number;
     }
+    interface GlobalPositionKeyframe {
+        Keyframe: number;
+        Value: number;
+    }
     interface Keyframe {
         Keyframe: number;
         Rotation: Quaternion;
@@ -273,6 +282,9 @@ declare module RwxViewer {
         FramesPerSecond: number;
         FrameCount: number;
         Joints: Joint[];
+        GlobalXPositions: GlobalPositionKeyframe[];
+        GlobalYPositions: GlobalPositionKeyframe[];
+        GlobalZPositions: GlobalPositionKeyframe[];
     }
 }
 declare module RwxViewer {

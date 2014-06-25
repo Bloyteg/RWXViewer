@@ -31,7 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Bloyteg.AW.Animation.Seq">
-      <HintPath>..\packages\Bloyteg.AW.Animation.Seq.1.0.2\lib\Bloyteg.AW.Animation.Seq.dll</HintPath>
+      <HintPath>..\packages\Bloyteg.AW.Animation.Seq.1.0.4\lib\Bloyteg.AW.Animation.Seq.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework">
       <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.dll</HintPath>

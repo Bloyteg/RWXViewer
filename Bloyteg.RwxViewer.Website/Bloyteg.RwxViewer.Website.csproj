@@ -45,9 +45,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Bloyteg.AW.Animation.Seq, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Bloyteg.AW.Animation.Seq, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Bloyteg.AW.Animation.Seq.1.0.2\lib\Bloyteg.AW.Animation.Seq.dll</HintPath>
+      <HintPath>..\packages\Bloyteg.AW.Animation.Seq.1.0.4\lib\Bloyteg.AW.Animation.Seq.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

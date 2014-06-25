@@ -107,6 +107,8 @@ var RwxViewer;
     })();
     RwxViewer.NoAnimation = NoAnimation;
 
+    var ROOT_JOINT = 1;
+
     var jointTags = {
         "pelvis": 1,
         "back": 2,
@@ -158,9 +160,12 @@ var RwxViewer;
             this._framesPerMS = animation.FramesPerSecond / 1000;
             this._totalFrames = Math.floor(animation.FrameCount / this._framesPerMS);
 
-            this._transform = mat4.create();
+            this._rotationMatrix = mat4.create();
+            this._translationMatrix = mat4.create();
+            this._transformMatrix = mat4.create();
+            this._identityMatrix = mat4.create();
             this._quaternion = quat.identity(quat.create());
-            this._identity = mat4.create();
+            this._translation = vec3.create();
 
             this._keyframesByJoint = this.buildKeyframesByJoint(animation);
         }
@@ -172,13 +177,21 @@ var RwxViewer;
                 var tag = _this.getJointTagFromName(joint.Name);
 
                 result[tag] = joint.Keyframes.map(function (frame) {
+                    var keyframe = Math.floor(frame.Keyframe / _this._framesPerMS);
                     var rotation = quat.fromValues(frame.Rotation.X, frame.Rotation.Y, -frame.Rotation.Z, frame.Rotation.W);
                     quat.invert(rotation, rotation);
 
+                    var translation = vec3.fromValues(frame.Translation.X, frame.Translation.Y, -frame.Translation.Z);
+
+                    if (tag === ROOT_JOINT) {
+                        var globalTranslation = _this.buildGlobalTranslationForKeyframe(animation, keyframe);
+                        vec3.add(translation, globalTranslation, translation);
+                    }
+
                     return {
-                        keyframe: Math.floor(frame.Keyframe / _this._framesPerMS),
+                        keyframe: keyframe,
                         rotation: rotation,
-                        translation: vec3.fromValues(frame.Translation.X, frame.Translation.Y, frame.Translation.Z)
+                        translation: translation
                     };
                 });
             });
@@ -190,12 +203,50 @@ var RwxViewer;
             return jointTags[name] || null;
         };
 
+        SequenceAnimation.prototype.buildGlobalTranslationForKeyframe = function (animation, keyframe) {
+            var framesPerMS = this._framesPerMS;
+
+            function computePositionKeyframe(position) {
+                return {
+                    keyframe: Math.floor(position.Keyframe / framesPerMS),
+                    value: position.Value
+                };
+            }
+
+            var xPositions = animation.GlobalXPositions.map(computePositionKeyframe);
+            var yPositions = animation.GlobalYPositions.map(computePositionKeyframe);
+            var zPositions = animation.GlobalZPositions.map(computePositionKeyframe);
+
+            return vec3.fromValues(this.interpolatePosition(xPositions, keyframe), this.interpolatePosition(yPositions, keyframe), -this.interpolatePosition(zPositions, keyframe));
+        };
+
+        SequenceAnimation.prototype.interpolatePosition = function (positions, keyframe) {
+            var length = positions.length - 1;
+
+            function getPosition(firstFrameIndex, secondFrameIndex) {
+                var interpFactor = (keyframe - positions[firstFrameIndex].keyframe) / Math.abs(positions[secondFrameIndex].keyframe - positions[firstFrameIndex].keyframe);
+                return (1 - interpFactor) * positions[firstFrameIndex].value + interpFactor * positions[secondFrameIndex].value;
+            }
+
+            for (var index = 0; index < length; ++index) {
+                var nextIndex = index + 1;
+
+                if (positions[index].keyframe <= keyframe && positions[nextIndex].keyframe >= keyframe) {
+                    return getPosition(index, index + 1);
+                } else if (nextIndex === length && positions[nextIndex].keyframe <= keyframe) {
+                    return getPosition(index + 1, 0);
+                }
+            }
+
+            return 0;
+        };
+
         SequenceAnimation.prototype.getTransformForTime = function (joint, time) {
             var _this = this;
             var frame = Math.floor((time - this._startTime) % this._totalFrames);
 
             if (!(joint in this._keyframesByJoint)) {
-                return this._identity;
+                return this._identityMatrix;
             }
 
             //TODO: This is a naive approach.  Add memoization or pre-baking of keyframes in the future.
@@ -206,7 +257,12 @@ var RwxViewer;
                 var interpFactor = (frame - keyframes[firstFrameIndex].keyframe) / Math.abs(keyframes[secondFrameIndex].keyframe - keyframes[firstFrameIndex].keyframe);
 
                 quat.slerp(_this._quaternion, keyframes[firstFrameIndex].rotation, keyframes[secondFrameIndex].rotation, interpFactor);
-                return mat4.fromQuat(_this._transform, _this._quaternion);
+                vec3.lerp(_this._translation, keyframes[firstFrameIndex].translation, keyframes[secondFrameIndex].translation, interpFactor);
+
+                mat4.fromQuat(_this._rotationMatrix, _this._quaternion);
+                mat4.translate(_this._translationMatrix, _this._identityMatrix, _this._translation);
+
+                return mat4.mul(_this._transformMatrix, _this._rotationMatrix, _this._translationMatrix);
             };
 
             for (var index = 0; index < length; ++index) {
@@ -219,7 +275,7 @@ var RwxViewer;
                 }
             }
 
-            return this._identity;
+            return this._identityMatrix;
         };
         return SequenceAnimation;
     })();

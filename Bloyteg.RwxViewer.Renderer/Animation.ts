@@ -35,6 +35,8 @@ module RwxViewer {
         }
     }
 
+    var ROOT_JOINT = 1;
+
     var jointTags = {
         "pelvis": 1,
         "back": 2,
@@ -85,20 +87,26 @@ module RwxViewer {
         private _framesPerMS: number;
         private _totalFrames: number;
 
-        private _identity: Mat4Array;
-        private _transform: Mat4Array;
+        private _identityMatrix: Mat4Array;
+        private _rotationMatrix: Mat4Array;
+        private _translationMatrix: Mat4Array;
+        private _transformMatrix: Mat4Array;
         private _quaternion: Vec4Array;
-        private _keyframesByJoint: { [tag: number]: { keyframe: number; rotation: Vec4Array; translation: Vec4Array }[] };
+        private _translation: Vec3Array;
+
+        private _keyframesByJoint: { [tag: number]: { keyframe: number; rotation: Vec4Array; translation: Vec3Array }[] };
 
         constructor(animation: ModelAnimation, startTime: number) {
             this._startTime = startTime;
             this._framesPerMS = animation.FramesPerSecond / 1000;
             this._totalFrames = Math.floor(animation.FrameCount / this._framesPerMS);
 
-            this._transform = mat4.create();
+            this._rotationMatrix = mat4.create();
+            this._translationMatrix = mat4.create();
+            this._transformMatrix = mat4.create();
+            this._identityMatrix = mat4.create();
             this._quaternion = quat.identity(quat.create());
-            this._identity = mat4.create();
-
+            this._translation = vec3.create();
 
             this._keyframesByJoint = this.buildKeyframesByJoint(animation);
         }
@@ -110,14 +118,22 @@ module RwxViewer {
                 var tag = this.getJointTagFromName(joint.Name);
 
                 result[tag] = joint.Keyframes.map(frame => {
+                    var keyframe = Math.floor(frame.Keyframe / this._framesPerMS);
                     var rotation = quat.fromValues(frame.Rotation.X, frame.Rotation.Y, -frame.Rotation.Z, frame.Rotation.W);
                     quat.invert(rotation, rotation);
 
-                    return {
-                        keyframe: Math.floor(frame.Keyframe / this._framesPerMS),
-                        rotation: rotation,
-                        translation: vec3.fromValues(frame.Translation.X, frame.Translation.Y, frame.Translation.Z)
+                    var translation = vec3.fromValues(frame.Translation.X, frame.Translation.Y, -frame.Translation.Z);
+
+                    if (tag === ROOT_JOINT) {
+                        var globalTranslation = this.buildGlobalTranslationForKeyframe(animation, keyframe);
+                        vec3.add(translation, globalTranslation, translation);
                     }
+
+                    return {
+                        keyframe: keyframe,
+                        rotation: rotation,
+                        translation: translation
+                    };
                 });
             });
 
@@ -128,11 +144,51 @@ module RwxViewer {
             return jointTags[name] || null;
         }
 
+        private buildGlobalTranslationForKeyframe(animation: RwxViewer.ModelAnimation, keyframe: number) {
+            var framesPerMS = this._framesPerMS;
+
+            function computePositionKeyframe(position: GlobalPositionKeyframe) {
+                return {
+                    keyframe: Math.floor(position.Keyframe / framesPerMS),
+                    value: position.Value
+                }
+            }
+
+            var xPositions = animation.GlobalXPositions.map(computePositionKeyframe);
+            var yPositions = animation.GlobalYPositions.map(computePositionKeyframe);
+            var zPositions = animation.GlobalZPositions.map(computePositionKeyframe);
+
+            return vec3.fromValues(this.interpolatePosition(xPositions, keyframe),
+                                   this.interpolatePosition(yPositions, keyframe),
+                                   -this.interpolatePosition(zPositions, keyframe));
+        }
+
+        private interpolatePosition(positions: { keyframe: number; value: number }[], keyframe: number) {
+            var length = positions.length - 1;
+
+            function getPosition(firstFrameIndex, secondFrameIndex) {
+                var interpFactor = (keyframe - positions[firstFrameIndex].keyframe) / Math.abs(positions[secondFrameIndex].keyframe - positions[firstFrameIndex].keyframe);
+                return (1 - interpFactor)*positions[firstFrameIndex].value + interpFactor*positions[secondFrameIndex].value;
+            }
+
+            for (var index = 0; index < length; ++index) {
+                var nextIndex = index + 1;
+
+                if (positions[index].keyframe <= keyframe && positions[nextIndex].keyframe >= keyframe) {
+                    return getPosition(index, index + 1);
+                } else if (nextIndex === length && positions[nextIndex].keyframe <= keyframe) {
+                    return getPosition(index + 1, 0);
+                }
+            }
+
+            return 0;
+        }
+
         getTransformForTime(joint: number, time: number): Mat4Array {
             var frame = Math.floor((time - this._startTime) % this._totalFrames);
 
             if (!(joint in this._keyframesByJoint)) {
-                return this._identity;
+                return this._identityMatrix;
             }
 
             //TODO: This is a naive approach.  Add memoization or pre-baking of keyframes in the future.
@@ -143,7 +199,12 @@ module RwxViewer {
                 var interpFactor = (frame - keyframes[firstFrameIndex].keyframe) / Math.abs(keyframes[secondFrameIndex].keyframe - keyframes[firstFrameIndex].keyframe);
 
                 quat.slerp(this._quaternion, keyframes[firstFrameIndex].rotation, keyframes[secondFrameIndex].rotation, interpFactor);
-                return mat4.fromQuat(this._transform, this._quaternion);
+                vec3.lerp(this._translation, keyframes[firstFrameIndex].translation, keyframes[secondFrameIndex].translation, interpFactor);
+
+                mat4.fromQuat(this._rotationMatrix, this._quaternion);
+                mat4.translate(this._translationMatrix, this._identityMatrix, this._translation);
+
+                return mat4.mul(this._transformMatrix, this._rotationMatrix, this._translationMatrix);
             }
 
             for (var index = 0; index < length; ++index) {
@@ -156,7 +217,7 @@ module RwxViewer {
                 }
             }
 
-            return this._identity;
+            return this._identityMatrix;
         }
     }
 }
