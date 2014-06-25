@@ -126,6 +126,7 @@ declare module RwxViewer {
         private _jointTag;
         private _modelMatrix;
         private _transformMatrix;
+        private _normalMatrix;
         constructor(subMeshes: SubMesh[], children: Drawable[], modelMatrix: Mat4Array, jointTag: number, isBillboard?: boolean, animation?: Animation);
         public animation : Animation;
         public cloneWithAnimation(animation: Animation): MeshDrawable;

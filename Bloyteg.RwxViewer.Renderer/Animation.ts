@@ -156,7 +156,6 @@ module RwxViewer {
                 }
             }
 
-            //  console.log("Frame " + frame + " had no corresponding keyframe range for joint " + joint + ", there's a total of " + this._totalFrames + " frames and the max frame for this joint is " + keyframes[length-1].keyframe);
             return this._identity;
         }
     }

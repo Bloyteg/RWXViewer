@@ -242,8 +242,10 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="..\Bloyteg.RwxViewer.Renderer\typings\gl-matrix\gl-matrix.d.ts">
+      <Link>Scripts\typings\gl-matrix.d.ts</Link>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Scripts\Bloyteg.RwxViewer.Renderer.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\gl-matrix\gl-matrix.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\knockout\knockout.d.ts" />
     <TypeScriptCompile Include="Scripts\viewer\CameraController.ts" />

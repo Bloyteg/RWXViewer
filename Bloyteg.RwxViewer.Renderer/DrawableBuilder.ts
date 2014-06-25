@@ -168,11 +168,13 @@ module RwxViewer {
             };
         }
 
-        //TODO: Will need to transform normals.
         private buildTriangleBuffers(transformMatrix: Mat4Array, vertices: Vertex[], faces: IFace[], material: Material) {
             var positions: number[] = [];
             var uvs: number[] = [];
             var normals: number[] = [];
+
+            var normalMatrix: Mat3Array = mat3.create();
+            mat3.normalFromMat4(normalMatrix, transformMatrix);
 
             faces.forEach(face => {
                 face.Triangles.forEach(triangle => {
@@ -182,7 +184,8 @@ module RwxViewer {
 
                         Array.prototype.push.apply(positions, this.computeVertexPosition(transformMatrix, vertex));
                         uvs.push((<any>(vertex.UV) || {}).U || 0, (<any>(vertex.UV) || {}).V || 0);
-                        normals.push(normal.X, normal.Y, normal.Z);
+
+                        Array.prototype.push.apply(normals, this.computeNormal(normalMatrix, normal));
                     });
                 });
             });
@@ -192,6 +195,11 @@ module RwxViewer {
                 uvs: new Float32Array(uvs),
                 normals: new Float32Array(normals)
             };
+        }
+
+        private computeNormal(normalMatrix: Mat3Array, normal: Vector3) {
+            var normalVector = [normal.X, normal.Y, normal.Z];
+            return vec3.transformMat3(normalVector, normalVector, normalMatrix);
         }
 
         private computeVertexPosition(transformMatrix: Mat4Array, vertex: Vertex) {

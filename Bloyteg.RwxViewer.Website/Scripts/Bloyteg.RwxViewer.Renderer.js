@@ -219,7 +219,6 @@ var RwxViewer;
                 }
             }
 
-            //  console.log("Frame " + frame + " had no corresponding keyframe range for joint " + joint + ", there's a total of " + this._totalFrames + " frames and the max frame for this joint is " + keyframes[length-1].keyframe);
             return this._identity;
         };
         return SequenceAnimation;
@@ -638,12 +637,14 @@ var RwxViewer;
             };
         };
 
-        //TODO: Will need to transform normals.
         MeshDrawableBuilder.prototype.buildTriangleBuffers = function (transformMatrix, vertices, faces, material) {
             var _this = this;
             var positions = [];
             var uvs = [];
             var normals = [];
+
+            var normalMatrix = mat3.create();
+            mat3.normalFromMat4(normalMatrix, transformMatrix);
 
             faces.forEach(function (face) {
                 face.Triangles.forEach(function (triangle) {
@@ -653,7 +654,8 @@ var RwxViewer;
 
                         Array.prototype.push.apply(positions, _this.computeVertexPosition(transformMatrix, vertex));
                         uvs.push(((vertex.UV) || {}).U || 0, ((vertex.UV) || {}).V || 0);
-                        normals.push(normal.X, normal.Y, normal.Z);
+
+                        Array.prototype.push.apply(normals, _this.computeNormal(normalMatrix, normal));
                     });
                 });
             });
@@ -663,6 +665,11 @@ var RwxViewer;
                 uvs: new Float32Array(uvs),
                 normals: new Float32Array(normals)
             };
+        };
+
+        MeshDrawableBuilder.prototype.computeNormal = function (normalMatrix, normal) {
+            var normalVector = [normal.X, normal.Y, normal.Z];
+            return vec3.transformMat3(normalVector, normalVector, normalMatrix);
         };
 
         MeshDrawableBuilder.prototype.computeVertexPosition = function (transformMatrix, vertex) {
@@ -804,6 +811,7 @@ var RwxViewer;
             this._jointTag = jointTag || 0;
             this._modelMatrix = modelMatrix;
             this._transformMatrix = mat4.create();
+            this._normalMatrix = mat3.create();
         }
         Object.defineProperty(MeshDrawable.prototype, "animation", {
             get: function () {
@@ -840,8 +848,10 @@ var RwxViewer;
         MeshDrawable.prototype.setTransformUniforms = function (gl, shader, transformMatrix, time) {
             mat4.multiply(this._transformMatrix, this._modelMatrix, this._animation.getTransformForTime(this._jointTag, time));
             mat4.multiply(this._transformMatrix, transformMatrix, this._transformMatrix);
+            mat3.normalFromMat4(this._normalMatrix, this._transformMatrix);
 
             gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._transformMatrix);
+            gl.uniformMatrix3fv(shader.uniforms["u_normalMatrix"], false, this._normalMatrix);
             gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
         };
 
