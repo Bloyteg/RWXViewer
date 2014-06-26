@@ -260,7 +260,7 @@ var RwxViewer;
                 mat4.fromQuat(_this._rotationMatrix, _this._quaternion);
                 mat4.translate(_this._translationMatrix, _this._identityMatrix, _this._translation);
 
-                return mat4.mul(_this._transformMatrix, _this._rotationMatrix, _this._translationMatrix);
+                return mat4.mul(_this._transformMatrix, _this._translationMatrix, _this._rotationMatrix);
             };
 
             for (var index = 0; index < length; ++index) {

@@ -9,6 +9,52 @@
     color: white;
 }
 
+select {
+    margin-bottom: 4px;
+    display: table-cell;
+    vertical-align: middle;
+    padding: 4px 4px 4px 4px;
+    border-radius: 8px;
+    border: 0;
+    box-shadow: inset 0 0 1em #5A5A5A;
+    background-color: #777;
+    color: white;
+    outline: none;
+    line-height: 1.2;
+}
+
+select:disabled {
+    color: #AAA;
+}
+
+select[disabled] {
+    color: #AAA;
+}
+
+select::-ms-expand {
+    border: none;
+    background-color: transparent;
+    color: white;
+}
+
+select:disabled::-ms-expand {
+    color: #AAA;
+}
+
+select:after {
+    content: "▼";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    font-size: 60%;
+    line-height: 30px;
+    padding: 0 7px;
+    background: #777;
+    color: white;
+    pointer-events: none;
+}
+
 #renderArea {
     position: absolute;
     padding: 0;
