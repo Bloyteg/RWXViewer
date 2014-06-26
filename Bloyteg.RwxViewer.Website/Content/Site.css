@@ -57,7 +57,7 @@ select::-ms-expand {
     padding: 0;
     margin: 0;
     left: 240px;
-    top: 0;
+    top: 120px;
     right: 0;
     bottom: 0;
 }
@@ -124,7 +124,7 @@ select::-ms-expand {
 #sidebar {
     position: absolute;
     left: 0;
-    top: 0;
+    top: 120px;
     width: 240px;
     bottom: 0;
     border-right: 1px solid #333;
