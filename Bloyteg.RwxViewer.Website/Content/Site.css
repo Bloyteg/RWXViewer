@@ -10,13 +10,20 @@
 }
 
 select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+
+    text-indent: 0.01px;
+    text-overflow: '';
+
     margin-bottom: 4px;
     display: table-cell;
     vertical-align: middle;
     padding: 4px 4px 4px 4px;
     border-radius: 8px;
     border: 0;
-    box-shadow: inset 0 0 1em #5A5A5A;
+    box-shadow: inset 0 0 8px #333;
     background-color: #777;
     color: white;
     outline: none;
@@ -27,32 +34,23 @@ select:disabled {
     color: #AAA;
 }
 
-select[disabled] {
-    color: #AAA;
-}
-
 select::-ms-expand {
-    border: none;
-    background-color: transparent;
-    color: white;
+    display: none;
 }
 
-select:disabled::-ms-expand {
-    color: #AAA;
-}
-
-select:after {
+.optionDropdown label:after {
     content: "▼";
     position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    font-size: 60%;
-    line-height: 30px;
-    padding: 0 7px;
-    background: #777;
+    right: 16px;
+
     color: white;
     pointer-events: none;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    .optionDropdown label:after {
+        margin-top: 4px;
+    }
 }
 
 #renderArea {
@@ -200,11 +198,11 @@ select:after {
     border-right: 4px solid red;
 }
 
-.optionSetting select {
+.optionDropdown select {
     width: 140px;
     float: right;
 }
 
-.optionSetting {
+.optionDropdown {
     clear: both;
 }
