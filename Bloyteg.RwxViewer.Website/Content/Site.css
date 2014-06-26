@@ -92,6 +92,15 @@
     padding: 4px 4px 4px 4px;
     border-bottom: 1px solid #333;
     border-right: 1px solid #333;
+
+    transition: background-color 300ms;
+}
+
+.optionGroup:hover {
+    background-color: black;
+    border-right: none;
+
+    transition: background-color 300ms;
 }
 
 .optionGroup[data-state=selected] {
@@ -99,9 +108,9 @@
     border-right: none;
 }
 
-    .optionGroup[data-state=selected] .optionHeader {
-        font-weight: bolder;
-    }
+.optionGroup[data-state=selected] .optionHeader {
+    font-weight: bolder;
+}
 
 .optionGroup .optionHeader {
     font-weight: bold;
