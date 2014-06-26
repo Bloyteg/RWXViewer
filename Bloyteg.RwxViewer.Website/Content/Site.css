@@ -5,7 +5,6 @@
     padding: 0 0 0 0;
     border: none;
     font-family: "Segoe UI Light", "Segoe UI", "Tahoma Light", "Arial Light", Helvetica, sans-serif;
-
     background-color: black;
     color: white;
 }
@@ -14,7 +13,6 @@
     position: absolute;
     padding: 0;
     margin: 0;
-
     left: 240px;
     top: 0;
     right: 0;
@@ -28,6 +26,8 @@
     margin: 0 0 0 0;
     border: none;
     display: block;
+
+    cursor: crosshair;
 }
 
 #renderArea #resetCamera {
@@ -36,10 +36,8 @@
     bottom: 8px;
     border: none;
     height: 2em;
-
     padding: 4px;
     margin: 0;
-
     background: #5d00a5;
     color: #fff;
 }
@@ -57,8 +55,6 @@
     top: 0;
     bottom: 0;
     text-align: center;
-
-/*    visibility: hidden; */
 }
 
 #renderArea #error {
@@ -67,13 +63,10 @@
     right: 300px;
     bottom: 8px;
     padding: 4px;
-
     text-align: center;
     background: red;
     color: white;
-
     border: 2px solid white;
-
     visibility: hidden;
 }
 
@@ -91,43 +84,72 @@
     top: 0;
     width: 240px;
     bottom: 0;
+    border-right: 1px solid #333;
 }
 
-#sidebar .optionGroup {
-    position: relative;
-    margin: 0 0 0 0;
-    padding: 4px 4px 8px 4px;
-
-    background-color: #1F1F1F;
-
-    border: none;
-    border-bottom: 1px solid #5F5F5F;
+.optionGroup {
+    background-color: #555;
+    padding: 4px 4px 4px 4px;
+    border-bottom: 1px solid #333;
+    border-right: 1px solid #333;
 }
+
+.optionGroup[data-state=selected] {
+    background-color: black;
+    border-right: none;
+}
+
+    .optionGroup[data-state=selected] .optionHeader {
+        font-weight: bolder;
+    }
 
 .optionGroup .optionHeader {
     font-weight: bold;
     font-size: 1.2em;
-
     color: white;
+
+    cursor: pointer;
 }
 
 .optionGroup .optionContent {
-    padding-left: 8px;
+    display: inline-block;
+    overflow: hidden;
+    position: absolute;
+    left: 240px;
+    width: 0;
+    background-color: black;
+    margin-top: -30px;
+    transition: all 250ms;
 }
 
-.optionGroup .optionContent div {
-    clear: both;
+.optionGroup .optionContent > * {
+    visibility: hidden;
 }
 
-.optionGroup#modelSelection {
+.optionGroup[data-state=selected] .optionContent {
+    padding: 8px 8px 8px 8px;
+    width: 240px;
+    border-left: none;
+    transition: width 250ms;
+}
+
+.optionGroup[data-state=selected] .optionContent > * {
+    visibility: visible;
+}
+
+.optionGroup[data-state=selected]#modelSelection .optionContent {
     border-right: 4px solid #ba61ff;
 }
 
-.optionGroup#controls {
-   border-right: 4px solid red; 
+.optionGroup[data-state=selected]#controls .optionContent {
+    border-right: 4px solid red;
 }
 
-.uiSelect {
+.optionSetting select {
     width: 140px;
     float: right;
+}
+
+.optionSetting {
+    clear: both;
 }

@@ -157,3 +157,18 @@ function tick() {
     renderer.draw(Date.now());
     window.requestAnimationFrame(tick);
 }
+
+
+var allGroups = $('.optionGroup');
+
+allGroups.click(function () {
+    var currentElement = $(this);
+    var currentState = currentElement.attr('data-state');
+
+    allGroups.attr('data-state', '');
+    currentElement.attr('data-state', currentState === 'selected' ? '' : 'selected');
+});
+
+$('.optionContent').click(e => {
+    e.stopPropagation();
+});
