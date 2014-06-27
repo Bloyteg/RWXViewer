@@ -155,19 +155,25 @@ select::-ms-expand {
     overflow: hidden;
     position: absolute;
     left: 240px;
-    width: 0;
+    width: 240px;
     background-color: #222;
     margin-top: -36px;
-    transition: all 400ms;
     white-space: nowrap;
+    padding: 8px 8px 8px 8px;
+    border-left: none;
+    border-right: 4px solid #ba61ff;
+    pointer-events: none;
+
+    opacity: 0;
+    transition: opacity 250ms ease-out;
 }
 
 .group[data-state=selected] .content {
-    padding: 8px 8px 8px 8px;
-    width: 240px;
-    border-left: none;
-    border-right: 4px solid #ba61ff;
-    transition: width 400ms;
+    pointer-events: all;
+
+
+    opacity: 1;
+    transition: opacity 250ms ease-in;
 }
 
 
