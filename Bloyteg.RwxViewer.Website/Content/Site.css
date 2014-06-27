@@ -105,6 +105,28 @@ select::-ms-expand {
     color: white;
 }
 
+#header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+
+    border-bottom: 4px solid #ba61ff;
+    padding-left: 8px;
+
+    display: table-cell;
+    vertical-align: middle;
+    line-height: 1em;
+}
+
+#header #toolbar {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    
+}
+
 #sidebar {
     position: absolute;
     left: 0;
@@ -116,7 +138,7 @@ select::-ms-expand {
 
 .group {
     background-color: #333;
-    padding: 4px 4px 4px 4px;
+    padding: 4px 4px 4px 8px;
     border-bottom: 1px solid #555;
 
     transition: background-color 300ms;
@@ -170,12 +192,9 @@ select::-ms-expand {
 
 .group[data-state=selected] .content {
     pointer-events: all;
-
-
     opacity: 1;
     transition: opacity 250ms ease-in;
 }
-
 
 #controls {
     position: absolute;
@@ -203,28 +222,6 @@ select::-ms-expand {
 
 .optionDropdown {
     clear: both;
-}
-
-#header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
-
-    border-bottom: 4px solid #ba61ff;
-    padding-left: 4px;
-
-    display: table-cell;
-    vertical-align: middle;
-    line-height: 1em;
-}
-
-#header #toolbar {
-    position: absolute;
-    top: -8px;
-    right: 32px;
-    
 }
 
 #sidebarSpacer {
