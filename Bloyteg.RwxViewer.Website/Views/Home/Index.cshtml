@@ -1,4 +1,5 @@
-﻿@{
+﻿@using System.Web.UI.WebControls
+@{
     ViewBag.Title = "RWX Viewer by Byte";
 }
 
@@ -16,8 +17,6 @@
         Your browser does not support the HTML 5 Canvas element.
     </canvas>
 
-    <button id="resetCamera" data-bind="click: resetCamera">Reset Camera</button>
-
     <h1 id="loading">Loading...</h1>
 
     <div id="error">
@@ -26,10 +25,19 @@
     </div>
 </div>
 
+<div id="header">
+    <h2>RWX Viewer</h2>
+    <div id="toolbar">
+        <img src="@Url.Content("~/Content/appbar.camera.png")" alt="Take Screenshot" />
+        <img src="@Url.Content("~/Content/appbar.link.png")" alt="Link to Current Model" />
+    </div>
+</div>
+
 <div id="sidebar">
-    <div id="modelSelection" class="optionGroup">
-        <div class="optionHeader">Model Selection</div>
-        <div class="optionContent">
+    <div id="sidebarSpacer"></div>
+    <div id="modelSelection" class="group">
+        <div class="header">Model Selection</div>
+        <div class="content">
             <div class="optionDropdown">
                 <label for="selectWorld">World:</label>
                 <select id="selectWorld" data-bind="options: worlds, optionsText: 'name', optionsCaption: '(None)', value: selectedWorld, enabled: worlds().length > 0"></select>
@@ -52,9 +60,26 @@
         </div>
     </div>
 
-    <div id="controls" class="optionGroup">
-        <div class="optionHeader">Controls</div>
-        <div class="optionContent">
+    <div id="camera" class="group">
+        <div class="header">Camera Controls</div>
+        <div class="content">
+            <button id="resetCamera" data-bind="click: resetCamera">Reset Camera</button>
+        </div>
+    </div>
+
+    <div id="light" class="group">
+        <div class="header">Lighting Controls</div>
+        <div class="content"></div>
+    </div>
+
+    <div id="settings" class="group">
+        <div class="header">Settings</div>
+        <div class="content"></div>
+    </div>
+
+    <div id="controls">
+        <div class="header">Controls</div>
+        <div class="content">
             Left Mouse: <span style="float: right">Rotate</span><br />
             Right Mouse: <span style="float: right">Pan</span><br />
             Mouse Wheel: <span style="float: right">Zoom</span>

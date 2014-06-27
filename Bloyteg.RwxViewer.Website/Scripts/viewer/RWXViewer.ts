@@ -159,7 +159,7 @@ function tick() {
 }
 
 
-var allGroups = $('.optionGroup');
+var allGroups = $('#sidebar .group');
 
 allGroups.click(function () {
     var currentElement = $(this);
@@ -169,6 +169,6 @@ allGroups.click(function () {
     currentElement.attr('data-state', currentState === 'selected' ? '' : 'selected');
 });
 
-$('.optionContent').click(e => {
+$('#sidebar .group .content').click(e => {
     e.stopPropagation();
 });

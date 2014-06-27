@@ -5,7 +5,7 @@
     padding: 0 0 0 0;
     border: none;
     font-family: "Segoe UI Light", "Segoe UI", "Tahoma Light", "Arial Light", Helvetica, sans-serif;
-    background-color: black;
+    background-color: #111;
     color: white;
 }
 
@@ -73,22 +73,6 @@ select::-ms-expand {
     cursor: crosshair;
 }
 
-#renderArea #resetCamera {
-    position: absolute;
-    right: 8px;
-    bottom: 8px;
-    border: none;
-    height: 2em;
-    padding: 4px;
-    margin: 0;
-    background: #5d00a5;
-    color: #fff;
-}
-
-#renderArea #resetCamera:hover {
-    background: #390066;
-}
-
 #renderArea #loading {
     margin: auto;
     padding: 0;
@@ -127,67 +111,83 @@ select::-ms-expand {
     top: 60px;
     width: 240px;
     bottom: 0;
-    border-right: 1px solid #333;
+    background-color: #222;
 }
 
-.optionGroup {
-    background-color: #555;
+.group {
+    background-color: #333;
     padding: 4px 4px 4px 4px;
-    border-bottom: 1px solid #333;
-    border-right: 1px solid #333;
+    border-bottom: 1px solid #555;
 
     transition: background-color 300ms;
 }
 
-.optionGroup:hover {
-    background-color: black;
+.group:hover {
+    background-color: #222;
     border-right: none;
 
     transition: background-color 300ms;
 }
 
-.optionGroup[data-state=selected] {
-    background-color: black;
+.group[data-state=selected] {
+    background-color: #222;
     border-right: none;
 }
 
-.optionGroup[data-state=selected] .optionHeader {
+.group[data-state=selected] .header {
     font-weight: bolder;
 }
 
-.optionGroup .optionHeader {
+.group .header {
     font-weight: bold;
     font-size: 1.2em;
     color: white;
 
     cursor: pointer;
+    height: 32px;
+
+    display: table-cell;
+    vertical-align: middle;
 }
 
-.optionGroup .optionContent {
+.group .content {
     display: inline-block;
     overflow: hidden;
     position: absolute;
     left: 240px;
     width: 0;
-    background-color: black;
-    margin-top: -30px;
+    background-color: #222;
+    margin-top: -36px;
     transition: all 400ms;
     white-space: nowrap;
 }
 
-.optionGroup[data-state=selected] .optionContent {
+.group[data-state=selected] .content {
     padding: 8px 8px 8px 8px;
     width: 240px;
     border-left: none;
+    border-right: 4px solid #ba61ff;
     transition: width 400ms;
 }
 
-.optionGroup[data-state=selected]#modelSelection .optionContent {
-    border-right: 4px solid #ba61ff;
+
+#controls {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 240px;
 }
 
-.optionGroup[data-state=selected]#controls .optionContent {
-    border-right: 4px solid red;
+#controls .header {
+    margin-left: 8px;
+    padding: 0 0 0 0;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 0;
+}
+
+#controls .content {
+     padding: 8px 8px 8px 8px;
 }
 
 .optionDropdown select {
@@ -197,4 +197,44 @@ select::-ms-expand {
 
 .optionDropdown {
     clear: both;
+}
+
+#header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+
+    border-bottom: 4px solid #ba61ff;
+    padding-left: 4px;
+
+    display: table-cell;
+    vertical-align: middle;
+    line-height: 1em;
+}
+
+#header #toolbar {
+    position: absolute;
+    top: -8px;
+    right: 32px;
+    
+}
+
+#sidebarSpacer {
+    height: 40px;
+    border-bottom: 1px solid #555;
+}
+
+#resetCamera {
+    border: none;
+    height: 2em;
+    padding: 4px;
+    margin: 0;
+    background: #ba61ff;
+    color: #fff;
+}
+
+#resetCamera:hover {
+    background: #5d00a5;
 }

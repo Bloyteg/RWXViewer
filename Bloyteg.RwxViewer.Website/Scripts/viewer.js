@@ -386,7 +386,7 @@ function tick() {
     window.requestAnimationFrame(tick);
 }
 
-var allGroups = $('.optionGroup');
+var allGroups = $('#sidebar .group');
 
 allGroups.click(function () {
     var currentElement = $(this);
@@ -396,7 +396,7 @@ allGroups.click(function () {
     currentElement.attr('data-state', currentState === 'selected' ? '' : 'selected');
 });
 
-$('.optionContent').click(function (e) {
+$('#sidebar .group .content').click(function (e) {
     e.stopPropagation();
 });
 //# sourceMappingURL=viewer.js.map
