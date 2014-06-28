@@ -236,6 +236,8 @@ select::-ms-expand {
     margin: 0;
     background: #ba61ff;
     color: #fff;
+    float: right;
+    margin-top: 8px;
 }
 
 #resetCamera:hover {

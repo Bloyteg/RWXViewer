@@ -17,7 +17,13 @@ attribute vec3 a_vertexPosition;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 uniform mat4 u_modelMatrix;
- 
+uniform bool u_faceCamera;
+
 void main(void) {
-    gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(a_vertexPosition, 1.0);
+	if(u_faceCamera) {
+		mat4 worldView = (u_viewMatrix * u_modelMatrix);
+		gl_Position = u_projectionMatrix * (vec4(a_vertexPosition, 1.0) + vec4(worldView[3].xyz, 0.0));
+	} else {
+		gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(a_vertexPosition, 1.0);
+	}
 }

@@ -273,6 +273,7 @@ var ViewModel = (function () {
         this.errorMessage = ko.observable(null);
 
         this.showBoundingBox = ko.observable(false);
+        this.showCameraTarget = ko.observable(true);
 
         this.modelsByType = ko.computed(function () {
             return _this.models().filter(function (model) {
@@ -344,14 +345,22 @@ var ViewModel = (function () {
                     self.errorMessage("Failed to load this object.");
                 });
             }
+        });
 
-            _this.showBoundingBox.subscribe(function (value) {
-                if (value) {
-                    renderer.showBoundingBox();
-                } else {
-                    renderer.hideBoundingBox();
-                }
-            });
+        this.showBoundingBox.subscribe(function (value) {
+            if (value) {
+                renderer.showBoundingBox();
+            } else {
+                renderer.hideBoundingBox();
+            }
+        });
+
+        this.showCameraTarget.subscribe(function (value) {
+            if (value) {
+                renderer.showCameraTarget();
+            } else {
+                renderer.hideCameraTarget();
+            }
         });
     }
     ViewModel.prototype.resetCamera = function () {

@@ -19,6 +19,7 @@ module RwxViewer {
         private _currentDrawable: Drawable;
         private _spatialGridDrawable: Drawable;
         private _boundingBoxDrawable: Drawable;
+        private _cameraTargetDrawable: Drawable;
 
         private _gridProgram: ShaderProgram;
         private _mainProgram: ShaderProgram;
@@ -33,6 +34,7 @@ module RwxViewer {
         private _viewportHeight: number;
 
         private _showBoundingBox: boolean;
+        private _showCameraTarget: boolean = true;
 
         constructor(gl: WebGLRenderingContext) {
             this._gl = gl;
@@ -44,6 +46,7 @@ module RwxViewer {
             if (gl) {
                 this._camera = makeCamera(gl.drawingBufferWidth, gl.drawingBufferHeight);
                 this._spatialGridDrawable = Drawable.createGridDrawable(gl);
+                this._cameraTargetDrawable = Drawable.createCameraTargetDrawable(gl);
 
                 gl.clearColor(0.75, 0.75, 0.75, 1.0);
                 gl.clearDepth(1.0);
@@ -91,6 +94,10 @@ module RwxViewer {
 
                     if (this._showBoundingBox && this._boundingBoxDrawable) {
                         this._boundingBoxDrawable.draw(gl, program, this._modelMatrix);
+                    }
+
+                    if (this._showCameraTarget && this._cameraTargetDrawable) {
+                        this._cameraTargetDrawable.draw(gl, program, this._camera.targetMatrix);
                     }
 
                     gl.depthMask(true);
@@ -147,6 +154,14 @@ module RwxViewer {
 
         hideBoundingBox() {
             this._showBoundingBox = false;
+        }
+
+        showCameraTarget() {
+            this._showCameraTarget = true;
+        }
+
+        hideCameraTarget() {
+            this._showCameraTarget = false;
         }
     }
 }

@@ -1,4 +1,13 @@
 ﻿declare module RwxViewer {
+    interface Animation {
+        getTransformForTime(joint: number, time: number): Mat4Array;
+    }
+    module Animation {
+        function getDefaultAnimation(): NoAnimation;
+        function getSequenceAnimation(animation: ModelAnimation): SequenceAnimation;
+    }
+}
+declare module RwxViewer {
     class NoAnimation implements Animation {
         private _transform;
         public getTransformForTime(joint: number, time: number): Mat4Array;
@@ -25,48 +34,6 @@ declare module RwxViewer {
     }
 }
 declare module RwxViewer {
-    module Drawable {
-        function createBoundingBoxDrawble(gl: WebGLRenderingContext, boundingBox: BoundingBox): BoundingBoxDrawable;
-    }
-    class BoundingBoxDrawable implements Drawable {
-        private _vertexBuffer;
-        private _vertexCount;
-        private _animation;
-        private _color;
-        constructor(gl: WebGLRenderingContext, boundingBox: BoundingBox);
-        private initializeNew(gl, boundingBox);
-        public animation : Animation;
-        public cloneWithAnimation(animation: Animation): BoundingBoxDrawable;
-        public draw(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix: Mat4Array): void;
-    }
-}
-declare module RwxViewer {
-    class AnimatedTexture implements Texture {
-        private _gl;
-        private _texture;
-        private _imageSource;
-        private _canvas;
-        private _currentFrame;
-        private _totalFrames;
-        private _textureFactory;
-        private _lastUpdate;
-        constructor(gl: WebGLRenderingContext, imageSource: HTMLImageElement, textureFactory: TextureFactory);
-        private getNextFrame();
-        public bind(slot: number, sampler: WebGLUniformLocation): void;
-        public update(update: number): void;
-        public isEmpty : boolean;
-    }
-}
-declare module RwxViewer {
-    interface Animation {
-        getTransformForTime(joint: number, time: number): Mat4Array;
-    }
-    module Animation {
-        function getDefaultAnimation(): NoAnimation;
-        function getSequenceAnimation(animation: ModelAnimation): SequenceAnimation;
-    }
-}
-declare module RwxViewer {
     interface BoundingBox {
         minimumX: number;
         minimumY: number;
@@ -88,8 +55,50 @@ declare module RwxViewer {
         zoomOut(zoomFactor?: number): any;
         pan(deltaX: number, deltaY: number): any;
         matrix: Mat4Array;
+        targetMatrix: Mat4Array;
     }
     function makeCamera(width: number, height: number): Camera;
+}
+declare module RwxViewer {
+    module Drawable {
+        function createBoundingBoxDrawble(gl: WebGLRenderingContext, boundingBox: BoundingBox): BoundingBoxDrawable;
+    }
+    class BoundingBoxDrawable implements Drawable {
+        private _vertexBuffer;
+        private _vertexCount;
+        private _animation;
+        private _color;
+        constructor(gl: WebGLRenderingContext, boundingBox: BoundingBox);
+        private initializeNew(gl, boundingBox);
+        public animation : Animation;
+        public cloneWithAnimation(animation: Animation): BoundingBoxDrawable;
+        public draw(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix: Mat4Array): void;
+    }
+}
+declare module RwxViewer {
+    module Drawable {
+        function createCameraTargetDrawable(gl: WebGLRenderingContext): CameraTargetDrawable;
+    }
+    class CameraTargetDrawable implements Drawable {
+        private _firstOuterCircleVertexBuffer;
+        private _secondOuterCircleVertexBuffer;
+        private _crossHairVertexBuffer;
+        private _innerCircleVertexBuffer;
+        private _firstOuterCircleVertexCount;
+        private _secondOuterCircleVertexCount;
+        private _crossHairVertexCount;
+        private _innerCircleVertexCount;
+        private _redColor;
+        private _whiteColor;
+        private _blackColor;
+        private _orangeColor;
+        private _animation;
+        constructor(gl: WebGLRenderingContext);
+        private initializeNew(gl);
+        public animation : Animation;
+        public cloneWithAnimation(animation: Animation): CameraTargetDrawable;
+        public draw(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix: Mat4Array): void;
+    }
 }
 declare module RwxViewer {
     interface Drawable {
@@ -101,15 +110,6 @@ declare module RwxViewer {
 declare module RwxViewer {
     module Drawable {
         function createDrawableFromModel(gl: WebGLRenderingContext, model: Model): Drawable;
-    }
-}
-declare module RwxViewer {
-    class EmptyTexture implements Texture {
-        private _gl;
-        constructor(gl: WebGLRenderingContext);
-        public bind(slot: number, sampler: WebGLUniformLocation): void;
-        public update(frameCount: number): void;
-        public isEmpty : boolean;
     }
 }
 declare module RwxViewer {
@@ -317,6 +317,7 @@ declare module RwxViewer {
         private _currentDrawable;
         private _spatialGridDrawable;
         private _boundingBoxDrawable;
+        private _cameraTargetDrawable;
         private _gridProgram;
         private _mainProgram;
         private _overlayProgram;
@@ -326,6 +327,7 @@ declare module RwxViewer {
         private _viewportWidth;
         private _viewportHeight;
         private _showBoundingBox;
+        private _showCameraTarget;
         constructor(gl: WebGLRenderingContext);
         public initialize(mainProgram: ShaderProgram, gridProgram: ShaderProgram, overlayProgram: ShaderProgram): void;
         public draw(time: number): void;
@@ -335,6 +337,8 @@ declare module RwxViewer {
         public updateViewport(width: number, height: number): void;
         public showBoundingBox(): void;
         public hideBoundingBox(): void;
+        public showCameraTarget(): void;
+        public hideCameraTarget(): void;
     }
 }
 declare module RwxViewer {
@@ -358,6 +362,32 @@ declare module RwxViewer {
         public uniforms : UniformInfo;
         private compileShader(shaderSource, type);
         public use(handler: (program: ShaderProgram) => void): void;
+    }
+}
+declare module RwxViewer {
+    class AnimatedTexture implements Texture {
+        private _gl;
+        private _texture;
+        private _imageSource;
+        private _canvas;
+        private _currentFrame;
+        private _totalFrames;
+        private _textureFactory;
+        private _lastUpdate;
+        constructor(gl: WebGLRenderingContext, imageSource: HTMLImageElement, textureFactory: TextureFactory);
+        private getNextFrame();
+        public bind(slot: number, sampler: WebGLUniformLocation): void;
+        public update(update: number): void;
+        public isEmpty : boolean;
+    }
+}
+declare module RwxViewer {
+    class EmptyTexture implements Texture {
+        private _gl;
+        constructor(gl: WebGLRenderingContext);
+        public bind(slot: number, sampler: WebGLUniformLocation): void;
+        public update(frameCount: number): void;
+        public isEmpty : boolean;
     }
 }
 declare module RwxViewer {

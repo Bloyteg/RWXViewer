@@ -35,6 +35,7 @@ class ViewModel {
     errorMessage: KnockoutObservable<string>;
 
     showBoundingBox: KnockoutObservable<boolean>;
+    showCameraTarget: KnockoutObservable<boolean>;
 
     constructor() {
         this.worlds = ko.observableArray([]);
@@ -49,6 +50,7 @@ class ViewModel {
         this.errorMessage = ko.observable(null);
 
         this.showBoundingBox = ko.observable(false);
+        this.showCameraTarget = ko.observable(true);
 
         this.modelsByType = ko.computed(() => {
             return this.models().filter(model => model.type === this.selectedType().type);
@@ -115,14 +117,22 @@ class ViewModel {
                         self.errorMessage("Failed to load this object.");
                     });
             }
+        });
 
-            this.showBoundingBox.subscribe(value => {
-                if (value) {
-                    renderer.showBoundingBox();
-                } else {
-                    renderer.hideBoundingBox();
-                }
-            });
+        this.showBoundingBox.subscribe(value => {
+            if (value) {
+                renderer.showBoundingBox();
+            } else {
+                renderer.hideBoundingBox();
+            }
+        });
+
+        this.showCameraTarget.subscribe(value => {
+            if (value) {
+                renderer.showCameraTarget();
+            } else {
+                renderer.hideCameraTarget();
+            }
         });
     }
 
@@ -170,7 +180,6 @@ function tick() {
     renderer.draw(Date.now());
     window.requestAnimationFrame(tick);
 }
-
 
 var allGroups = $('#sidebar .group');
 

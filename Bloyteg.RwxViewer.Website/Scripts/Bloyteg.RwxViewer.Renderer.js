@@ -13,6 +13,34 @@
 // limitations under the License.
 var RwxViewer;
 (function (RwxViewer) {
+    (function (Animation) {
+        function getDefaultAnimation() {
+            return new RwxViewer.NoAnimation();
+        }
+        Animation.getDefaultAnimation = getDefaultAnimation;
+
+        function getSequenceAnimation(animation) {
+            return new RwxViewer.SequenceAnimation(animation, Date.now());
+        }
+        Animation.getSequenceAnimation = getSequenceAnimation;
+    })(RwxViewer.Animation || (RwxViewer.Animation = {}));
+    var Animation = RwxViewer.Animation;
+})(RwxViewer || (RwxViewer = {}));
+// Copyright 2014 Joshua R. Rodgers
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
     var NoAnimation = (function () {
         function NoAnimation() {
             this._transform = mat4.create();
@@ -211,199 +239,6 @@ var RwxViewer;
     })();
     RwxViewer.SequenceAnimation = SequenceAnimation;
 })(RwxViewer || (RwxViewer = {}));
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-var RwxViewer;
-(function (RwxViewer) {
-    (function (Drawable) {
-        function createBoundingBoxDrawble(gl, boundingBox) {
-            return new BoundingBoxDrawable(gl, boundingBox);
-        }
-        Drawable.createBoundingBoxDrawble = createBoundingBoxDrawble;
-    })(RwxViewer.Drawable || (RwxViewer.Drawable = {}));
-    var Drawable = RwxViewer.Drawable;
-
-    var BoundingBoxDrawable = (function () {
-        function BoundingBoxDrawable(gl, boundingBox) {
-            this._animation = RwxViewer.Animation.getDefaultAnimation();
-            this._color = vec4.fromValues(1, 1, 0, 1);
-            this.initializeNew(gl, boundingBox);
-        }
-        BoundingBoxDrawable.prototype.initializeNew = function (gl, boundingBox) {
-            var vertices = [];
-
-            vertices.push(boundingBox.minimumX, boundingBox.minimumY, boundingBox.minimumZ);
-            vertices.push(boundingBox.maximumX, boundingBox.minimumY, boundingBox.minimumZ);
-
-            vertices.push(boundingBox.minimumX, boundingBox.minimumY, boundingBox.maximumZ);
-            vertices.push(boundingBox.maximumX, boundingBox.minimumY, boundingBox.maximumZ);
-
-            vertices.push(boundingBox.minimumX, boundingBox.maximumY, boundingBox.minimumZ);
-            vertices.push(boundingBox.maximumX, boundingBox.maximumY, boundingBox.minimumZ);
-
-            vertices.push(boundingBox.minimumX, boundingBox.maximumY, boundingBox.maximumZ);
-            vertices.push(boundingBox.maximumX, boundingBox.maximumY, boundingBox.maximumZ);
-
-            vertices.push(boundingBox.minimumX, boundingBox.minimumY, boundingBox.minimumZ);
-            vertices.push(boundingBox.minimumX, boundingBox.minimumY, boundingBox.maximumZ);
-
-            vertices.push(boundingBox.maximumX, boundingBox.minimumY, boundingBox.minimumZ);
-            vertices.push(boundingBox.maximumX, boundingBox.minimumY, boundingBox.maximumZ);
-
-            vertices.push(boundingBox.minimumX, boundingBox.maximumY, boundingBox.minimumZ);
-            vertices.push(boundingBox.minimumX, boundingBox.maximumY, boundingBox.maximumZ);
-
-            vertices.push(boundingBox.maximumX, boundingBox.maximumY, boundingBox.minimumZ);
-            vertices.push(boundingBox.maximumX, boundingBox.maximumY, boundingBox.maximumZ);
-
-            vertices.push(boundingBox.minimumX, boundingBox.minimumY, boundingBox.minimumZ);
-            vertices.push(boundingBox.minimumX, boundingBox.maximumY, boundingBox.minimumZ);
-
-            vertices.push(boundingBox.maximumX, boundingBox.minimumY, boundingBox.minimumZ);
-            vertices.push(boundingBox.maximumX, boundingBox.maximumY, boundingBox.minimumZ);
-
-            vertices.push(boundingBox.minimumX, boundingBox.minimumY, boundingBox.maximumZ);
-            vertices.push(boundingBox.minimumX, boundingBox.maximumY, boundingBox.maximumZ);
-
-            vertices.push(boundingBox.maximumX, boundingBox.minimumY, boundingBox.maximumZ);
-            vertices.push(boundingBox.maximumX, boundingBox.maximumY, boundingBox.maximumZ);
-
-            this._vertexCount = vertices.length / 3;
-            this._vertexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        };
-
-        Object.defineProperty(BoundingBoxDrawable.prototype, "animation", {
-            get: function () {
-                return this._animation;
-            },
-            enumerable: true,
-            configurable: true
-        });
-
-        BoundingBoxDrawable.prototype.cloneWithAnimation = function (animation) {
-            return this;
-        };
-
-        BoundingBoxDrawable.prototype.draw = function (gl, shader, transformMatrix) {
-            gl.uniform4fv(shader.uniforms["u_baseColor"], this._color);
-            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, transformMatrix);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
-            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
-            gl.drawArrays(gl.LINES, 0, this._vertexCount);
-        };
-        return BoundingBoxDrawable;
-    })();
-    RwxViewer.BoundingBoxDrawable = BoundingBoxDrawable;
-})(RwxViewer || (RwxViewer = {}));
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-var RwxViewer;
-(function (RwxViewer) {
-    var AnimatedTexture = (function () {
-        function AnimatedTexture(gl, imageSource, textureFactory) {
-            this._gl = gl;
-            this._imageSource = imageSource;
-
-            this._canvas = document.createElement("canvas");
-            this._canvas.width = imageSource.width;
-            this._canvas.height = imageSource.width;
-
-            this._currentFrame = 0;
-            this._totalFrames = this._imageSource.height / this._imageSource.width;
-
-            this._textureFactory = textureFactory;
-            this._texture = textureFactory.getTexture(this.getNextFrame());
-
-            this._lastUpdate = null;
-        }
-        AnimatedTexture.prototype.getNextFrame = function () {
-            var canvas = this._canvas;
-
-            var offsetY = canvas.width * (this._currentFrame % this._totalFrames);
-            var dimension = canvas.width;
-
-            var context = canvas.getContext("2d");
-            context.clearRect(0, 0, dimension, dimension);
-            context.drawImage(this._imageSource, 0, offsetY, dimension, dimension, 0, 0, dimension, dimension);
-
-            return canvas;
-        };
-
-        AnimatedTexture.prototype.bind = function (slot, sampler) {
-            var slotName = "TEXTURE" + slot;
-            var gl = this._gl;
-
-            gl.activeTexture(gl[slotName]);
-            gl.bindTexture(gl.TEXTURE_2D, this._texture);
-            gl.uniform1i(sampler, slot);
-        };
-
-        AnimatedTexture.prototype.update = function (update) {
-            if (this._lastUpdate === null || (update - this._lastUpdate) >= 160) {
-                this._textureFactory.updateTexture(this._texture, this.getNextFrame());
-                this._currentFrame++;
-                this._lastUpdate = update;
-            }
-        };
-
-        Object.defineProperty(AnimatedTexture.prototype, "isEmpty", {
-            get: function () {
-                return false;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return AnimatedTexture;
-    })();
-    RwxViewer.AnimatedTexture = AnimatedTexture;
-})(RwxViewer || (RwxViewer = {}));
-// Copyright 2014 Joshua R. Rodgers
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-var RwxViewer;
-(function (RwxViewer) {
-    (function (Animation) {
-        function getDefaultAnimation() {
-            return new RwxViewer.NoAnimation();
-        }
-        Animation.getDefaultAnimation = getDefaultAnimation;
-
-        function getSequenceAnimation(animation) {
-            return new RwxViewer.SequenceAnimation(animation, Date.now());
-        }
-        Animation.getSequenceAnimation = getSequenceAnimation;
-    })(RwxViewer.Animation || (RwxViewer.Animation = {}));
-    var Animation = RwxViewer.Animation;
-})(RwxViewer || (RwxViewer = {}));
 // Copyright 2014 Joshua R. Rodgers
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -533,6 +368,7 @@ var RwxViewer;
         OrbitCamera.prototype.reset = function () {
             this._cameraMatrix = mat4.create();
             this._cameraMatrixInverse = mat4.create();
+            this._targetMatrix = mat4.create();
 
             this._offset = vec3.create();
             this._position = vec3.fromValues(0.0, 0.707 * DEFAULT_CAMERA_DISTANCE, 0.707 * DEFAULT_CAMERA_DISTANCE);
@@ -592,6 +428,9 @@ var RwxViewer;
         };
 
         OrbitCamera.prototype.update = function () {
+            mat4.identity(this._targetMatrix);
+            mat4.translate(this._targetMatrix, this._targetMatrix, this._target);
+
             vec3.sub(this._offset, this._position, this._target);
             vec3.transformQuat(this._offset, this._offset, this._upQuaternion);
 
@@ -633,8 +472,234 @@ var RwxViewer;
             enumerable: true,
             configurable: true
         });
+
+        Object.defineProperty(OrbitCamera.prototype, "targetMatrix", {
+            get: function () {
+                return this._targetMatrix;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return OrbitCamera;
     })();
+})(RwxViewer || (RwxViewer = {}));
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    (function (Drawable) {
+        function createBoundingBoxDrawble(gl, boundingBox) {
+            return new BoundingBoxDrawable(gl, boundingBox);
+        }
+        Drawable.createBoundingBoxDrawble = createBoundingBoxDrawble;
+    })(RwxViewer.Drawable || (RwxViewer.Drawable = {}));
+    var Drawable = RwxViewer.Drawable;
+
+    var BoundingBoxDrawable = (function () {
+        function BoundingBoxDrawable(gl, boundingBox) {
+            this._animation = RwxViewer.Animation.getDefaultAnimation();
+            this._color = vec4.fromValues(1, 1, 0, 1);
+            this.initializeNew(gl, boundingBox);
+        }
+        BoundingBoxDrawable.prototype.initializeNew = function (gl, boundingBox) {
+            var vertices = [];
+
+            vertices.push(boundingBox.minimumX, boundingBox.minimumY, boundingBox.minimumZ);
+            vertices.push(boundingBox.maximumX, boundingBox.minimumY, boundingBox.minimumZ);
+
+            vertices.push(boundingBox.minimumX, boundingBox.minimumY, boundingBox.maximumZ);
+            vertices.push(boundingBox.maximumX, boundingBox.minimumY, boundingBox.maximumZ);
+
+            vertices.push(boundingBox.minimumX, boundingBox.maximumY, boundingBox.minimumZ);
+            vertices.push(boundingBox.maximumX, boundingBox.maximumY, boundingBox.minimumZ);
+
+            vertices.push(boundingBox.minimumX, boundingBox.maximumY, boundingBox.maximumZ);
+            vertices.push(boundingBox.maximumX, boundingBox.maximumY, boundingBox.maximumZ);
+
+            vertices.push(boundingBox.minimumX, boundingBox.minimumY, boundingBox.minimumZ);
+            vertices.push(boundingBox.minimumX, boundingBox.minimumY, boundingBox.maximumZ);
+
+            vertices.push(boundingBox.maximumX, boundingBox.minimumY, boundingBox.minimumZ);
+            vertices.push(boundingBox.maximumX, boundingBox.minimumY, boundingBox.maximumZ);
+
+            vertices.push(boundingBox.minimumX, boundingBox.maximumY, boundingBox.minimumZ);
+            vertices.push(boundingBox.minimumX, boundingBox.maximumY, boundingBox.maximumZ);
+
+            vertices.push(boundingBox.maximumX, boundingBox.maximumY, boundingBox.minimumZ);
+            vertices.push(boundingBox.maximumX, boundingBox.maximumY, boundingBox.maximumZ);
+
+            vertices.push(boundingBox.minimumX, boundingBox.minimumY, boundingBox.minimumZ);
+            vertices.push(boundingBox.minimumX, boundingBox.maximumY, boundingBox.minimumZ);
+
+            vertices.push(boundingBox.maximumX, boundingBox.minimumY, boundingBox.minimumZ);
+            vertices.push(boundingBox.maximumX, boundingBox.maximumY, boundingBox.minimumZ);
+
+            vertices.push(boundingBox.minimumX, boundingBox.minimumY, boundingBox.maximumZ);
+            vertices.push(boundingBox.minimumX, boundingBox.maximumY, boundingBox.maximumZ);
+
+            vertices.push(boundingBox.maximumX, boundingBox.minimumY, boundingBox.maximumZ);
+            vertices.push(boundingBox.maximumX, boundingBox.maximumY, boundingBox.maximumZ);
+
+            this._vertexCount = vertices.length / 3;
+            this._vertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        };
+
+        Object.defineProperty(BoundingBoxDrawable.prototype, "animation", {
+            get: function () {
+                return this._animation;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        BoundingBoxDrawable.prototype.cloneWithAnimation = function (animation) {
+            return this;
+        };
+
+        BoundingBoxDrawable.prototype.draw = function (gl, shader, transformMatrix) {
+            gl.uniform4fv(shader.uniforms["u_baseColor"], this._color);
+            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, transformMatrix);
+            gl.uniform1i(shader.uniforms["u_faceCamera"], 0);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
+            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.LINES, 0, this._vertexCount);
+        };
+        return BoundingBoxDrawable;
+    })();
+    RwxViewer.BoundingBoxDrawable = BoundingBoxDrawable;
+})(RwxViewer || (RwxViewer = {}));
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    (function (Drawable) {
+        function createCameraTargetDrawable(gl) {
+            return new CameraTargetDrawable(gl);
+        }
+        Drawable.createCameraTargetDrawable = createCameraTargetDrawable;
+    })(RwxViewer.Drawable || (RwxViewer.Drawable = {}));
+    var Drawable = RwxViewer.Drawable;
+
+    var CameraTargetDrawable = (function () {
+        function CameraTargetDrawable(gl) {
+            this._redColor = vec4.fromValues(1, 0, 0, 1);
+            this._whiteColor = vec4.fromValues(1, 1, 1, 1);
+            this._blackColor = vec4.fromValues(0, 0, 0, 1);
+            this._orangeColor = vec4.fromValues(1, 0.549, 0, 1);
+            this._animation = RwxViewer.Animation.getDefaultAnimation();
+            this.initializeNew(gl);
+        }
+        CameraTargetDrawable.prototype.initializeNew = function (gl) {
+            var firstOuterCircleVertices = [];
+            var secondOuterCircleVertices = [];
+
+            var sides = 16;
+            var stepSize = (2 * Math.PI) / sides;
+            var radius = 0.01;
+
+            for (var side = 0, currentStep = 0; side < sides; ++side, currentStep += stepSize) {
+                var vertices = side % 2 == 0 ? firstOuterCircleVertices : secondOuterCircleVertices;
+
+                vertices.push(Math.cos(currentStep) * radius, Math.sin(currentStep) * radius, 0);
+                vertices.push(Math.cos(currentStep + stepSize) * radius, Math.sin(currentStep + stepSize) * radius, 0);
+            }
+
+            this._firstOuterCircleVertexCount = firstOuterCircleVertices.length / 3;
+            this._firstOuterCircleVertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._firstOuterCircleVertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(firstOuterCircleVertices), gl.STATIC_DRAW);
+
+            this._secondOuterCircleVertexCount = secondOuterCircleVertices.length / 3;
+            this._secondOuterCircleVertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._secondOuterCircleVertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(secondOuterCircleVertices), gl.STATIC_DRAW);
+
+            var crossHairVertices = [];
+
+            crossHairVertices.push(-radius * 1.5, 0, 0);
+            crossHairVertices.push(radius * 1.5, 0, 0);
+            crossHairVertices.push(0, -radius * 1.5, 0.0);
+            crossHairVertices.push(0, radius * 1.5, 0.0);
+
+            this._crossHairVertexCount = crossHairVertices.length / 3;
+            this._crossHairVertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._crossHairVertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(crossHairVertices), gl.STATIC_DRAW);
+
+            var innerCircleVertices = [];
+
+            radius = 0.0025;
+
+            for (side = 0, currentStep = 0; side < sides; ++side, currentStep += stepSize) {
+                innerCircleVertices.push(0, 0, 0);
+                innerCircleVertices.push(Math.cos(currentStep) * radius, Math.sin(currentStep) * radius, 0);
+                innerCircleVertices.push(Math.cos(currentStep + stepSize) * radius, Math.sin(currentStep + stepSize) * radius, 0);
+            }
+
+            this._innerCircleVertexCount = innerCircleVertices.length / 3;
+            this._innerCircleVertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._innerCircleVertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(innerCircleVertices), gl.STATIC_DRAW);
+        };
+
+        Object.defineProperty(CameraTargetDrawable.prototype, "animation", {
+            get: function () {
+                return this._animation;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        CameraTargetDrawable.prototype.cloneWithAnimation = function (animation) {
+            return this;
+        };
+
+        CameraTargetDrawable.prototype.draw = function (gl, shader, transformMatrix) {
+            gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, transformMatrix);
+            gl.uniform1i(shader.uniforms["u_faceCamera"], 1);
+
+            gl.uniform4fv(shader.uniforms["u_baseColor"], this._redColor);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._firstOuterCircleVertexBuffer);
+            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.LINES, 0, this._firstOuterCircleVertexCount);
+
+            gl.uniform4fv(shader.uniforms["u_baseColor"], this._whiteColor);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._secondOuterCircleVertexBuffer);
+            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.LINES, 0, this._secondOuterCircleVertexCount);
+
+            gl.uniform4fv(shader.uniforms["u_baseColor"], this._blackColor);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._crossHairVertexBuffer);
+            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.LINES, 0, this._crossHairVertexCount);
+
+            gl.uniform4fv(shader.uniforms["u_baseColor"], this._orangeColor);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._innerCircleVertexBuffer);
+            gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.TRIANGLES, 0, this._innerCircleVertexCount);
+        };
+        return CameraTargetDrawable;
+    })();
+    RwxViewer.CameraTargetDrawable = CameraTargetDrawable;
 })(RwxViewer || (RwxViewer = {}));
 // Copyright 2014 Joshua R. Rodgers
 //
@@ -879,46 +944,6 @@ var RwxViewer;
 // limitations under the License.
 var RwxViewer;
 (function (RwxViewer) {
-    var EmptyTexture = (function () {
-        function EmptyTexture(gl) {
-            this._gl = gl;
-        }
-        EmptyTexture.prototype.bind = function (slot, sampler) {
-            var slotName = "TEXTURE" + slot;
-            var gl = this._gl;
-
-            gl.activeTexture(gl[slotName]);
-            gl.bindTexture(gl.TEXTURE_2D, null);
-            gl.uniform1i(sampler, slot);
-        };
-
-        EmptyTexture.prototype.update = function (frameCount) {
-            //No op on a static texture.
-        };
-
-        Object.defineProperty(EmptyTexture.prototype, "isEmpty", {
-            get: function () {
-                return true;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return EmptyTexture;
-    })();
-    RwxViewer.EmptyTexture = EmptyTexture;
-})(RwxViewer || (RwxViewer = {}));
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-var RwxViewer;
-(function (RwxViewer) {
     (function (Drawable) {
         function createGridDrawable(gl) {
             return new GridDrawable(gl);
@@ -1150,6 +1175,7 @@ var RwxViewer;
         function Renderer(gl) {
             this._projectionMatrix = mat4.create();
             this._modelMatrix = mat4.create();
+            this._showCameraTarget = true;
             this._gl = gl;
         }
         Renderer.prototype.initialize = function (mainProgram, gridProgram, overlayProgram) {
@@ -1158,6 +1184,7 @@ var RwxViewer;
             if (gl) {
                 this._camera = RwxViewer.makeCamera(gl.drawingBufferWidth, gl.drawingBufferHeight);
                 this._spatialGridDrawable = RwxViewer.Drawable.createGridDrawable(gl);
+                this._cameraTargetDrawable = RwxViewer.Drawable.createCameraTargetDrawable(gl);
 
                 gl.clearColor(0.75, 0.75, 0.75, 1.0);
                 gl.clearDepth(1.0);
@@ -1206,6 +1233,10 @@ var RwxViewer;
 
                     if (_this._showBoundingBox && _this._boundingBoxDrawable) {
                         _this._boundingBoxDrawable.draw(gl, program, _this._modelMatrix);
+                    }
+
+                    if (_this._showCameraTarget && _this._cameraTargetDrawable) {
+                        _this._cameraTargetDrawable.draw(gl, program, _this._camera.targetMatrix);
                     }
 
                     gl.depthMask(true);
@@ -1264,6 +1295,14 @@ var RwxViewer;
 
         Renderer.prototype.hideBoundingBox = function () {
             this._showBoundingBox = false;
+        };
+
+        Renderer.prototype.showCameraTarget = function () {
+            this._showCameraTarget = true;
+        };
+
+        Renderer.prototype.hideCameraTarget = function () {
+            this._showCameraTarget = false;
         };
         return Renderer;
     })();
@@ -1382,6 +1421,116 @@ var RwxViewer;
         return ShaderProgram;
     })();
     RwxViewer.ShaderProgram = ShaderProgram;
+})(RwxViewer || (RwxViewer = {}));
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    var AnimatedTexture = (function () {
+        function AnimatedTexture(gl, imageSource, textureFactory) {
+            this._gl = gl;
+            this._imageSource = imageSource;
+
+            this._canvas = document.createElement("canvas");
+            this._canvas.width = imageSource.width;
+            this._canvas.height = imageSource.width;
+
+            this._currentFrame = 0;
+            this._totalFrames = this._imageSource.height / this._imageSource.width;
+
+            this._textureFactory = textureFactory;
+            this._texture = textureFactory.getTexture(this.getNextFrame());
+
+            this._lastUpdate = null;
+        }
+        AnimatedTexture.prototype.getNextFrame = function () {
+            var canvas = this._canvas;
+
+            var offsetY = canvas.width * (this._currentFrame % this._totalFrames);
+            var dimension = canvas.width;
+
+            var context = canvas.getContext("2d");
+            context.clearRect(0, 0, dimension, dimension);
+            context.drawImage(this._imageSource, 0, offsetY, dimension, dimension, 0, 0, dimension, dimension);
+
+            return canvas;
+        };
+
+        AnimatedTexture.prototype.bind = function (slot, sampler) {
+            var slotName = "TEXTURE" + slot;
+            var gl = this._gl;
+
+            gl.activeTexture(gl[slotName]);
+            gl.bindTexture(gl.TEXTURE_2D, this._texture);
+            gl.uniform1i(sampler, slot);
+        };
+
+        AnimatedTexture.prototype.update = function (update) {
+            if (this._lastUpdate === null || (update - this._lastUpdate) >= 160) {
+                this._textureFactory.updateTexture(this._texture, this.getNextFrame());
+                this._currentFrame++;
+                this._lastUpdate = update;
+            }
+        };
+
+        Object.defineProperty(AnimatedTexture.prototype, "isEmpty", {
+            get: function () {
+                return false;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return AnimatedTexture;
+    })();
+    RwxViewer.AnimatedTexture = AnimatedTexture;
+})(RwxViewer || (RwxViewer = {}));
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var RwxViewer;
+(function (RwxViewer) {
+    var EmptyTexture = (function () {
+        function EmptyTexture(gl) {
+            this._gl = gl;
+        }
+        EmptyTexture.prototype.bind = function (slot, sampler) {
+            var slotName = "TEXTURE" + slot;
+            var gl = this._gl;
+
+            gl.activeTexture(gl[slotName]);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.uniform1i(sampler, slot);
+        };
+
+        EmptyTexture.prototype.update = function (frameCount) {
+            //No op on a static texture.
+        };
+
+        Object.defineProperty(EmptyTexture.prototype, "isEmpty", {
+            get: function () {
+                return true;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return EmptyTexture;
+    })();
+    RwxViewer.EmptyTexture = EmptyTexture;
 })(RwxViewer || (RwxViewer = {}));
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at

@@ -63,6 +63,12 @@
     <div id="camera" class="group">
         <div class="header">Camera Controls</div>
         <div class="content">
+            <div class="optionCheck">
+                <label for="showCameraTarget">Show Camera Target:</label>
+                <input id="showCameraTarget" type="checkbox" data-bind="checked: showCameraTarget" />
+                <label for="showCameraTarget"></label>
+            </div>
+
             <button id="resetCamera" data-bind="click: resetCamera">Reset Camera</button>
         </div>
     </div>
@@ -80,13 +86,6 @@
                 <input id="showModelOrigin" type="checkbox" />
                 <label for="showModelOrigin"></label>
             </div>
-
-            <div class="optionCheck">
-                <label for="showCameraTarget">Show Camera Target:</label>
-                <input id="showCameraTarget" type="checkbox" />
-                <label for="showCameraTarget"></label>
-            </div>
-
             <div class="optionCheck">
                 <label for="showBoundingBox">Show Bounding Box:</label>
                 <input id="showBoundingBox" type="checkbox" data-bind="checked: showBoundingBox" />

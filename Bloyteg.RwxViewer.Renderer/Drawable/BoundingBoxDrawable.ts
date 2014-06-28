@@ -82,6 +82,7 @@ module RwxViewer {
         draw(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix: Mat4Array): void {
             gl.uniform4fv(shader.uniforms["u_baseColor"], this._color);
             gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, transformMatrix);
+            gl.uniform1i(shader.uniforms["u_faceCamera"], 0);
 
             gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
             gl.vertexAttribPointer(shader.attributes["a_vertexPosition"], 3, gl.FLOAT, false, 0, 0);
