@@ -325,6 +325,7 @@ declare module RwxViewer {
         private _modelMatrix;
         private _viewportWidth;
         private _viewportHeight;
+        private _showBoundingBox;
         constructor(gl: WebGLRenderingContext);
         public initialize(mainProgram: ShaderProgram, gridProgram: ShaderProgram, overlayProgram: ShaderProgram): void;
         public draw(time: number): void;
@@ -332,6 +333,8 @@ declare module RwxViewer {
         public setCurrentAnimation(animation: ModelAnimation): void;
         public camera : Camera;
         public updateViewport(width: number, height: number): void;
+        public showBoundingBox(): void;
+        public hideBoundingBox(): void;
     }
 }
 declare module RwxViewer {

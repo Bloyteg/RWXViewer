@@ -34,6 +34,8 @@ class ViewModel {
 
     errorMessage: KnockoutObservable<string>;
 
+    showBoundingBox: KnockoutObservable<boolean>;
+
     constructor() {
         this.worlds = ko.observableArray([]);
         this.models = ko.observableArray([]);
@@ -45,6 +47,8 @@ class ViewModel {
         this.selectedType = ko.observable(types[0]);
         this.selectedAnimation = ko.observable(null);
         this.errorMessage = ko.observable(null);
+
+        this.showBoundingBox = ko.observable(false);
 
         this.modelsByType = ko.computed(() => {
             return this.models().filter(model => model.type === this.selectedType().type);
@@ -111,6 +115,14 @@ class ViewModel {
                         self.errorMessage("Failed to load this object.");
                     });
             }
+
+            this.showBoundingBox.subscribe(value => {
+                if (value) {
+                    renderer.showBoundingBox();
+                } else {
+                    renderer.hideBoundingBox();
+                }
+            });
         });
     }
 

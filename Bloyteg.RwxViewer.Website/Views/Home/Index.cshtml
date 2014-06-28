@@ -74,7 +74,22 @@
 
     <div id="settings" class="group">
         <div class="header">Settings</div>
-        <div class="content"></div>
+        <div class="content">
+            <div class="optionCheck">
+                <label for="showModelOrigin">Show Model Origin:</label>
+                <input id="showModelOrigin" type="checkbox" />
+            </div>
+
+            <div class="optionCheck">
+                <label for="showCameraTarget">Show Camera Target:</label>
+                <input id="showCameraTarget" type="checkbox" />
+            </div>
+
+            <div class="optionCheck">
+                <label for="showBoundingBox">Show Bounding Box:</label>
+                <input id="showBoundingBox" type="checkbox" data-bind="checked: showBoundingBox" />
+            </div>
+        </div>
     </div>
 
     <div id="controls">

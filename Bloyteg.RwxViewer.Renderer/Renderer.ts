@@ -28,9 +28,11 @@ module RwxViewer {
 
         private _projectionMatrix: Mat4Array = mat4.create();
         private _modelMatrix: Mat4Array = mat4.create();
-        private _viewportWidth: number;
 
+        private _viewportWidth: number;
         private _viewportHeight: number;
+
+        private _showBoundingBox: boolean;
 
         constructor(gl: WebGLRenderingContext) {
             this._gl = gl;
@@ -87,7 +89,7 @@ module RwxViewer {
                     gl.disable(gl.DEPTH_TEST);
                     gl.depthMask(false);
 
-                    if (this._boundingBoxDrawable) {
+                    if (this._showBoundingBox && this._boundingBoxDrawable) {
                         this._boundingBoxDrawable.draw(gl, program, this._modelMatrix);
                     }
 
@@ -137,6 +139,14 @@ module RwxViewer {
             }
 
             mat4.perspective(this._projectionMatrix, 45, this._viewportWidth / this._viewportHeight, 0.01, 1000.0);
+        }
+
+        showBoundingBox() {
+            this._showBoundingBox = true;
+        }
+
+        hideBoundingBox() {
+            this._showBoundingBox = false;
         }
     }
 }

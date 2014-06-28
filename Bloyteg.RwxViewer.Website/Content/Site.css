@@ -224,6 +224,14 @@ select::-ms-expand {
     clear: both;
 }
 
+.optionCheck input[type=checkbox] {
+    float: right;
+}
+
+.optionCheck {
+    clear: both;
+}
+
 #sidebarSpacer {
     height: 40px;
     border-bottom: 1px solid #555;

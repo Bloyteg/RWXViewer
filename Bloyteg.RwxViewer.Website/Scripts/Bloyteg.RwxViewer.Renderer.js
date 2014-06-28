@@ -1204,7 +1204,7 @@ var RwxViewer;
                     gl.disable(gl.DEPTH_TEST);
                     gl.depthMask(false);
 
-                    if (_this._boundingBoxDrawable) {
+                    if (_this._showBoundingBox && _this._boundingBoxDrawable) {
                         _this._boundingBoxDrawable.draw(gl, program, _this._modelMatrix);
                     }
 
@@ -1256,6 +1256,14 @@ var RwxViewer;
             }
 
             mat4.perspective(this._projectionMatrix, 45, this._viewportWidth / this._viewportHeight, 0.01, 1000.0);
+        };
+
+        Renderer.prototype.showBoundingBox = function () {
+            this._showBoundingBox = true;
+        };
+
+        Renderer.prototype.hideBoundingBox = function () {
+            this._showBoundingBox = false;
         };
         return Renderer;
     })();
