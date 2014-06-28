@@ -12,30 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
-using System.Data.Entity;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Bloyteg.AW.Animation.Seq;
-using Bloyteg.RwxViewer.Resources.DAL;
 using Animation = Bloyteg.AW.Animation.Seq.Animation;
 
 namespace Bloyteg.RwxViewer.Resources
 {
-    public interface IResourceDownloader<T>
+    public class AnimationDownloader : IResourceDownloader<DAL.Animation, Animation>
     {
-        Task<T> DownloadResourceAsync(int worldId, string animationName);
-    }
-
-    public class AnimationDownloader : IResourceDownloader<Animation>
-    {
-        public async Task<Animation> DownloadResourceAsync(int worldId, string animationName)
+        public async Task<Animation> DownloadResourceAsync(DAL.Animation animation)
         {
-            using (var context = new ObjectPathContext())
             using (var webClient = new WebClient())
             {
-                var animation = await context.Animations.SingleOrDefaultAsync(entity => entity.WorldId == worldId && entity.Name == animationName);
-
                 if (animation == null)
                 {
                     return null;

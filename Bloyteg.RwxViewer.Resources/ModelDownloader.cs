@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
 using System.ComponentModel;
 using System.Data.Entity;
@@ -23,15 +22,12 @@ using Model = MrByte.RWX.Model.Model;
 
 namespace Bloyteg.RwxViewer.Resources
 {
-    public class ModelDownloader : IResourceDownloader<Model>
+    public class ModelDownloader : IResourceDownloader<DAL.Model, Model>
     {
-        public async Task<Model> DownloadResourceAsync(int worldId, string modelName)
+        public async Task<Model> DownloadResourceAsync(DAL.Model model)
         {
-            using (var context = new ObjectPathContext())
             using (var webClient = new WebClient())
             {
-                var model = await context.Models.SingleOrDefaultAsync(entity => entity.WorldId == worldId && entity.Name == modelName);
-
                 if (model == null)
                 {
                     return null;

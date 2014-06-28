@@ -17,52 +17,49 @@ using System.Threading.Tasks;
 
 namespace Bloyteg.RwxViewer.Resources
 {
-    public class ResourceLocator<T> : IResourceLocator<T>
-        where T : class
+    public class ResourceLocator<TIdentifier, TResult> : IResourceLocator<TIdentifier, TResult>
+        where TResult : class
     {
-        private readonly IResourceDownloader<T> _resourceDownloader;
+        private readonly IResourceDownloader<TIdentifier, TResult> _resourceDownloader;
+        private readonly ICacheKeyGenerator<TIdentifier> _cacheKeyGenerator;
 
-        public ResourceLocator(IResourceDownloader<T> resourceDownloader)
+        public ResourceLocator(IResourceDownloader<TIdentifier, TResult> resourceDownloader, ICacheKeyGenerator<TIdentifier> cacheKeyGenerator)
         {
             _resourceDownloader = resourceDownloader;
+            _cacheKeyGenerator = cacheKeyGenerator;
         }
 
-        public async Task<T> GetResourceAsync(int id, string resourceName)
+        public async Task<TResult> GetResourceAsync(TIdentifier identifier)
         {
-            var resource = LoadFromCache(id, resourceName);
+            var resource = LoadFromCache(identifier);
 
             if (resource != null)
             {
                 return resource;
             }
 
-            resource = await _resourceDownloader.DownloadResourceAsync(id, resourceName);
+            resource = await _resourceDownloader.DownloadResourceAsync(identifier);
 
             if (resource != null)
             {
-                AddToCache(id, resourceName, resource);
+                AddToCache(identifier, resource);
             }
 
             return resource;
         }
 
-        private T LoadFromCache(int worldId, string resourceName)
+        private TResult LoadFromCache(TIdentifier identifier)
         {
             var cache = MemoryCache.Default;
-            var key = BuildCacheKey(worldId, resourceName);
-            return cache[key] as T;
+            var key = _cacheKeyGenerator.GetKey(identifier);
+            return cache[key] as TResult;
         }
 
-        private void AddToCache(int worldId, string resourceName, T resource)
+        private void AddToCache(TIdentifier identifier, TResult resource)
         {
             var cache = MemoryCache.Default;
-            var key = BuildCacheKey(worldId, resourceName);
+            var key = _cacheKeyGenerator.GetKey(identifier);
             cache.Add(key, resource, DateTimeOffset.Now + TimeSpan.FromHours(24));
-        }
-
-        private string BuildCacheKey(int worldId, string resourceName)
-        {
-            return string.Format("{0}-{1}/{2}", typeof(T).Name, worldId, resourceName);
         }
     }
 }

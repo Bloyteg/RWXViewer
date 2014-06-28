@@ -11,39 +11,53 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+using System.Data.Entity;
 using System.Threading.Tasks;
-using Bloyteg.AW.Animation.Seq;
-using MrByte.RWX.Model;
+using Bloyteg.RwxViewer.Resources.DAL;
+using Animation = Bloyteg.AW.Animation.Seq.Animation;
+using Model = MrByte.RWX.Model.Model;
 
 
 namespace Bloyteg.RwxViewer.Resources
 {
     public class ObjectPathItemLoader : IObjectPathItemLoader
     {
-        private readonly IResourceLocator<Model> _modelLoader;
-        private readonly IResourceLocator<byte[]> _textureLoader;
-        private readonly IResourceLocator<Animation> _animationLocator;
+        private readonly IResourceLocator<DAL.Model, Model> _modelLocator;
+        private readonly IResourceLocator<Texture, byte[]> _textureLocator;
+        private readonly IResourceLocator<DAL.Animation, Animation> _animationLocator;
 
-        public ObjectPathItemLoader(IResourceLocator<Model> modelLoader, IResourceLocator<byte[]> textureLoader, IResourceLocator<Animation> animationLocator)
+        public ObjectPathItemLoader(IResourceLocator<DAL.Model, Model> modelLocator,
+                                    IResourceLocator<Texture, byte[]> textureLocator,
+                                    IResourceLocator<DAL.Animation, Animation> animationLocator)
         {
-            _textureLoader = textureLoader;
-            _modelLoader = modelLoader;
+            _textureLocator = textureLocator;
+            _modelLocator = modelLocator;
             _animationLocator = animationLocator;
         }
 
         public async Task<Model> GetModelAsync(int worldId, string modelName)
         {
-            return await _modelLoader.GetResourceAsync(worldId, modelName);
+            using (var context = new ObjectPathContext())
+            {
+                return await _modelLocator.GetResourceAsync(await context.Models.SingleOrDefaultAsync(entity => entity.WorldId == worldId && entity.Name == modelName));
+            }
         }
 
         public async Task<byte[]> GetTextureAsync(int worldId, string textureName)
         {
-            return await _textureLoader.GetResourceAsync(worldId, textureName);
+            using (var context = new ObjectPathContext())
+            {
+                return await _textureLocator.GetResourceAsync(await context.Textures.SingleOrDefaultAsync(entity => entity.WorldId == worldId && entity.Name == textureName));
+            }
         }
 
-        public async Task<Animation> GetAnimationAsync(int id, string animationName)
+        public async Task<Animation> GetAnimationAsync(int worldId, string animationName)
         {
-            return await _animationLocator.GetResourceAsync(id, animationName);
+            using (var context = new ObjectPathContext())
+            {
+                return await _animationLocator.GetResourceAsync(await context.Animations.SingleOrDefaultAsync(entity => entity.WorldId == worldId && entity.Name == animationName));
+            }
         }
     }
 }

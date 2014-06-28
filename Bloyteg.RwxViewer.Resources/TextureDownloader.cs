@@ -11,9 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 using System;
-using System.Data.Entity;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -23,15 +21,12 @@ using Bloyteg.RwxViewer.Resources.DAL;
 
 namespace Bloyteg.RwxViewer.Resources
 {
-    public class TextureDownloader : IResourceDownloader<byte[]>
+    public class TextureDownloader : IResourceDownloader<Texture, byte[]>
     {
-        public async Task<byte[]> DownloadResourceAsync(int worldId, string textureName)
+        public async Task<byte[]> DownloadResourceAsync(Texture texture)
         {
-            using (var context = new ObjectPathContext())
             using (var webClient = new WebClient())
             {
-                var texture = await context.Textures.SingleOrDefaultAsync(entity => entity.WorldId == worldId && entity.Name == textureName);
-
                 if (texture == null)
                 {
                     return null;
@@ -60,6 +55,7 @@ namespace Bloyteg.RwxViewer.Resources
         private Stream OpenTextureStream(Texture texture, byte[] resultData)
         {
             var extension = Path.GetExtension(texture.FileName);
+
             if (extension != null)
             {
                 var fileExtension = extension.ToUpperInvariant();

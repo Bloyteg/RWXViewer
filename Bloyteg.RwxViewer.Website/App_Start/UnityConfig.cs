@@ -27,14 +27,17 @@ namespace Bloyteg.RwxViewer.Website
         {
 			var container = new UnityContainer();
 
-            container.RegisterType<IResourceDownloader<Model>, ModelDownloader>();
-            container.RegisterType<IResourceDownloader<byte[]>, TextureDownloader>();
-            container.RegisterType<IResourceDownloader<Animation>, AnimationDownloader>();
+            container.RegisterType<ICacheKeyGenerator<Resources.DAL.Model>, ModelCacheKeyGenerator>();
+            container.RegisterType<ICacheKeyGenerator<Resources.DAL.Texture>, TextureCacheKeyGenerator>();
+            container.RegisterType<ICacheKeyGenerator<Resources.DAL.Animation>, AnimationCacheKeyGenerator>();
 
-            container.RegisterType<IResourceLocator<Model>, ResourceLocator<Model>>();
-            container.RegisterType<IResourceLocator<byte[]>, ResourceLocator<byte[]>>();
-            container.RegisterType<IResourceLocator<Animation>, ResourceLocator<Animation>>();
+            container.RegisterType<IResourceDownloader<Resources.DAL.Model, Model>, ModelDownloader>();
+            container.RegisterType<IResourceDownloader<Resources.DAL.Texture, byte[]>, TextureDownloader>();
+            container.RegisterType<IResourceDownloader<Resources.DAL.Animation, Animation>, AnimationDownloader>();
 
+            container.RegisterType<IResourceLocator<Resources.DAL.Model, Model>, ResourceLocator<Resources.DAL.Model, Model>>();
+            container.RegisterType<IResourceLocator<Resources.DAL.Texture, byte[]>, ResourceLocator<Resources.DAL.Texture, byte[]>>();
+            container.RegisterType<IResourceLocator<Resources.DAL.Animation, Animation>, ResourceLocator<Resources.DAL.Animation, Animation>>();
 
             container.RegisterType<IObjectPathItemLoader, ObjectPathItemLoader>(new ContainerControlledLifetimeManager());
 

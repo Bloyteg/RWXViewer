@@ -21,6 +21,6 @@ namespace Bloyteg.RwxViewer.Resources
     {
         Task<Model> GetModelAsync(int worldId, string modelName);
         Task<byte[]> GetTextureAsync(int worldId, string textureName);
-        Task<Animation> GetAnimationAsync(int id, string animationName);
+        Task<Animation> GetAnimationAsync(int worldId, string animationName);
     }
 }

@@ -15,8 +15,8 @@ using System.Threading.Tasks;
 
 namespace Bloyteg.RwxViewer.Resources
 {
-    public interface IResourceLocator<in TIdentifier, TResult>
+    public interface IResourceDownloader<in TIdentifier, TResult>
     {
-        Task<TResult> GetResourceAsync(TIdentifier resourceIdentifier);
+        Task<TResult> DownloadResourceAsync(TIdentifier identifier);
     }
 }
