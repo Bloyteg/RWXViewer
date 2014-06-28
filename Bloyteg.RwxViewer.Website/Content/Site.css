@@ -224,14 +224,6 @@ select::-ms-expand {
     clear: both;
 }
 
-.optionCheck input[type=checkbox] {
-    float: right;
-}
-
-.optionCheck {
-    clear: both;
-}
-
 #sidebarSpacer {
     height: 40px;
     border-bottom: 1px solid #555;
@@ -248,4 +240,43 @@ select::-ms-expand {
 
 #resetCamera:hover {
     background: #5d00a5;
+}
+
+.optionCheck {
+    padding: 4px 0 4px 0;
+}
+
+.optionCheck input[type=checkbox] {
+    display: none;
+    float: right;
+}
+
+.optionCheck input[type=checkbox] + label {
+    float: right;
+    display: inline-block;
+    padding: 4px 4px 4px 4px;
+    border-radius: 8px;
+    border: 0;
+    box-shadow: inset 0 0 8px #333;
+    background-color: #777;
+    color: white;
+
+    width: 16px;
+    height: 16px;
+
+    position: relative;
+
+    cursor: pointer;
+}
+
+.optionCheck input[type=checkbox]:checked + label:after {
+    position: absolute;
+    top: 0;
+    left: 4px;
+    font-size: 16px;
+    content: "✔";
+}
+
+.optionCheck {
+    clear: both;
 }
