@@ -14,6 +14,12 @@
 
 //TODO: Restore billboard mesh handling.  Still not 100% sure how to do this.
 module RwxViewer {    
+    export module Drawable {
+        export function createDrawableFromModel(gl: WebGLRenderingContext, model: Model): Drawable {
+            return new MeshDrawableBuilder(gl, model).build();
+        }
+    }
+
     interface PrototypeMap {
         [name: string]: Prototype;
     }
@@ -115,6 +121,7 @@ module RwxViewer {
             });
         }
 
+        //TODO: Move all of this out as a separate interface/implemenetations.
         private buildVertexBuffer(transformMatrix: Mat4Array, vertices: Vertex[], faces: IFace[], material: Material): VertexBuffer {
             var buffers = material.GeometrySampling === GeometrySampling.Wireframe
                 ? this.buildLineBuffers(transformMatrix, vertices, faces)
@@ -206,9 +213,5 @@ module RwxViewer {
             var vertexVector = [vertex.Position.X, vertex.Position.Y, vertex.Position.Z];
             return vec3.transformMat4(vertexVector, vertexVector, transformMatrix);
         }
-    }
-
-    export function createDrawableFromModel(gl: WebGLRenderingContext, model: Model): Drawable {
-        return new MeshDrawableBuilder(gl, model).build();
     }
 }

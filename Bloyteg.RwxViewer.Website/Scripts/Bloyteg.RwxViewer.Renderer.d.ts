@@ -1,4 +1,46 @@
 ﻿declare module RwxViewer {
+    class NoAnimation implements Animation {
+        private _transform;
+        public getTransformForTime(joint: number, time: number): Mat4Array;
+    }
+}
+declare module RwxViewer {
+    class SequenceAnimation implements Animation {
+        private _startTime;
+        private _framesPerMS;
+        private _totalFrames;
+        private _identityMatrix;
+        private _rotationMatrix;
+        private _translationMatrix;
+        private _transformMatrix;
+        private _quaternion;
+        private _translation;
+        private _keyframesByJoint;
+        constructor(animation: ModelAnimation, startTime: number);
+        private buildKeyframesByJoint(animation);
+        private getJointTagFromName(name);
+        private buildGlobalTranslationForKeyframe(animation, keyframe);
+        private interpolatePosition(positions, keyframe);
+        public getTransformForTime(joint: number, time: number): Mat4Array;
+    }
+}
+declare module RwxViewer {
+    module Drawable {
+        function createBoundingBoxDrawble(gl: WebGLRenderingContext, boundingBox: BoundingBox): BoundingBoxDrawable;
+    }
+    class BoundingBoxDrawable implements Drawable {
+        private _vertexBuffer;
+        private _vertexCount;
+        private _animation;
+        private _color;
+        constructor(gl: WebGLRenderingContext, boundingBox: BoundingBox);
+        private initializeNew(gl, boundingBox);
+        public animation : Animation;
+        public cloneWithAnimation(animation: Animation): BoundingBoxDrawable;
+        public draw(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix: Mat4Array): void;
+    }
+}
+declare module RwxViewer {
     class AnimatedTexture implements Texture {
         private _gl;
         private _texture;
@@ -22,28 +64,6 @@ declare module RwxViewer {
     module Animation {
         function getDefaultAnimation(): NoAnimation;
         function getSequenceAnimation(animation: ModelAnimation): SequenceAnimation;
-    }
-    class NoAnimation implements Animation {
-        private _transform;
-        public getTransformForTime(joint: number, time: number): Mat4Array;
-    }
-    class SequenceAnimation implements Animation {
-        private _startTime;
-        private _framesPerMS;
-        private _totalFrames;
-        private _identityMatrix;
-        private _rotationMatrix;
-        private _translationMatrix;
-        private _transformMatrix;
-        private _quaternion;
-        private _translation;
-        private _keyframesByJoint;
-        constructor(animation: ModelAnimation, startTime: number);
-        private buildKeyframesByJoint(animation);
-        private getJointTagFromName(name);
-        private buildGlobalTranslationForKeyframe(animation, keyframe);
-        private interpolatePosition(positions, keyframe);
-        public getTransformForTime(joint: number, time: number): Mat4Array;
     }
 }
 declare module RwxViewer {
@@ -79,7 +99,9 @@ declare module RwxViewer {
     }
 }
 declare module RwxViewer {
-    function createDrawableFromModel(gl: WebGLRenderingContext, model: Model): Drawable;
+    module Drawable {
+        function createDrawableFromModel(gl: WebGLRenderingContext, model: Model): Drawable;
+    }
 }
 declare module RwxViewer {
     class EmptyTexture implements Texture {
@@ -91,7 +113,9 @@ declare module RwxViewer {
     }
 }
 declare module RwxViewer {
-    function makeGrid(gl: WebGLRenderingContext): GridDrawable;
+    module Drawable {
+        function createGridDrawable(gl: WebGLRenderingContext): GridDrawable;
+    }
     class GridDrawable implements Drawable {
         private _vertexBuffer;
         private _vertexCount;
@@ -292,15 +316,17 @@ declare module RwxViewer {
         private _gl;
         private _currentDrawable;
         private _spatialGridDrawable;
+        private _boundingBoxDrawable;
         private _gridProgram;
         private _mainProgram;
+        private _overlayProgram;
         private _camera;
         private _projectionMatrix;
         private _modelMatrix;
         private _viewportWidth;
         private _viewportHeight;
         constructor(gl: WebGLRenderingContext);
-        public initialize(mainProgram: ShaderProgram, gridProgram: ShaderProgram): void;
+        public initialize(mainProgram: ShaderProgram, gridProgram: ShaderProgram, overlayProgram: ShaderProgram): void;
         public draw(time: number): void;
         public setCurrentModel(model: Model): void;
         public setCurrentAnimation(animation: ModelAnimation): void;

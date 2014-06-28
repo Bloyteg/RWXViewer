@@ -12,8 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-precision mediump float;
+module RwxViewer {
+    export interface Animation {
+        getTransformForTime(joint: number, time: number): Mat4Array;
+    }
 
-void main(void) {
-	gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    export module Animation {
+        export function getDefaultAnimation() {
+            return new NoAnimation();
+        }
+
+        export function getSequenceAnimation(animation: ModelAnimation) {
+            return new SequenceAnimation(animation, Date.now());
+        }
+    }
 }

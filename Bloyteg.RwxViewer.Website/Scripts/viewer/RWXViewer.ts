@@ -140,12 +140,13 @@ $('#error').css('visibility', 'visible').hide();
 
 $.when(ObjectPathItemLoader.getWorlds(),
     ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl"),
-    ShaderProgramLoader.loadShaderProgram(gl, "SpatialGridVertexShader.glsl", "SpatialGridFragmentShader.glsl"))
-    .done((worlds: ObjectPathItemLoader.IObjectPathWorld[], mainProgram: RwxViewer.ShaderProgram, gridProgram: RwxViewer.ShaderProgram) => {
+    ShaderProgramLoader.loadShaderProgram(gl, "SpatialGridVertexShader.glsl", "SpatialGridFragmentShader.glsl"),
+    ShaderProgramLoader.loadShaderProgram(gl, "OverlayVertexShader.glsl", "OverlayFragmentShader.glsl"))
+    .done((worlds: ObjectPathItemLoader.IObjectPathWorld[], mainProgram: RwxViewer.ShaderProgram, gridProgram: RwxViewer.ShaderProgram, overlayProgram: RwxViewer.ShaderProgram) => {
         resizeViewport();
         viewModel.worlds(worlds);
         ko.applyBindings(viewModel);
-        renderer.initialize(mainProgram, gridProgram);
+        renderer.initialize(mainProgram, gridProgram, overlayProgram);
 
         $('#loading').fadeOut(FADE_TIME);
 

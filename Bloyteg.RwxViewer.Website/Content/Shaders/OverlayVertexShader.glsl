@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-precision mediump float;
+attribute vec3 a_vertexPosition;
 
+uniform mat4 u_viewMatrix;
+uniform mat4 u_projectionMatrix;
+uniform mat4 u_modelMatrix;
+ 
 void main(void) {
-	gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(a_vertexPosition, 1.0);
 }

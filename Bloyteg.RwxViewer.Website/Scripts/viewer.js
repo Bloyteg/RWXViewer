@@ -369,11 +369,11 @@ var viewModel = new ViewModel();
 
 $('#error').css('visibility', 'visible').hide();
 
-$.when(ObjectPathItemLoader.getWorlds(), ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl"), ShaderProgramLoader.loadShaderProgram(gl, "SpatialGridVertexShader.glsl", "SpatialGridFragmentShader.glsl")).done(function (worlds, mainProgram, gridProgram) {
+$.when(ObjectPathItemLoader.getWorlds(), ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl"), ShaderProgramLoader.loadShaderProgram(gl, "SpatialGridVertexShader.glsl", "SpatialGridFragmentShader.glsl"), ShaderProgramLoader.loadShaderProgram(gl, "OverlayVertexShader.glsl", "OverlayFragmentShader.glsl")).done(function (worlds, mainProgram, gridProgram, overlayProgram) {
     resizeViewport();
     viewModel.worlds(worlds);
     ko.applyBindings(viewModel);
-    renderer.initialize(mainProgram, gridProgram);
+    renderer.initialize(mainProgram, gridProgram, overlayProgram);
 
     $('#loading').fadeOut(FADE_TIME);
 

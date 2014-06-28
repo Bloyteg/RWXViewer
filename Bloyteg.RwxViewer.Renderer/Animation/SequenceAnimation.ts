@@ -13,28 +13,6 @@
 // limitations under the License.
 
 module RwxViewer {
-    export interface Animation {
-        getTransformForTime(joint: number, time: number): Mat4Array;
-    }
-
-    export module Animation {
-        export function getDefaultAnimation() {
-            return new NoAnimation();
-        }
-
-        export function getSequenceAnimation(animation: ModelAnimation) {
-            return new SequenceAnimation(animation, Date.now());
-        }
-    }
-
-    export class NoAnimation implements Animation {
-        private _transform = mat4.create();
-
-        getTransformForTime(joint: number, time: number): Mat4Array {
-            return this._transform;
-        }
-    }
-
     var ROOT_JOINT = 1;
 
     var jointTags = {
@@ -164,7 +142,7 @@ module RwxViewer {
 
             function getPosition(firstFrameIndex, secondFrameIndex) {
                 var interpFactor = (keyframe - positions[firstFrameIndex].keyframe) / Math.abs(positions[secondFrameIndex].keyframe - positions[firstFrameIndex].keyframe);
-                return (1 - interpFactor)*positions[firstFrameIndex].value + interpFactor*positions[secondFrameIndex].value;
+                return (1 - interpFactor) * positions[firstFrameIndex].value + interpFactor * positions[secondFrameIndex].value;
             }
 
             for (var index = 0; index < length; ++index) {

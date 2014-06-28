@@ -10,8 +10,10 @@
 // limitations under the License.
 
 module RwxViewer {
-    export function makeGrid(gl: WebGLRenderingContext) {
-        return new GridDrawable(gl);
+    export module Drawable {
+        export function createGridDrawable(gl: WebGLRenderingContext) {
+            return new GridDrawable(gl);
+        }
     }
 
     export class GridDrawable implements Drawable {

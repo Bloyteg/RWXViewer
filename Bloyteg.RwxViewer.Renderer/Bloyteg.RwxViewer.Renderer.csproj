@@ -58,23 +58,26 @@
     <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
   </PropertyGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="AnimatedTexture.ts" />
-    <TypeScriptCompile Include="Animation.ts" />
+    <TypeScriptCompile Include="Animation\NoAnimation.ts" />
+    <TypeScriptCompile Include="Animation\SequenceAnimation.ts" />
+    <TypeScriptCompile Include="Drawable\BoundingBoxDrawable.ts" />
+    <TypeScriptCompile Include="Texture\AnimatedTexture.ts" />
+    <TypeScriptCompile Include="Animation\Animation.ts" />
     <TypeScriptCompile Include="BoundingBox.ts" />
     <TypeScriptCompile Include="Camera.ts" />
-    <TypeScriptCompile Include="Drawable.ts" />
-    <TypeScriptCompile Include="DrawableBuilder.ts" />
-    <TypeScriptCompile Include="EmptyTexture.ts" />
-    <TypeScriptCompile Include="GridDrawable.ts" />
-    <TypeScriptCompile Include="MeshDrawable.ts" />
+    <TypeScriptCompile Include="Drawable\Drawable.ts" />
+    <TypeScriptCompile Include="Drawable\DrawableBuilder.ts" />
+    <TypeScriptCompile Include="Texture\EmptyTexture.ts" />
+    <TypeScriptCompile Include="Drawable\GridDrawable.ts" />
+    <TypeScriptCompile Include="Drawable\MeshDrawable.ts" />
     <TypeScriptCompile Include="Model.ts" />
     <TypeScriptCompile Include="Renderer.ts" />
     <TypeScriptCompile Include="ShaderProgram.ts" />
-    <TypeScriptCompile Include="StaticTexture.ts" />
-    <TypeScriptCompile Include="Texture.ts" />
-    <TypeScriptCompile Include="TextureCache.ts" />
+    <TypeScriptCompile Include="Texture\StaticTexture.ts" />
+    <TypeScriptCompile Include="Texture\Texture.ts" />
+    <TypeScriptCompile Include="Texture\TextureCache.ts" />
     <TypeScriptCompile Include="typings\gl-matrix\gl-matrix.d.ts" />
-    <TypeScriptCompile Include="TextureFactory.ts" />
+    <TypeScriptCompile Include="Texture\TextureFactory.ts" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <Import Project="$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets')" />
