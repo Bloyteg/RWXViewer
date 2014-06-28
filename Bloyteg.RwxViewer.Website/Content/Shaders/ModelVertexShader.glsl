@@ -41,7 +41,7 @@ void main(void) {
 		gl_Position = u_projectionMatrix * (vec4(a_vertexPosition, 1.0) + vec4(worldView[3].xyz, 0.0));
 	} else {
 		vec3 normal = u_normalMatrix * a_vertexNormal;
-		v_lightWeighting = u_ambientFactor + max(dot(normal, lightDirection), 0.0) * u_diffuseFactor;
+		v_lightWeighting = u_ambientFactor + clamp(dot(normal, lightDirection), 0.0, 1.0) * u_diffuseFactor;
 		gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(a_vertexPosition, 1.0);
 	}
 }

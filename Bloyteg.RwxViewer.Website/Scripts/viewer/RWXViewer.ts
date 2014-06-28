@@ -151,7 +151,7 @@ var viewModel = new ViewModel();
 $('#error').css('visibility', 'visible').hide();
 
 $.when(ObjectPathItemLoader.getWorlds(),
-    ShaderProgramLoader.loadShaderProgram(gl, "vertexShader.glsl", "fragmentShader.glsl"),
+    ShaderProgramLoader.loadShaderProgram(gl, "ModelVertexShader.glsl", "ModelFragmentShader.glsl"),
     ShaderProgramLoader.loadShaderProgram(gl, "SpatialGridVertexShader.glsl", "SpatialGridFragmentShader.glsl"),
     ShaderProgramLoader.loadShaderProgram(gl, "OverlayVertexShader.glsl", "OverlayFragmentShader.glsl"))
     .done((worlds: ObjectPathItemLoader.IObjectPathWorld[], mainProgram: RwxViewer.ShaderProgram, gridProgram: RwxViewer.ShaderProgram, overlayProgram: RwxViewer.ShaderProgram) => {
