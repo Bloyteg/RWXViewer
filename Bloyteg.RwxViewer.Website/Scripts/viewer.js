@@ -379,6 +379,28 @@ var ViewModel = (function () {
     ViewModel.prototype.hideError = function () {
         this.errorMessage(null);
     };
+
+    ViewModel.prototype.saveScreenshot = function (_, event) {
+        var dataURL = canvas.toDataURL();
+        var data = atob(dataURL.substring("data:image/png;base64,".length));
+        var asArray = new Uint8Array(data.length);
+
+        for (var index = 0; index < data.length; ++index) {
+            asArray[index] = data.charCodeAt(index);
+        }
+
+        var blob;
+
+        if (window.navigator.msSaveBlob) {
+            blob = new Blob([asArray.buffer], { type: "image/png" });
+            window.navigator.msSaveBlob(blob, "screenshot.png");
+            return false;
+        } else {
+            blob = new Blob([asArray.buffer], { type: "image/png" });
+            event.currentTarget.href = URL.createObjectURL(blob);
+            return true;
+        }
+    };
     return ViewModel;
 })();
 

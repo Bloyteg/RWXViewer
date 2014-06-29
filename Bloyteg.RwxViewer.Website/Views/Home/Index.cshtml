@@ -7,7 +7,6 @@
     <script src="@Url.Content("~/Scripts/jquery-2.1.1.min.js")"></script>
     <script src="@Url.Content("~/Scripts/gl-matrix-min.js")"></script>
     <script src="@Url.Content("~/Scripts/knockout-3.1.0.js")"></script>
-    <script src="@Url.Content("~/Scripts/Bloyteg.RwxViewer.Renderer.js")"></script>
 }
 
 
@@ -27,8 +26,12 @@
 <div id="header">
     <h2>RWX Viewer</h2>
     <div id="toolbar">
-        <img src="@Url.Content("~/Content/appbar.camera.png")" alt="Take Screenshot" />
-        <img src="@Url.Content("~/Content/appbar.link.png")" alt="Link to Current Model" />
+        <a href="#" data-bind="click: saveScreenshot" download="screenshot.png">
+            <img class="toolButton" src="@Url.Content("~/Content/appbar.camera.png")" alt="Save Screenshot" title="Save Screenshot" />
+        </a>
+        <a href="#">
+            <img class="toolButton" src="@Url.Content("~/Content/appbar.link.png")" alt="Link to Current Model" title="Link to Current Model" />
+        </a>
     </div>
 </div>
 
@@ -68,7 +71,7 @@
                 <label for="showCameraTarget"></label>
             </div>
             
-            <button id="snapToModelOrigin">Snap to Model</button>
+            <button id="snapToModelOrigin" data-bind="enable: selectedModel()">Snap to Model</button>
             <button id="resetCamera" data-bind="click: resetCamera">Reset Camera</button>
         </div>
     </div>
@@ -124,4 +127,5 @@
     </div>
 </div>
 
+<script src="@Url.Content("~/Scripts/Bloyteg.RwxViewer.Renderer.js")"></script>
 <script src="@Url.Content("~/Scripts/viewer.js")"></script>

@@ -127,6 +127,11 @@ select::-ms-expand {
     
 }
 
+#header #toolbar a {
+    text-decoration: none;
+    outline: none;
+}
+
 #sidebar {
     position: absolute;
     left: 0;
@@ -242,6 +247,11 @@ button {
 
 button:hover {
     background: #5d00a5;
+}
+
+button:disabled, button:disabled:hover {
+    color: #777;
+    background: #555;
 }
 
 .optionCheck {
