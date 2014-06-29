@@ -422,7 +422,6 @@ var Viewer;
     }
 
     function start() {
-        var _this = this;
         var canvas = document.getElementById("viewport");
         var glOptions = { preserveDrawingBuffer: true };
         var gl = (canvas.getContext("webgl", glOptions) || canvas.getContext("experimental-webgl", glOptions));
@@ -434,9 +433,52 @@ var Viewer;
         startRenderer(canvas, renderer, gl, new ViewModel(canvas, renderer));
 
         $('.roundSlider').each(function () {
-            var element = $(_this);
-            element.attr('data-value', 0);
+            var element = $(this);
             var handle = element.find('.sliderHandle');
+            var outerCircle = element.find('.outerCircle');
+            var mouseDown = false;
+
+            function setValue(angle) {
+                var angleInRadians = angle * (Math.PI / 180);
+
+                handle.css({
+                    top: Math.sin(angleInRadians) * 56 + (outerCircle.height() / 2 - handle.height() / 2 + 4),
+                    left: -Math.cos(angleInRadians) * 56 + (outerCircle.width() / 2 - handle.width() / 2 + 4)
+                });
+
+                element.find('.innerCircle').html("<div>" + angle + "&deg;</div>");
+            }
+
+            setValue(0);
+
+            element.attr('data-value', 0);
+
+            handle.mousedown(function () {
+                mouseDown = true;
+            });
+
+            $(document).mouseup(function () {
+                mouseDown = false;
+            });
+
+            $(document).mousemove(function (event) {
+                if (mouseDown) {
+                    event.preventDefault();
+
+                    var offset = outerCircle.offset();
+
+                    var newPosition = {
+                        left: event.pageX - offset.left - (outerCircle.width() / 2),
+                        top: event.pageY - offset.top - (outerCircle.height() / 2)
+                    };
+
+                    var angle = Math.floor(Math.atan2(newPosition.top, -newPosition.left) * 180 / Math.PI);
+                    angle = angle < 0 ? 360 + (angle % 360) : (angle % 360);
+
+                    element.attr("data-value", angle);
+                    setValue(angle);
+                }
+            });
         });
     }
     Viewer.start = start;
