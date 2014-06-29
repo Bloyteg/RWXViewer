@@ -20,6 +20,7 @@ module RwxViewer {
         private _spatialGridDrawable: Drawable;
         private _boundingBoxDrawable: Drawable;
         private _cameraTargetDrawable: Drawable;
+        private _originAxesDrawable: Drawable;
 
         private _gridProgram: ShaderProgram;
         private _mainProgram: ShaderProgram;
@@ -35,6 +36,7 @@ module RwxViewer {
 
         private _showBoundingBox: boolean;
         private _showCameraTarget: boolean = true;
+        private _showOriginAxes: boolean;
 
         constructor(gl: WebGLRenderingContext) {
             this._gl = gl;
@@ -47,6 +49,7 @@ module RwxViewer {
                 this._camera = makeCamera(gl.drawingBufferWidth, gl.drawingBufferHeight);
                 this._spatialGridDrawable = Drawable.createGridDrawable(gl);
                 this._cameraTargetDrawable = Drawable.createCameraTargetDrawable(gl);
+                this._originAxesDrawable = Drawable.createOriginAxesDrawable(gl);
 
                 gl.clearColor(0.75, 0.75, 0.75, 1.0);
                 gl.clearDepth(1.0);
@@ -96,8 +99,12 @@ module RwxViewer {
                         this._boundingBoxDrawable.draw(gl, program, this._modelMatrix);
                     }
 
-                    if (this._showCameraTarget && this._cameraTargetDrawable) {
+                    if (this._showCameraTarget) {
                         this._cameraTargetDrawable.draw(gl, program, this._camera.targetMatrix);
+                    }
+
+                    if (this._currentDrawable && this._showOriginAxes) {
+                        this._originAxesDrawable.draw(gl, program, this._modelMatrix);
                     }
 
                     gl.depthMask(true);
@@ -162,6 +169,14 @@ module RwxViewer {
 
         hideCameraTarget() {
             this._showCameraTarget = false;
+        }
+
+        showOriginAxes() {
+            this._showOriginAxes = true;
+        }
+
+        hideOriginAxes() {
+            this._showOriginAxes = false;
         }
     }
 }

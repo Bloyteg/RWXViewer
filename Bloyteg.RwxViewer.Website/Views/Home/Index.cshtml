@@ -1,5 +1,4 @@
-﻿@using System.Web.UI.WebControls
-@{
+﻿@{
     ViewBag.Title = "RWX Viewer by Byte";
 }
 
@@ -68,14 +67,35 @@
                 <input id="showCameraTarget" type="checkbox" data-bind="checked: showCameraTarget" />
                 <label for="showCameraTarget"></label>
             </div>
-
+            
+            <button id="snapToModelOrigin">Snap to Model</button>
             <button id="resetCamera" data-bind="click: resetCamera">Reset Camera</button>
         </div>
     </div>
 
     <div id="light" class="group">
         <div class="header">Lighting Controls</div>
-        <div class="content"></div>
+        <div class="content">
+            <span>Azimuth</span>
+            <div id="azimuthSlider" class="roundSlider">
+                <div class="outerCircle">
+                    <div class="innerCircle">
+
+                    </div>
+                </div>
+                <div class="sliderHandle"></div>
+            </div>
+
+            <span>Altitude</span>
+            <div id="altitudeSlider" class="roundSlider">
+                <div class="outerCircle">
+                    <div class="innerCircle">
+
+                    </div>
+                </div>
+                <div class="sliderHandle"></div>
+            </div>
+        </div>
     </div>
 
     <div id="settings" class="group">
@@ -83,7 +103,7 @@
         <div class="content">
             <div class="optionCheck">
                 <label for="showModelOrigin">Show Model Origin:</label>
-                <input id="showModelOrigin" type="checkbox" />
+                <input id="showModelOrigin" type="checkbox" data-bind="checked: showModelOrigin" />
                 <label for="showModelOrigin"></label>
             </div>
             <div class="optionCheck">

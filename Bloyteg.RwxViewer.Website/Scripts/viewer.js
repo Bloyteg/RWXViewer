@@ -274,6 +274,7 @@ var ViewModel = (function () {
 
         this.showBoundingBox = ko.observable(false);
         this.showCameraTarget = ko.observable(true);
+        this.showModelOrigin = ko.observable(false);
 
         this.modelsByType = ko.computed(function () {
             return _this.models().filter(function (model) {
@@ -360,6 +361,14 @@ var ViewModel = (function () {
                 renderer.showCameraTarget();
             } else {
                 renderer.hideCameraTarget();
+            }
+        });
+
+        this.showModelOrigin.subscribe(function (value) {
+            if (value) {
+                renderer.showOriginAxes();
+            } else {
+                renderer.hideOriginAxes();
             }
         });
     }

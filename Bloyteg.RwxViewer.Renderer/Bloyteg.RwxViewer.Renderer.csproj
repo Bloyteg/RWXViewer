@@ -62,6 +62,7 @@
     <TypeScriptCompile Include="Animation\SequenceAnimation.ts" />
     <TypeScriptCompile Include="Drawable\BoundingBoxDrawable.ts" />
     <TypeScriptCompile Include="Drawable\CameraTargetDrawable.ts" />
+    <TypeScriptCompile Include="Drawable\OriginAxesDrawable.ts" />
     <TypeScriptCompile Include="Texture\AnimatedTexture.ts" />
     <TypeScriptCompile Include="Animation\Animation.ts" />
     <TypeScriptCompile Include="BoundingBox.ts" />

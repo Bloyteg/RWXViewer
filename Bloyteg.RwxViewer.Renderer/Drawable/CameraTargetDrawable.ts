@@ -11,12 +11,12 @@
 
 module RwxViewer {
     export module Drawable {
-        export function createCameraTargetDrawable(gl: WebGLRenderingContext) {
+        export function createCameraTargetDrawable(gl: WebGLRenderingContext): Drawable {
             return new CameraTargetDrawable(gl);
         }
     }
 
-    export class CameraTargetDrawable implements Drawable {
+    class CameraTargetDrawable implements Drawable {
         private _firstOuterCircleVertexBuffer: WebGLBuffer;
         private _secondOuterCircleVertexBuffer: WebGLBuffer;
         private _crossHairVertexBuffer: WebGLBuffer;

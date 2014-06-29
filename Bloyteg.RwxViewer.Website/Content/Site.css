@@ -181,7 +181,7 @@ select::-ms-expand {
     background-color: #222;
     margin-top: -36px;
     white-space: nowrap;
-    padding: 8px 8px 8px 8px;
+    padding: 8px 12px 8px 8px;
     border-left: none;
     border-right: 4px solid #ba61ff;
     pointer-events: none;
@@ -229,18 +229,18 @@ select::-ms-expand {
     border-bottom: 1px solid #555;
 }
 
-#resetCamera {
+button {
     border: none;
     height: 2em;
     padding: 4px;
     margin: 0;
     background: #ba61ff;
     color: #fff;
-    float: right;
     margin-top: 8px;
+    width: 50%;
 }
 
-#resetCamera:hover {
+button:hover {
     background: #5d00a5;
 }
 
@@ -281,4 +281,68 @@ select::-ms-expand {
 
 .optionCheck {
     clear: both;
+}
+
+.roundSlider {
+    margin-left: auto;
+    margin-right: auto;
+
+    position: relative;
+    width: 128px;
+    height: 128px;
+}
+
+.roundSlider > .outerCircle {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+
+    height: 120px;
+    width: 120px;
+    border-radius: 50%;
+    border: 1px solid #555;
+
+    background-color: #333;
+}
+
+.roundSlider > .outerCircle > .innerCircle {
+    margin: auto;
+    position: absolute;
+
+    top: 6px;
+    left: 6px;
+
+    height: 106px;
+    width: 106px;
+    border-radius: 50%;
+    border: 1px solid #555;
+
+    background-color: #222;
+}
+
+.roundSlider > .sliderHandle {
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+
+    position: absolute;
+    top: 0;
+    left: 56px;
+
+    width: 16px;
+    height: 16px;
+
+    border-radius: 50%;
+
+    background-color: #ba61ff;
+    transition: background-color 0.2s;
+}
+
+.roundSlider > .sliderHandle:hover {
+    background-color: #5d00a5;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+#light > .content {
+    text-align: center;
 }

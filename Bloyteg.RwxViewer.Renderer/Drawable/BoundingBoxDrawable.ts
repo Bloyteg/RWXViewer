@@ -11,12 +11,12 @@
 
 module RwxViewer {
     export module Drawable {
-        export function createBoundingBoxDrawble(gl: WebGLRenderingContext, boundingBox: BoundingBox) {
+        export function createBoundingBoxDrawble(gl: WebGLRenderingContext, boundingBox: BoundingBox): Drawable {
             return new BoundingBoxDrawable(gl, boundingBox);
         }
     }
 
-    export class BoundingBoxDrawable implements Drawable {
+    class BoundingBoxDrawable implements Drawable {
         private _vertexBuffer: WebGLBuffer;
         private _vertexCount: number;
         private _animation = Animation.getDefaultAnimation();

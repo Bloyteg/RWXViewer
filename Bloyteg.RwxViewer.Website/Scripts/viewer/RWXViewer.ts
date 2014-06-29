@@ -36,6 +36,7 @@ class ViewModel {
 
     showBoundingBox: KnockoutObservable<boolean>;
     showCameraTarget: KnockoutObservable<boolean>;
+    showModelOrigin: KnockoutObservable<boolean>;
 
     constructor() {
         this.worlds = ko.observableArray([]);
@@ -51,6 +52,7 @@ class ViewModel {
 
         this.showBoundingBox = ko.observable(false);
         this.showCameraTarget = ko.observable(true);
+        this.showModelOrigin = ko.observable(false);
 
         this.modelsByType = ko.computed(() => {
             return this.models().filter(model => model.type === this.selectedType().type);
@@ -132,6 +134,14 @@ class ViewModel {
                 renderer.showCameraTarget();
             } else {
                 renderer.hideCameraTarget();
+            }
+        });
+
+        this.showModelOrigin.subscribe(value => {
+            if (value) {
+                renderer.showOriginAxes();
+            } else {
+                renderer.hideOriginAxes();
             }
         });
     }
