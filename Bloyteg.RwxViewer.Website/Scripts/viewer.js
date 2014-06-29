@@ -93,35 +93,6 @@ var CameraController;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-var ShaderProgramLoader;
-(function (ShaderProgramLoader) {
-    function loadShaderProgram(gl, vertexShader, fragmentShader) {
-        var shaderLocation = "/Content/Shaders/";
-        var deferred = $.Deferred();
-
-        $.when($.get(shaderLocation + vertexShader), $.get(shaderLocation + fragmentShader)).done(function (vertexShaderData, fragmentShaderData) {
-            return deferred.resolve(new RwxViewer.ShaderProgram(gl, vertexShaderData[0], fragmentShaderData[0]));
-        }).fail(function () {
-            return deferred.fail();
-        });
-
-        return deferred.promise();
-    }
-    ShaderProgramLoader.loadShaderProgram = loadShaderProgram;
-})(ShaderProgramLoader || (ShaderProgramLoader = {}));
-// Copyright 2014 Joshua R. Rodgers
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 var ObjectPathItemLoader;
 (function (ObjectPathItemLoader) {
     function loadModel(worldId, modelName) {
@@ -250,203 +221,256 @@ var ObjectPathItemLoader;
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-var FADE_TIME = 500;
+var Viewer;
+(function (Viewer) {
+    var FADE_TIME = 500;
+    var types = [{ name: "Model", type: 0 }, { name: "Avatar", type: 1 }];
 
-var canvas = document.getElementById("viewport");
-var glOptions = { preserveDrawingBuffer: true };
-var gl = (canvas.getContext("webgl", glOptions) || canvas.getContext("experimental-webgl", glOptions));
-var renderer = new RwxViewer.Renderer(gl);
-var types = [{ name: "Model", type: 0 }, { name: "Avatar", type: 1 }];
+    var ViewModel = (function () {
+        function ViewModel(canvas, renderer) {
+            var _this = this;
+            this.canvas = canvas;
+            this.renderer = renderer;
 
-var ViewModel = (function () {
-    function ViewModel() {
-        var _this = this;
-        this.worlds = ko.observableArray([]);
-        this.models = ko.observableArray([]);
-        this.types = ko.observableArray(types);
-        this.animations = ko.observableArray([]);
+            this.worlds = ko.observableArray([]);
+            this.models = ko.observableArray([]);
+            this.types = ko.observableArray(types);
+            this.animations = ko.observableArray([]);
 
-        this.selectedWorld = ko.observable(null);
-        this.selectedModel = ko.observable(null);
-        this.selectedType = ko.observable(types[0]);
-        this.selectedAnimation = ko.observable(null);
-        this.errorMessage = ko.observable(null);
+            this.selectedWorld = ko.observable(null);
+            this.selectedModel = ko.observable(null);
+            this.selectedType = ko.observable(types[0]);
+            this.selectedAnimation = ko.observable(null);
+            this.errorMessage = ko.observable(null);
 
-        this.showBoundingBox = ko.observable(false);
-        this.showCameraTarget = ko.observable(true);
-        this.showModelOrigin = ko.observable(false);
+            this.showBoundingBox = ko.observable(false);
+            this.showCameraTarget = ko.observable(true);
+            this.showModelOrigin = ko.observable(false);
 
-        this.modelsByType = ko.computed(function () {
-            return _this.models().filter(function (model) {
-                return model.type === _this.selectedType().type;
+            this.modelsByType = ko.computed(function () {
+                return _this.models().filter(function (model) {
+                    return model.type === _this.selectedType().type;
+                });
             });
-        });
 
-        var self = this;
+            var self = this;
 
-        this.selectedWorld.subscribe(function (world) {
-            if (world) {
-                ObjectPathItemLoader.getModels(world.worldId).done(function (models) {
-                    return self.models(models);
-                });
-                ObjectPathItemLoader.getAnimations(world.worldId).done(function (animations) {
-                    return self.animations(animations);
-                });
-            } else {
-                self.models([]);
-                self.animations([]);
-            }
-        });
+            this.selectedWorld.subscribe(function (world) {
+                if (world) {
+                    ObjectPathItemLoader.getModels(world.worldId).done(function (models) {
+                        return self.models(models);
+                    });
+                    ObjectPathItemLoader.getAnimations(world.worldId).done(function (animations) {
+                        return self.animations(animations);
+                    });
+                } else {
+                    self.models([]);
+                    self.animations([]);
+                }
+            });
 
-        this.errorMessage.subscribe(function (message) {
-            if (message) {
-                $('#error').fadeIn(FADE_TIME);
-            } else {
-                $('#error').fadeOut(FADE_TIME);
-            }
-        });
+            this.errorMessage.subscribe(function (message) {
+                if (message) {
+                    $('#error').fadeIn(FADE_TIME);
+                } else {
+                    $('#error').fadeOut(FADE_TIME);
+                }
+            });
 
-        this.selectedAnimation.subscribe(function (animation) {
-            self.errorMessage(null);
-            renderer.setCurrentAnimation(null);
+            this.selectedAnimation.subscribe(function (animation) {
+                self.errorMessage(null);
+                renderer.setCurrentAnimation(null);
 
-            if (animation) {
-                $.when(ObjectPathItemLoader.loadAnimation(animation.worldId, animation.name), $('#loading').fadeIn(FADE_TIME)).done(function (modelAnimation) {
-                    renderer.setCurrentAnimation(modelAnimation);
-                    $('#loading').fadeOut(FADE_TIME);
-                }).fail(function () {
-                    renderer.setCurrentAnimation(null);
-                    self.errorMessage("Failed to load the selected animation.");
-                    $('#loading').fadeOut(FADE_TIME);
-                });
-            }
-        });
-
-        this.selectedModel.subscribe(function (model) {
-            self.errorMessage(null);
-            self.selectedAnimation(null);
-            renderer.setCurrentModel(null);
-
-            if (model) {
-                $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), $('#loading').fadeIn(FADE_TIME)).done(function (result) {
-                    ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(function (textures) {
-                        Object.keys(textures).forEach(function (imageKey) {
-                            return RwxViewer.TextureCache.addImageToCache(imageKey, textures[imageKey]);
-                        });
-
-                        renderer.setCurrentModel(result);
+                if (animation) {
+                    $.when(ObjectPathItemLoader.loadAnimation(animation.worldId, animation.name), $('#loading').fadeIn(FADE_TIME)).done(function (modelAnimation) {
+                        renderer.setCurrentAnimation(modelAnimation);
                         $('#loading').fadeOut(FADE_TIME);
                     }).fail(function () {
-                        renderer.setCurrentModel(result);
+                        renderer.setCurrentAnimation(null);
+                        self.errorMessage("Failed to load the selected animation.");
                         $('#loading').fadeOut(FADE_TIME);
-                        self.errorMessage("Failed to load the textures for this object.");
                     });
-                }).fail(function () {
-                    $('#loading').fadeOut(FADE_TIME);
-                    self.errorMessage("Failed to load this object.");
-                });
+                }
+            });
+
+            this.selectedModel.subscribe(function (model) {
+                self.errorMessage(null);
+                self.selectedAnimation(null);
+                renderer.setCurrentModel(null);
+
+                if (model) {
+                    $.when(ObjectPathItemLoader.loadModel(model.worldId, model.name), $('#loading').fadeIn(FADE_TIME)).done(function (result) {
+                        ObjectPathItemLoader.loadTextures(model.worldId, result.Materials).done(function (textures) {
+                            Object.keys(textures).forEach(function (imageKey) {
+                                return RwxViewer.TextureCache.addImageToCache(imageKey, textures[imageKey]);
+                            });
+
+                            renderer.setCurrentModel(result);
+                            $('#loading').fadeOut(FADE_TIME);
+                        }).fail(function () {
+                            renderer.setCurrentModel(result);
+                            $('#loading').fadeOut(FADE_TIME);
+                            self.errorMessage("Failed to load the textures for this object.");
+                        });
+                    }).fail(function () {
+                        $('#loading').fadeOut(FADE_TIME);
+                        self.errorMessage("Failed to load this object.");
+                    });
+                }
+            });
+
+            this.showBoundingBox.subscribe(function (value) {
+                if (value) {
+                    renderer.showBoundingBox();
+                } else {
+                    renderer.hideBoundingBox();
+                }
+            });
+
+            this.showCameraTarget.subscribe(function (value) {
+                if (value) {
+                    renderer.showCameraTarget();
+                } else {
+                    renderer.hideCameraTarget();
+                }
+            });
+
+            this.showModelOrigin.subscribe(function (value) {
+                if (value) {
+                    renderer.showOriginAxes();
+                } else {
+                    renderer.hideOriginAxes();
+                }
+            });
+        }
+        ViewModel.prototype.resetCamera = function () {
+            this.renderer.camera.reset();
+        };
+
+        ViewModel.prototype.hideError = function () {
+            this.errorMessage(null);
+        };
+
+        ViewModel.prototype.saveScreenshot = function (_, event) {
+            var dataUrl = this.canvas.toDataURL();
+            var data = atob(dataUrl.substring("data:image/png;base64,".length));
+            var asArray = new Uint8Array(data.length);
+
+            for (var index = 0; index < data.length; ++index) {
+                asArray[index] = data.charCodeAt(index);
             }
+
+            var blob;
+
+            if (window.navigator.msSaveBlob) {
+                blob = new Blob([asArray.buffer], { type: "image/png" });
+                window.navigator.msSaveBlob(blob, "screenshot.png");
+                return false;
+            } else {
+                blob = new Blob([asArray.buffer], { type: "image/png" });
+                event.currentTarget.href = URL.createObjectURL(blob);
+                return true;
+            }
+        };
+        return ViewModel;
+    })();
+
+    function setupSidebar() {
+        var allGroups = $('#sidebar .group');
+
+        allGroups.click(function () {
+            var currentElement = $(this);
+            var currentState = currentElement.attr('data-state');
+
+            allGroups.attr('data-state', '');
+            currentElement.attr('data-state', currentState === 'selected' ? '' : 'selected');
         });
 
-        this.showBoundingBox.subscribe(function (value) {
-            if (value) {
-                renderer.showBoundingBox();
-            } else {
-                renderer.hideBoundingBox();
-            }
-        });
-
-        this.showCameraTarget.subscribe(function (value) {
-            if (value) {
-                renderer.showCameraTarget();
-            } else {
-                renderer.hideCameraTarget();
-            }
-        });
-
-        this.showModelOrigin.subscribe(function (value) {
-            if (value) {
-                renderer.showOriginAxes();
-            } else {
-                renderer.hideOriginAxes();
-            }
+        $('#sidebar .group .content').click(function (e) {
+            e.stopPropagation();
         });
     }
-    ViewModel.prototype.resetCamera = function () {
-        renderer.camera.reset();
-    };
 
-    ViewModel.prototype.hideError = function () {
-        this.errorMessage(null);
-    };
+    function startRenderer(canvas, renderer, gl, viewModel) {
+        function resizeViewport() {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
 
-    ViewModel.prototype.saveScreenshot = function (_, event) {
-        var dataURL = canvas.toDataURL();
-        var data = atob(dataURL.substring("data:image/png;base64,".length));
-        var asArray = new Uint8Array(data.length);
-
-        for (var index = 0; index < data.length; ++index) {
-            asArray[index] = data.charCodeAt(index);
+            if (renderer) {
+                renderer.updateViewport(canvas.clientWidth, canvas.clientHeight);
+            }
         }
 
-        var blob;
-
-        if (window.navigator.msSaveBlob) {
-            blob = new Blob([asArray.buffer], { type: "image/png" });
-            window.navigator.msSaveBlob(blob, "screenshot.png");
-            return false;
-        } else {
-            blob = new Blob([asArray.buffer], { type: "image/png" });
-            event.currentTarget.href = URL.createObjectURL(blob);
-            return true;
+        function tick() {
+            window.requestAnimationFrame(tick);
+            renderer.draw(Date.now());
         }
-    };
-    return ViewModel;
-})();
 
-function resizeViewport() {
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
+        $(window).resize(resizeViewport);
 
-    if (renderer) {
-        renderer.updateViewport(canvas.clientWidth, canvas.clientHeight);
+        $.when(ObjectPathItemLoader.getWorlds(), ShaderProgramLoader.loadShaderProgram(gl, "ModelVertexShader.glsl", "ModelFragmentShader.glsl"), ShaderProgramLoader.loadShaderProgram(gl, "SpatialGridVertexShader.glsl", "SpatialGridFragmentShader.glsl"), ShaderProgramLoader.loadShaderProgram(gl, "OverlayVertexShader.glsl", "OverlayFragmentShader.glsl")).done(function (worlds, mainProgram, gridProgram, overlayProgram) {
+            resizeViewport();
+            viewModel.worlds(worlds);
+            ko.applyBindings(viewModel);
+            renderer.initialize(mainProgram, gridProgram, overlayProgram);
+
+            $('#loading').fadeOut(FADE_TIME);
+
+            CameraController.registerCamera(renderer.camera);
+            tick();
+        });
     }
-}
 
-$(window).resize(resizeViewport);
+    function start() {
+        var _this = this;
+        var canvas = document.getElementById("viewport");
+        var glOptions = { preserveDrawingBuffer: true };
+        var gl = (canvas.getContext("webgl", glOptions) || canvas.getContext("experimental-webgl", glOptions));
+        var renderer = new RwxViewer.Renderer(gl);
 
-var viewModel = new ViewModel();
+        $('#error').css('visibility', 'visible').hide();
 
-$('#error').css('visibility', 'visible').hide();
+        setupSidebar();
+        startRenderer(canvas, renderer, gl, new ViewModel(canvas, renderer));
 
-$.when(ObjectPathItemLoader.getWorlds(), ShaderProgramLoader.loadShaderProgram(gl, "ModelVertexShader.glsl", "ModelFragmentShader.glsl"), ShaderProgramLoader.loadShaderProgram(gl, "SpatialGridVertexShader.glsl", "SpatialGridFragmentShader.glsl"), ShaderProgramLoader.loadShaderProgram(gl, "OverlayVertexShader.glsl", "OverlayFragmentShader.glsl")).done(function (worlds, mainProgram, gridProgram, overlayProgram) {
-    resizeViewport();
-    viewModel.worlds(worlds);
-    ko.applyBindings(viewModel);
-    renderer.initialize(mainProgram, gridProgram, overlayProgram);
+        $('.roundSlider').each(function () {
+            var element = $(_this);
+            element.attr('data-value', 0);
+            var handle = element.find('.sliderHandle');
+        });
+    }
+    Viewer.start = start;
+})(Viewer || (Viewer = {}));
+;
 
-    $('#loading').fadeOut(FADE_TIME);
+$(document).ready(Viewer.start);
+// Copyright 2014 Joshua R. Rodgers
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var ShaderProgramLoader;
+(function (ShaderProgramLoader) {
+    function loadShaderProgram(gl, vertexShader, fragmentShader) {
+        var shaderLocation = "/Content/Shaders/";
+        var deferred = $.Deferred();
 
-    CameraController.registerCamera(renderer.camera);
-    tick();
-});
+        $.when($.get(shaderLocation + vertexShader), $.get(shaderLocation + fragmentShader)).done(function (vertexShaderData, fragmentShaderData) {
+            return deferred.resolve(new RwxViewer.ShaderProgram(gl, vertexShaderData[0], fragmentShaderData[0]));
+        }).fail(function () {
+            return deferred.fail();
+        });
 
-function tick() {
-    renderer.draw(Date.now());
-    window.requestAnimationFrame(tick);
-}
-
-var allGroups = $('#sidebar .group');
-
-allGroups.click(function () {
-    var currentElement = $(this);
-    var currentState = currentElement.attr('data-state');
-
-    allGroups.attr('data-state', '');
-    currentElement.attr('data-state', currentState === 'selected' ? '' : 'selected');
-});
-
-$('#sidebar .group .content').click(function (e) {
-    e.stopPropagation();
-});
+        return deferred.promise();
+    }
+    ShaderProgramLoader.loadShaderProgram = loadShaderProgram;
+})(ShaderProgramLoader || (ShaderProgramLoader = {}));
 //# sourceMappingURL=viewer.js.map
