@@ -47,7 +47,7 @@
 
             setValue(0, true);
 
-            sliderHandle.mousedown(() => {
+            sliderHandle.mousedown(event => {
                 event.preventDefault();
                 mouseDown = true;
             });

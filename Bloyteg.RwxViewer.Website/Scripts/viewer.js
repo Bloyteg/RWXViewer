@@ -124,7 +124,7 @@ var CameraController;
 
             setValue(0, true);
 
-            sliderHandle.mousedown(function () {
+            sliderHandle.mousedown(function (event) {
                 event.preventDefault();
                 mouseDown = true;
             });
