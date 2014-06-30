@@ -208,6 +208,69 @@ var ObjectPathItemLoader;
     }
     ObjectPathItemLoader.getAnimations = getAnimations;
 })(ObjectPathItemLoader || (ObjectPathItemLoader = {}));
+(function ($) {
+    $.fn.roundSlider = function () {
+        $(this).each(function () {
+            var slider = $(this);
+
+            slider.hide();
+            slider.after('<div id="azimuthSlider" class="roundSlider">  \
+                     <div class="outerCircle">                 \
+                         <div class="innerCircle" >            \
+                             <div class="valueDisplay"></div>  \
+                         </div>                                \
+                     </div>                                    \
+                     <div class="sliderHandle" ></div>         \
+                 </div>');
+
+            var sliderRegion = slider.next('.roundSlider');
+            var sliderHandle = sliderRegion.find('.sliderHandle');
+            var sliderOuterCircle = sliderRegion.find('.outerCircle');
+            var sliderDisplay = sliderRegion.find('.valueDisplay');
+            var mouseDown = false;
+
+            function setValue(angle) {
+                slider.val(angle);
+                sliderDisplay.html(angle + '&deg;');
+
+                var angleInRadians = angle * (Math.PI / 180);
+
+                sliderHandle.css({
+                    top: Math.sin(angleInRadians) * 56 + (sliderOuterCircle.height() / 2 - sliderHandle.height() / 2 + 4),
+                    left: -Math.cos(angleInRadians) * 56 + (sliderOuterCircle.width() / 2 - sliderHandle.width() / 2 + 4)
+                });
+            }
+
+            setValue(0);
+
+            sliderHandle.mousedown(function () {
+                event.preventDefault();
+                mouseDown = true;
+            });
+
+            $(document).mouseup(function () {
+                mouseDown = false;
+            });
+
+            $(document).mousemove(function (event) {
+                if (mouseDown) {
+                    event.preventDefault();
+
+                    var offset = sliderOuterCircle.offset();
+                    var newPosition = {
+                        left: event.pageX - offset.left - (sliderOuterCircle.width() / 2),
+                        top: event.pageY - offset.top - (sliderOuterCircle.height() / 2)
+                    };
+
+                    var angle = Math.floor(Math.atan2(newPosition.top, -newPosition.left) * 180 / Math.PI);
+                    angle = angle < 0 ? 360 + (angle % 360) : (angle % 360);
+
+                    setValue(angle);
+                }
+            });
+        });
+    };
+})(jQuery);
 // Copyright 2014 Joshua R. Rodgers
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -389,6 +452,13 @@ var Viewer;
         $('#sidebar .group .content').click(function (e) {
             e.stopPropagation();
         });
+
+        setupSliders();
+    }
+
+    function setupSliders() {
+        $('#azimuthSlider').roundSlider();
+        $('#altitudeSlider').roundSlider();
     }
 
     function startRenderer(canvas, renderer, gl, viewModel) {
@@ -431,55 +501,6 @@ var Viewer;
 
         setupSidebar();
         startRenderer(canvas, renderer, gl, new ViewModel(canvas, renderer));
-
-        $('.roundSlider').each(function () {
-            var element = $(this);
-            var handle = element.find('.sliderHandle');
-            var outerCircle = element.find('.outerCircle');
-            var mouseDown = false;
-
-            function setValue(angle) {
-                var angleInRadians = angle * (Math.PI / 180);
-
-                handle.css({
-                    top: Math.sin(angleInRadians) * 56 + (outerCircle.height() / 2 - handle.height() / 2 + 4),
-                    left: -Math.cos(angleInRadians) * 56 + (outerCircle.width() / 2 - handle.width() / 2 + 4)
-                });
-
-                element.find('.innerCircle').html("<div>" + angle + "&deg;</div>");
-            }
-
-            setValue(0);
-
-            element.attr('data-value', 0);
-
-            handle.mousedown(function () {
-                mouseDown = true;
-            });
-
-            $(document).mouseup(function () {
-                mouseDown = false;
-            });
-
-            $(document).mousemove(function (event) {
-                if (mouseDown) {
-                    event.preventDefault();
-
-                    var offset = outerCircle.offset();
-
-                    var newPosition = {
-                        left: event.pageX - offset.left - (outerCircle.width() / 2),
-                        top: event.pageY - offset.top - (outerCircle.height() / 2)
-                    };
-
-                    var angle = Math.floor(Math.atan2(newPosition.top, -newPosition.left) * 180 / Math.PI);
-                    angle = angle < 0 ? 360 + (angle % 360) : (angle % 360);
-
-                    element.attr("data-value", angle);
-                    setValue(angle);
-                }
-            });
-        });
     }
     Viewer.start = start;
 })(Viewer || (Viewer = {}));

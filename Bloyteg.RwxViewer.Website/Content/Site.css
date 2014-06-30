@@ -313,8 +313,6 @@ button:disabled, button:disabled:hover {
     border: 1px solid #555;
 
     background-color: #333;
-
-    display: table;
 }
 
 .roundSlider > .outerCircle > .innerCircle {
@@ -332,14 +330,15 @@ button:disabled, button:disabled:hover {
     background-color: #222;
     text-align: center;
     font-size: 1.5em;
-
-    display: table-cell;
-    vertical-align: middle;
 }
 
 .roundSlider > .outerCircle > .innerCircle * {
-    top: 32%;
-    position: relative;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
 }
 
 .roundSlider > .sliderHandle {
