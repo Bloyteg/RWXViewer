@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-precision mediump float;
+module RwxViewer {
+    export class NoAnimation implements Animation {
+        private _transform = mat4.create();
 
-void main(void) {
-	gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-}
+        getTransformForTime(joint: number, time: number): Mat4Array {
+            return this._transform;
+        }
+    }
+} 

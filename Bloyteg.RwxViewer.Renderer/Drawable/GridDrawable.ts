@@ -10,11 +10,13 @@
 // limitations under the License.
 
 module RwxViewer {
-    export function makeGrid(gl: WebGLRenderingContext) {
-        return new GridDrawable(gl);
+    export module Drawable {
+        export function createGridDrawable(gl: WebGLRenderingContext): Drawable {
+            return new GridDrawable(gl);
+        }
     }
 
-    export class GridDrawable implements Drawable {
+    class GridDrawable implements Drawable {
         private _vertexBuffer: WebGLBuffer;
         private _vertexCount: number;
         private _animation = Animation.getDefaultAnimation();

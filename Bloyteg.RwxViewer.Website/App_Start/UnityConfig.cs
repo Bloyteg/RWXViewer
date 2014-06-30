@@ -13,8 +13,10 @@
 // limitations under the License.
 
 using System.Web.Http;
-using Bloyteg.RwxViewer.Website.Models;
+using Bloyteg.AW.Animation.Seq;
+using Bloyteg.RwxViewer.Resources;
 using Microsoft.Practices.Unity;
+using MrByte.RWX.Model;
 using Unity.WebApi;
 
 namespace Bloyteg.RwxViewer.Website
@@ -25,7 +27,19 @@ namespace Bloyteg.RwxViewer.Website
         {
 			var container = new UnityContainer();
 
-            container.RegisterInstance<IObjectPathItemLoader>(new ObjectPathItemLoader());
+            container.RegisterType<ICacheKeyGenerator<Resources.DAL.Model>, ModelCacheKeyGenerator>();
+            container.RegisterType<ICacheKeyGenerator<Resources.DAL.Texture>, TextureCacheKeyGenerator>();
+            container.RegisterType<ICacheKeyGenerator<Resources.DAL.Animation>, AnimationCacheKeyGenerator>();
+
+            container.RegisterType<IResourceDownloader<Resources.DAL.Model, Model>, ModelDownloader>();
+            container.RegisterType<IResourceDownloader<Resources.DAL.Texture, byte[]>, TextureDownloader>();
+            container.RegisterType<IResourceDownloader<Resources.DAL.Animation, Animation>, AnimationDownloader>();
+
+            container.RegisterType<IResourceLocator<Resources.DAL.Model, Model>, ResourceLocator<Resources.DAL.Model, Model>>();
+            container.RegisterType<IResourceLocator<Resources.DAL.Texture, byte[]>, ResourceLocator<Resources.DAL.Texture, byte[]>>();
+            container.RegisterType<IResourceLocator<Resources.DAL.Animation, Animation>, ResourceLocator<Resources.DAL.Animation, Animation>>();
+
+            container.RegisterType<IObjectPathItemLoader, ObjectPathItemLoader>(new ContainerControlledLifetimeManager());
 
             GlobalConfiguration.Configuration.DependencyResolver = new UnityDependencyResolver(container);
         }

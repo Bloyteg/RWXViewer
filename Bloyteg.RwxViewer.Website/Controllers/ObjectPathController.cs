@@ -19,8 +19,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Bloyteg.RwxViewer.Website.Models;
-using Bloyteg.RwxViewer.Website.Models.DAL;
+using Bloyteg.RwxViewer.Resources;
+using Bloyteg.RwxViewer.Resources.DAL;
 
 namespace Bloyteg.RwxViewer.Website.Controllers
 {
@@ -103,10 +103,10 @@ namespace Bloyteg.RwxViewer.Website.Controllers
             }
         }
 
-        [Route("api/ObjectPath/Worlds/{id}/Animations/{animationlName}")]
-        public async Task<IHttpActionResult> GetWorldAnimation(int id, string animationlName)
+        [Route("api/ObjectPath/Worlds/{id}/Animations/{animationName}")]
+        public async Task<IHttpActionResult> GetWorldAnimation(int id, string animationName)
         {
-            var model = await _objectPathItemLoader.GetAnimationAsync(id, animationlName);
+            var model = await _objectPathItemLoader.GetAnimationAsync(id, animationName);
             return model == null ? (IHttpActionResult)NotFound() : Ok(model);
         }
     }

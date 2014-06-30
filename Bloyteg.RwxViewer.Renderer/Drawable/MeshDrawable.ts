@@ -44,6 +44,7 @@ module RwxViewer {
         private _jointTag: number;
         private _modelMatrix: Mat4Array;
         private _transformMatrix: Mat4Array;
+        private _normalMatrix: Mat3Array;
 
         constructor(subMeshes: SubMesh[], children: Drawable[], modelMatrix: Mat4Array, jointTag: number, isBillboard?: boolean, animation?: Animation) {
             this._subMeshes = subMeshes;
@@ -53,6 +54,7 @@ module RwxViewer {
             this._jointTag = jointTag || 0;
             this._modelMatrix = modelMatrix;
             this._transformMatrix = mat4.create();
+            this._normalMatrix = mat3.create();
         }
 
         get animation(): Animation {
@@ -81,8 +83,10 @@ module RwxViewer {
         private setTransformUniforms(gl: WebGLRenderingContext, shader: ShaderProgram, transformMatrix: Mat4Array, time: number) {
             mat4.multiply(this._transformMatrix, this._modelMatrix, this._animation.getTransformForTime(this._jointTag, time));
             mat4.multiply(this._transformMatrix, transformMatrix, this._transformMatrix);
+            mat3.normalFromMat4(this._normalMatrix, this._transformMatrix);
 
             gl.uniformMatrix4fv(shader.uniforms["u_modelMatrix"], false, this._transformMatrix);
+            gl.uniformMatrix3fv(shader.uniforms["u_normalMatrix"], false, this._normalMatrix);
             gl.uniform1i(shader.uniforms["u_isBillboard"], this._isBillboard ? 1 : 0);
         }
 

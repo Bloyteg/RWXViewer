@@ -19,18 +19,16 @@ attribute vec3 a_vertexNormal;
 uniform mat4 u_modelMatrix;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
-
+uniform mat3 u_normalMatrix;
 uniform bool u_isBillboard;
-
 uniform float u_ambientFactor;
 uniform float u_diffuseFactor;
+uniform vec3 u_lightPosition;
 
 varying vec2 v_textureCoordinates;
 varying float v_lightWeighting;
         
 void main(void) {
-	vec3 lightDirection = normalize(vec3(-1, 1, 1));
-
 	v_textureCoordinates = a_vertexUV;
 
 	if(u_isBillboard) {
@@ -38,7 +36,8 @@ void main(void) {
 		mat4 worldView = (u_viewMatrix * u_modelMatrix);
 		gl_Position = u_projectionMatrix * (vec4(a_vertexPosition, 1.0) + vec4(worldView[3].xyz, 0.0));
 	} else {
-		v_lightWeighting = u_ambientFactor + max(dot(a_vertexNormal, lightDirection), 0.0) * u_diffuseFactor;
+		vec3 normal = u_normalMatrix * a_vertexNormal;
+		v_lightWeighting = clamp(u_ambientFactor + clamp(dot(normal, normalize(u_lightPosition)), 0.0, 1.0) * u_diffuseFactor, 0.0, 1.0);
 		gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(a_vertexPosition, 1.0);
 	}
 }

@@ -58,9 +58,9 @@ module RwxViewer {
                     minimumX = Math.min(minimumX, position[0]);
                     minimumY = Math.min(minimumY, position[1]);
                     minimumZ = Math.min(minimumZ, position[2]);
-                    maximumX = Math.min(maximumX, position[0]);
-                    maximumY = Math.min(maximumY, position[1]);
-                    maximumZ = Math.min(maximumZ, position[2]);
+                    maximumX = Math.max(maximumX, position[0]);
+                    maximumY = Math.max(maximumY, position[1]);
+                    maximumZ = Math.max(maximumZ, position[2]);
                 });
             }
 

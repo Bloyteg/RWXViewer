@@ -82,6 +82,8 @@ interface Vector3 {
     dot(a: Vec3Array, b: Vec3Array): number;
     cross(out: Vec3Array, a: Vec3Array, b: Vec3Array): Vec3Array;
     lerp(out: Vec3Array, a: Vec3Array, b: Vec3Array, t: number): Vec3Array;
+    transformMat3(out: Vec3Array, a: Vec3Array, m: Mat3Array): Vec3Array;
+    transformMat3(out: number[], a: number[], m: Mat3Array): Vec3Array;
     transformMat4(out: Vec3Array, a: Vec3Array, m: Mat4Array): Vec3Array;
     transformMat4(out: number[], a: number[], m: Mat4Array): Vec3Array;
     transformQuat(out: Vec3Array, a: Vec3Array, q: Vec4Array): Vec3Array;
@@ -187,6 +189,7 @@ interface Matrix3 {
     mul(out: Mat3Array, a: Mat3Array, b: Mat3Array): Mat3Array;
     multiply(out: Mat3Array, a: Mat3Array, b: Mat3Array): Mat3Array;
     str(a: Mat3Array): string;
+    normalFromMat4(out: Mat3Array, a: Mat4Array): Mat3Array;
 }
 
 declare var mat3: Matrix3;
@@ -213,13 +216,13 @@ interface Matrix4 {
     rotateX(out: Mat4Array, a: Mat4Array, rad: number): Mat4Array;
     rotateY(out: Mat4Array, a: Mat4Array, rad: number): Mat4Array;
     rotateZ(out: Mat4Array, a: Mat4Array, rad: number): Mat4Array;
-    fromQuat(out: Mat4Array, quat: Vec4Array): Mat4Array;
     fromRotationTranslation(out: Mat4Array, q: Vec4Array, v: Vec3Array): Mat4Array;
     frustum(out: Mat4Array, left: number, right: number, bottom: number, top: number, near: number, far: number): Mat4Array;
     perspective(out: Mat4Array, fovy: number, aspect: number, near: number, far: number): Mat4Array;
     ortho(out: Mat4Array, left: number, right: number, bottom: number, top: number, near: number, far: number): Mat4Array;
     lookAt(out: Mat4Array, eye: Vec3Array, center: Vec3Array, up: Vec3Array): Mat4Array;
     lookAt(out: Mat4Array, eye: number[], center: number[], up: number[]): Mat4Array;
+    fromQuat(out: Mat4Array, q: Vec4Array): Mat4Array;
 }
 
 declare var mat4: Matrix4;

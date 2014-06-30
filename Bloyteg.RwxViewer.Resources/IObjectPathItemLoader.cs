@@ -11,9 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+using System.Threading.Tasks;
+using Bloyteg.AW.Animation.Seq;
+using MrByte.RWX.Model;
 
-precision mediump float;
-
-void main(void) {
-	gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+namespace Bloyteg.RwxViewer.Resources
+{
+    public interface IObjectPathItemLoader
+    {
+        Task<Model> GetModelAsync(int worldId, string modelName);
+        Task<byte[]> GetTextureAsync(int worldId, string textureName);
+        Task<Animation> GetAnimationAsync(int worldId, string animationName);
+    }
 }

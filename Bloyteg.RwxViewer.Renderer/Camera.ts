@@ -22,13 +22,14 @@ module RwxViewer {
     var PHI_EPS = 0.000001;
 
     export interface Camera {
-        setViewpowerSize(width: number, height: number);
+        setViewportSize(width: number, height: number);
         reset();
         rotate(deltaX: number, deltaY: number);
         zoomIn(zoomFactor?: number);
         zoomOut(zoomFactor?: number);
         pan(deltaX: number, deltaY: number);
-        matrix : Mat4Array;
+        matrix: Mat4Array;
+        targetMatrix: Mat4Array;
     }
 
     export function makeCamera(width: number, height: number): Camera {
@@ -45,6 +46,8 @@ module RwxViewer {
         private _panOffset: Vec3Array;
         private _up: Vec3Array;
 
+        private _targetMatrix: Mat4Array;
+
         private _upQuaternion: Vec4Array;
         private _upQuarternionInverse: Vec4Array;
 
@@ -57,11 +60,11 @@ module RwxViewer {
 
         constructor(viewportWidth: number, viewportHeight: number) {
             this.reset();
-            this.setViewpowerSize(viewportWidth, viewportHeight);
+            this.setViewportSize(viewportWidth, viewportHeight);
             this.update();
         }
 
-        setViewpowerSize(width: number, height: number) {
+        setViewportSize(width: number, height: number) {
             this._viewportWidth = width;
             this._viewportHeight = height;
         }
@@ -69,6 +72,7 @@ module RwxViewer {
         reset() {
             this._cameraMatrix = mat4.create();
             this._cameraMatrixInverse = mat4.create();
+            this._targetMatrix = mat4.create();
 
             this._offset = vec3.create();
             this._position = vec3.fromValues(0.0, 0.707 * DEFAULT_CAMERA_DISTANCE, 0.707 * DEFAULT_CAMERA_DISTANCE);
@@ -128,6 +132,9 @@ module RwxViewer {
         }
 
         private update() {
+            mat4.identity(this._targetMatrix);
+            mat4.translate(this._targetMatrix, this._targetMatrix, this._target);
+
             vec3.sub(this._offset, this._position, this._target);
             vec3.transformQuat(this._offset, this._offset, this._upQuaternion);
 
@@ -164,5 +171,7 @@ module RwxViewer {
         }
 
         get matrix() { return this._cameraMatrix; }
+
+        get targetMatrix() { return this._targetMatrix; }
     }
 }

@@ -11,17 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+using Bloyteg.RwxViewer.Resources.DAL;
 
-using System.Threading.Tasks;
-using Animation = Bloyteg.AW.Animation.Seq.Animation;
-using Model = MrByte.RWX.Model.Model;
-
-namespace Bloyteg.RwxViewer.Website.Models
+namespace Bloyteg.RwxViewer.Resources
 {
-    public interface IObjectPathItemLoader
+    public class AnimationCacheKeyGenerator : ICacheKeyGenerator<Animation>
     {
-        Task<Model> GetModelAsync(int worldId, string modelName);
-        Task<byte[]> GetTextureAsync(int worldId, string textureName);
-        Task<Animation> GetAnimationAsync(int id, string animationName);
+        public string GetKey(Animation item)
+        {
+            return string.Format("animation-{0}-{1}", item.WorldId, item.Name);
+        }
     }
 }

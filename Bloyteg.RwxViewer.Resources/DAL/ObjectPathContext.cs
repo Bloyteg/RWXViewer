@@ -12,8 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-precision mediump float;
+using System.Data.Entity;
 
-void main(void) {
-	gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+namespace Bloyteg.RwxViewer.Resources.DAL
+{
+    public class ObjectPathContext : DbContext
+    {
+        public ObjectPathContext() : base("ObjectPathDb")
+        {
+        }
+
+        public DbSet<World> Worlds { get; set; }
+        public DbSet<Model> Models { get; set; }
+        public DbSet<Texture> Textures { get; set; }
+        public DbSet<Animation> Animations { get; set; }
+    }
 }

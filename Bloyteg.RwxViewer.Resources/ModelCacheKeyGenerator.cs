@@ -11,9 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+using Bloyteg.RwxViewer.Resources.DAL;
 
-precision mediump float;
-
-void main(void) {
-	gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+namespace Bloyteg.RwxViewer.Resources
+{
+    public class ModelCacheKeyGenerator : ICacheKeyGenerator<Model>
+    {
+        public string GetKey(Model item)
+        {
+            return string.Format("model-{0}-{1}", item.WorldId, item.Name);
+        }
+    }
 }

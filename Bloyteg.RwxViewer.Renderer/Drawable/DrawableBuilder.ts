@@ -14,6 +14,12 @@
 
 //TODO: Restore billboard mesh handling.  Still not 100% sure how to do this.
 module RwxViewer {    
+    export module Drawable {
+        export function createDrawableFromModel(gl: WebGLRenderingContext, model: Model): Drawable {
+            return new MeshDrawableBuilder(gl, model).build();
+        }
+    }
+
     interface PrototypeMap {
         [name: string]: Prototype;
     }
@@ -43,7 +49,7 @@ module RwxViewer {
 
             mat4.multiply(matrix, transformMatrix, matrix);
 
-            return new MeshDrawable(meshData.subMeshes, meshData.meshChildren, matrix, clump.Tag);
+            return new MeshDrawable(meshData.subMeshes, meshData.meshChildren, matrix, clump.Tag, this._model.AxisAlignment !== AxisAlignment.None);
         }
 
         private buildGeometryMeshData(geometry: MeshGeometry, transformMatrix: Mat4Array) {
@@ -115,6 +121,7 @@ module RwxViewer {
             });
         }
 
+        //TODO: Move all of this out as a separate interface/implemenetations.
         private buildVertexBuffer(transformMatrix: Mat4Array, vertices: Vertex[], faces: IFace[], material: Material): VertexBuffer {
             var buffers = material.GeometrySampling === GeometrySampling.Wireframe
                 ? this.buildLineBuffers(transformMatrix, vertices, faces)
@@ -168,11 +175,13 @@ module RwxViewer {
             };
         }
 
-        //TODO: Will need to transform normals.
         private buildTriangleBuffers(transformMatrix: Mat4Array, vertices: Vertex[], faces: IFace[], material: Material) {
             var positions: number[] = [];
             var uvs: number[] = [];
             var normals: number[] = [];
+
+            var normalMatrix: Mat3Array = mat3.create();
+            mat3.normalFromMat4(normalMatrix, transformMatrix);
 
             faces.forEach(face => {
                 face.Triangles.forEach(triangle => {
@@ -182,7 +191,8 @@ module RwxViewer {
 
                         Array.prototype.push.apply(positions, this.computeVertexPosition(transformMatrix, vertex));
                         uvs.push((<any>(vertex.UV) || {}).U || 0, (<any>(vertex.UV) || {}).V || 0);
-                        normals.push(normal.X, normal.Y, normal.Z);
+
+                        Array.prototype.push.apply(normals, this.computeNormal(normalMatrix, normal));
                     });
                 });
             });
@@ -194,13 +204,14 @@ module RwxViewer {
             };
         }
 
+        private computeNormal(normalMatrix: Mat3Array, normal: Vector3) {
+            var normalVector = [normal.X, normal.Y, normal.Z];
+            return vec3.transformMat3(normalVector, normalVector, normalMatrix);
+        }
+
         private computeVertexPosition(transformMatrix: Mat4Array, vertex: Vertex) {
             var vertexVector = [vertex.Position.X, vertex.Position.Y, vertex.Position.Z];
             return vec3.transformMat4(vertexVector, vertexVector, transformMatrix);
         }
-    }
-
-    export function createDrawableFromModel(gl: WebGLRenderingContext, model: Model): Drawable {
-        return new MeshDrawableBuilder(gl, model).build();
     }
 }

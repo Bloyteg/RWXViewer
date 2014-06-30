@@ -45,9 +45,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Bloyteg.AW.Animation.Seq, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Bloyteg.AW.Animation.Seq, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Bloyteg.AW.Animation.Seq.1.0.2\lib\Bloyteg.AW.Animation.Seq.dll</HintPath>
+      <HintPath>..\packages\Bloyteg.AW.Animation.Seq.1.0.4\lib\Bloyteg.AW.Animation.Seq.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -195,26 +195,18 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\AnimationLoader.cs" />
-    <Compile Include="Models\DAL\Animation.cs" />
-    <Compile Include="Models\DAL\ObjectPathItem.cs" />
-    <Compile Include="Models\DAL\Texture.cs" />
-    <Compile Include="Models\IObjectPathItemLoader.cs" />
-    <Compile Include="Models\DAL\ObjectPathContext.cs" />
-    <Compile Include="Models\DAL\Model.cs" />
-    <Compile Include="Models\ModelLoader.cs" />
-    <Compile Include="Models\ObjectPathItemLoader.cs" />
-    <Compile Include="Models\DAL\World.cs" />
-    <Compile Include="Models\TextureLoader.cs" />
-    <Compile Include="Models\ArchiveFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\appbar.camera.png" />
+    <Content Include="Content\appbar.link.png" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Content\Shaders\SpatialGridVertexShader.glsl" />
     <Content Include="Content\Shaders\SpatialGridFragmentShader.glsl" />
+    <Content Include="Content\Shaders\OverlayFragmentShader.glsl" />
+    <Content Include="Content\Shaders\OverlayVertexShader.glsl" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <Content Include="Scripts\Bloyteg.RwxViewer.Renderer.js" />
     <Content Include="Scripts\gl-matrix-min.js" />
@@ -240,10 +232,10 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Scripts\jquery-2.1.1.min.map" />
-    <Content Include="Content\Shaders\vertexShader.glsl">
+    <Content Include="Content\Shaders\ModelVertexShader.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\Shaders\fragmentShader.glsl">
+    <Content Include="Content\Shaders\ModelFragmentShader.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -254,14 +246,23 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="..\Bloyteg.RwxViewer.Renderer\typings\gl-matrix\gl-matrix.d.ts">
+      <Link>Scripts\typings\gl-matrix.d.ts</Link>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Scripts\Bloyteg.RwxViewer.Renderer.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\gl-matrix\gl-matrix.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\knockout\knockout.d.ts" />
     <TypeScriptCompile Include="Scripts\viewer\CameraController.ts" />
+    <TypeScriptCompile Include="Scripts\viewer\RoundSliderPlugin.ts" />
     <TypeScriptCompile Include="Scripts\viewer\ShaderProgramLoader.ts" />
     <TypeScriptCompile Include="Scripts\viewer\ObjectPathItemLoader.ts" />
     <TypeScriptCompile Include="Scripts\viewer\RWXViewer.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Bloyteg.RwxViewer.Resources\Bloyteg.RwxViewer.Resources.csproj">
+      <Project>{43DBEAD6-5E85-447B-8AB9-3D4AB29A3689}</Project>
+      <Name>Bloyteg.RwxViewer.Resources</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

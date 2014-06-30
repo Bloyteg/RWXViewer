@@ -1,4 +1,4 @@
-﻿// Copyright 2014 Joshua R. Rodgers
+// Copyright 2014 Joshua R. Rodgers
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,20 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+using System.Threading.Tasks;
 
-using System.Data.Entity;
-
-namespace Bloyteg.RwxViewer.Website.Models.DAL
+namespace Bloyteg.RwxViewer.Resources
 {
-    public class ObjectPathContext : DbContext
+    public interface IResourceLocator<in TIdentifier, TResult>
     {
-        public ObjectPathContext() : base("ObjectPathDb")
-        {
-        }
-
-        public DbSet<World> Worlds { get; set; }
-        public DbSet<Model> Models { get; set; }
-        public DbSet<Texture> Textures { get; set; }
-        public DbSet<Animation> Animations { get; set; }
+        Task<TResult> GetResourceAsync(TIdentifier resourceIdentifier);
     }
 }
