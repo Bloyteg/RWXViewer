@@ -30,6 +30,7 @@ module RwxViewer {
 
         private _projectionMatrix: Mat4Array = mat4.create();
         private _modelMatrix: Mat4Array = mat4.create();
+        private _lightPosition: Vec3Array = vec3.create();
 
         private _viewportWidth: number;
         private _viewportHeight: number;
@@ -83,6 +84,8 @@ module RwxViewer {
                     if (this._currentDrawable) {
                         gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, this._projectionMatrix);
                         gl.uniformMatrix4fv(program.uniforms["u_viewMatrix"], false, this._camera.matrix);
+                        gl.uniform3fv(program.uniforms["u_lightPosition"], this._lightPosition);
+
                         this._currentDrawable.draw(gl, program, this._modelMatrix, time);
                     }
                 });
@@ -177,6 +180,17 @@ module RwxViewer {
 
         hideOriginAxes() {
             this._showOriginAxes = false;
+        }
+
+        setLightPosition(lightAzimuth: number, lightAltitude: number) {
+            var theta = lightAzimuth * (Math.PI / 180);
+            var phi = lightAltitude * (Math.PI / 180) - (Math.PI / 2);
+
+            var x = Math.cos(theta) * Math.sin(phi);
+            var y = -Math.cos(phi);
+            var z = -Math.sin(theta) * Math.sin(phi);
+
+            this._lightPosition = vec3.fromValues(x, y, z);
         }
     }
 }

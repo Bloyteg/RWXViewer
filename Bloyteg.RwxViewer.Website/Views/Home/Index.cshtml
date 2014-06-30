@@ -29,7 +29,7 @@
         <a href="#" data-bind="click: saveScreenshot" download="screenshot.png">
             <img class="toolButton" src="@Url.Content("~/Content/appbar.camera.png")" alt="Save Screenshot" title="Save Screenshot" />
         </a>
-        <a href="#">
+        <a href="#" style="display: none">
             <img class="toolButton" src="@Url.Content("~/Content/appbar.link.png")" alt="Link to Current Model" title="Link to Current Model" />
         </a>
     </div>
@@ -71,7 +71,7 @@
                 <label for="showCameraTarget"></label>
             </div>
             
-            <button id="snapToModelOrigin" data-bind="enable: selectedModel()">Snap to Model</button>
+            <button id="snapToModelOrigin" data-bind="enable: selectedModel()" style="visibility: hidden">Snap to Model</button>
             <button id="resetCamera" data-bind="click: resetCamera">Reset Camera</button>
         </div>
     </div>

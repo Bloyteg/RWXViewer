@@ -153,13 +153,15 @@ module Viewer {
                 }
             });
 
-            this.lightAzimuth.subscribe(value => {
-
+            this.lightAzimuth.subscribe(() => {
+                renderer.setLightPosition(self.lightAzimuth(), self.lightAltitude());
             });
 
-            this.lightAltitude.subscribe(value => {
-
+            this.lightAltitude.subscribe(() => {
+                renderer.setLightPosition(self.lightAzimuth(), self.lightAltitude());
             });
+
+            renderer.setLightPosition(this.lightAzimuth(), this.lightAltitude());
         }
 
         resetCamera() {

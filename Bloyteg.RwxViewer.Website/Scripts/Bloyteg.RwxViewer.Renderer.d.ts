@@ -315,6 +315,7 @@ declare module RwxViewer {
         private _camera;
         private _projectionMatrix;
         private _modelMatrix;
+        private _lightPosition;
         private _viewportWidth;
         private _viewportHeight;
         private _showBoundingBox;
@@ -333,6 +334,7 @@ declare module RwxViewer {
         public hideCameraTarget(): void;
         public showOriginAxes(): void;
         public hideOriginAxes(): void;
+        public setLightPosition(lightAzimuth: number, lightAltitude: number): void;
     }
 }
 declare module RwxViewer {

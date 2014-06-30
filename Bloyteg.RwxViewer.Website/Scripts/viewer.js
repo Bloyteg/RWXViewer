@@ -447,11 +447,15 @@ var Viewer;
                 }
             });
 
-            this.lightAzimuth.subscribe(function (value) {
+            this.lightAzimuth.subscribe(function () {
+                renderer.setLightPosition(self.lightAzimuth(), self.lightAltitude());
             });
 
-            this.lightAltitude.subscribe(function (value) {
+            this.lightAltitude.subscribe(function () {
+                renderer.setLightPosition(self.lightAzimuth(), self.lightAltitude());
             });
+
+            renderer.setLightPosition(this.lightAzimuth(), this.lightAltitude());
         }
         ViewModel.prototype.resetCamera = function () {
             this.renderer.camera.reset();

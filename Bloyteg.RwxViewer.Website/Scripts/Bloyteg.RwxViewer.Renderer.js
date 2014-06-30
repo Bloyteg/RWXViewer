@@ -1373,6 +1373,7 @@ var RwxViewer;
         function Renderer(gl) {
             this._projectionMatrix = mat4.create();
             this._modelMatrix = mat4.create();
+            this._lightPosition = vec3.create();
             this._showCameraTarget = true;
             this._gl = gl;
         }
@@ -1418,6 +1419,8 @@ var RwxViewer;
                     if (_this._currentDrawable) {
                         gl.uniformMatrix4fv(program.uniforms["u_projectionMatrix"], false, _this._projectionMatrix);
                         gl.uniformMatrix4fv(program.uniforms["u_viewMatrix"], false, _this._camera.matrix);
+                        gl.uniform3fv(program.uniforms["u_lightPosition"], _this._lightPosition);
+
                         _this._currentDrawable.draw(gl, program, _this._modelMatrix, time);
                     }
                 });
@@ -1514,6 +1517,17 @@ var RwxViewer;
 
         Renderer.prototype.hideOriginAxes = function () {
             this._showOriginAxes = false;
+        };
+
+        Renderer.prototype.setLightPosition = function (lightAzimuth, lightAltitude) {
+            var theta = lightAzimuth * (Math.PI / 180);
+            var phi = lightAltitude * (Math.PI / 180) - (Math.PI / 2);
+
+            var x = Math.cos(theta) * Math.sin(phi);
+            var y = -Math.cos(phi);
+            var z = -Math.sin(theta) * Math.sin(phi);
+
+            this._lightPosition = vec3.fromValues(x, y, z);
         };
         return Renderer;
     })();
