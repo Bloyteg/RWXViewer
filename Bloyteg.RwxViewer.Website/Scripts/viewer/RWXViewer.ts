@@ -34,6 +34,9 @@ module Viewer {
         showCameraTarget: KnockoutObservable<boolean>;
         showModelOrigin: KnockoutObservable<boolean>;
 
+        lightAzimuth: KnockoutObservable<number>;
+        lightAltitude: KnockoutObservable<number>;
+
         canvas: HTMLCanvasElement;
         renderer: RwxViewer.Renderer;
 
@@ -55,6 +58,9 @@ module Viewer {
             this.showBoundingBox = ko.observable(false);
             this.showCameraTarget = ko.observable(true);
             this.showModelOrigin = ko.observable(false);
+
+            this.lightAzimuth = ko.observable(45);
+            this.lightAltitude = ko.observable(315);
 
             this.modelsByType = ko.computed(() => {
                 return this.models().filter(model => model.type === this.selectedType().type);
@@ -145,6 +151,14 @@ module Viewer {
                 } else {
                     renderer.hideOriginAxes();
                 }
+            });
+
+            this.lightAzimuth.subscribe(value => {
+
+            });
+
+            this.lightAltitude.subscribe(value => {
+
             });
         }
 
@@ -237,6 +251,12 @@ module Viewer {
     }
 
     export function start() {
+        (<any>ko.bindingHandlers).defaultValue = {
+            init: function(element, valueAccessor, allBindings) {
+                $(element).val(ko.unwrap(valueAccessor())).change();
+            }
+        }
+
         var canvas = <HTMLCanvasElement>document.getElementById("viewport");
         var glOptions: any = { preserveDrawingBuffer: true };
         var gl = <WebGLRenderingContext>(canvas.getContext("webgl", glOptions) || canvas.getContext("experimental-webgl", glOptions));

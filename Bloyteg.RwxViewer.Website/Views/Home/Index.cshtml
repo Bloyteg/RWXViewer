@@ -80,10 +80,10 @@
         <div class="header">Lighting Controls</div>
         <div class="content">
             <span>Azimuth</span>
-            <input id="azimuthSlider" type="number"/>
+            <input id="azimuthSlider" type="number" data-bind="defaultValue: lightAzimuth, value: lightAzimuth, updateValue: input" />
 
             <span>Altitude</span>
-            <input id="altitudeSlider" type="number"/>
+            <input id="altitudeSlider" type="number" data-bind="defaultValue: lightAltitude, value: lightAltitude, updateValue: input" />
         </div>
     </div>
 

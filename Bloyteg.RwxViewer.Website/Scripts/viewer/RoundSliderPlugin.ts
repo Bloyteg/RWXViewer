@@ -24,8 +24,13 @@
             var sliderDisplay = sliderRegion.find('.valueDisplay');
             var mouseDown = false;
 
-            function setValue(angle) {
+            function setValue(angle: number, notify: boolean) {
                 slider.val(angle);
+
+                if (notify) {
+                    slider.change();
+                }
+
                 sliderDisplay.html(angle + '&deg;');
 
                 var angleInRadians = angle * (Math.PI / 180);
@@ -36,7 +41,11 @@
                 });
             }
 
-            setValue(0);
+            slider.change(() => {
+                setValue(slider.val(), false);
+            });
+
+            setValue(0, true);
 
             sliderHandle.mousedown(() => {
                 event.preventDefault();
@@ -60,7 +69,7 @@
                     var angle = Math.floor(Math.atan2(newPosition.top, -newPosition.left) * 180 / Math.PI);
                     angle = angle < 0 ? 360 + (angle % 360) : (angle % 360);
 
-                    setValue(angle);
+                    setValue(angle, true);
                 }
             });
 
