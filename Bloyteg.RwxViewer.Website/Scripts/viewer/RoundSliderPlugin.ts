@@ -24,6 +24,12 @@
             var sliderDisplay = sliderRegion.find('.valueDisplay');
             var mouseDown = false;
 
+            var outerCircleHeight = sliderOuterCircle.height();
+            var outerCircleWidth = sliderOuterCircle.width();
+            var sliderHandleHeight = sliderHandle.height();
+            var sliderHandleWidth = sliderHandle.width();
+            var offset = sliderOuterCircle.offset();
+
             function setValue(angle: number, notify: boolean) {
                 slider.val(angle);
 
@@ -36,8 +42,8 @@
                 var angleInRadians = angle * (Math.PI / 180);
 
                 sliderHandle.css({
-                    top: Math.sin(angleInRadians) * 56 + (sliderOuterCircle.height() / 2 - sliderHandle.height() / 2 + 4),
-                    left: -Math.cos(angleInRadians) * 56 + (sliderOuterCircle.width() / 2 - sliderHandle.width() / 2 + 4)
+                    top: Math.sin(angleInRadians) * (outerCircleHeight / 2 - 4) + (outerCircleHeight / 2) - (sliderHandleHeight / 2) + 4,
+                    left: -Math.cos(angleInRadians) * (outerCircleWidth / 2 - 4) + (outerCircleWidth / 2) - (sliderHandleWidth / 2) + 4
                 });
             }
 
@@ -60,10 +66,9 @@
                 if (mouseDown) {
                     event.preventDefault();
 
-                    var offset = sliderOuterCircle.offset();
                     var newPosition = {
-                        left: event.pageX - offset.left - (sliderOuterCircle.width() / 2),
-                        top: event.pageY - offset.top - (sliderOuterCircle.height() / 2)
+                        left: event.pageX - offset.left - (outerCircleWidth / 2),
+                        top: event.pageY - offset.top - (outerCircleHeight / 2)
                     };
 
                     var angle = Math.floor(Math.atan2(newPosition.top, -newPosition.left) * 180 / Math.PI);
