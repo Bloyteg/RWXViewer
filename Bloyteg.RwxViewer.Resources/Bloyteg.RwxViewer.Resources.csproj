@@ -33,6 +33,22 @@
     <Reference Include="Bloyteg.AW.Animation.Seq">
       <HintPath>..\packages\Bloyteg.AW.Animation.Seq.1.0.4\lib\Bloyteg.AW.Animation.Seq.dll</HintPath>
     </Reference>
+    <Reference Include="Bloyteg.AW.Math, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Bloyteg.AW.Math.1.0.5\lib\net45\Bloyteg.AW.Math.dll</HintPath>
+    </Reference>
+    <Reference Include="Bloyteg.AW.Model.RWX, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Bloyteg.AW.Model.RWX.1.0.2\lib\net45\Bloyteg.AW.Model.RWX.dll</HintPath>
+    </Reference>
+    <Reference Include="Bloyteg.AW.Model.RWX.Data, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Bloyteg.AW.Model.RWX.Data.1.0.2\lib\net45\Bloyteg.AW.Model.RWX.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Bloyteg.AW.Model.RWX.Parser, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Bloyteg.AW.Model.RWX.Parser.1.0.2\lib\net45\Bloyteg.AW.Model.RWX.Parser.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework">
       <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -46,23 +62,8 @@
       <HintPath>..\packages\FParsec-Big-Data-Edition.1.0.1\lib\net45\FParsecCS.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="MrByte.FSharp.Helpers">
-      <HintPath>..\packages\MrByte.RWX.1.0.5\lib\net45\MrByte.FSharp.Helpers.dll</HintPath>
-    </Reference>
-    <Reference Include="MrByte.Math">
-      <HintPath>..\packages\MrByte.RWX.1.0.5\lib\net45\MrByte.Math.dll</HintPath>
-    </Reference>
-    <Reference Include="MrByte.RWX">
-      <HintPath>..\packages\MrByte.RWX.1.0.5\lib\net45\MrByte.RWX.dll</HintPath>
-    </Reference>
-    <Reference Include="MrByte.RWX.Model">
-      <HintPath>..\packages\MrByte.RWX.1.0.5\lib\net45\MrByte.RWX.Model.dll</HintPath>
-    </Reference>
-    <Reference Include="MrByte.RWX.Parser">
-      <HintPath>..\packages\MrByte.RWX.1.0.5\lib\net45\MrByte.RWX.Parser.dll</HintPath>
-    </Reference>
-    <Reference Include="MrByte.Utility">
-      <HintPath>..\packages\MrByte.RWX.1.0.5\lib\net45\MrByte.Utility.dll</HintPath>
+    <Reference Include="LibTessDotNet">
+      <HintPath>..\packages\LibTessDotNet.1.0.1\lib\net20\LibTessDotNet.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

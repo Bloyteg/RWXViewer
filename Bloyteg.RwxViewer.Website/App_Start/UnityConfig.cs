@@ -16,7 +16,7 @@ using System.Web.Http;
 using Bloyteg.AW.Animation.Seq;
 using Bloyteg.RwxViewer.Resources;
 using Microsoft.Practices.Unity;
-using MrByte.RWX.Model;
+using Bloyteg.AW.Model.RWX.Data;
 using Unity.WebApi;
 
 namespace Bloyteg.RwxViewer.Website

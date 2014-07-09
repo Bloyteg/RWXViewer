@@ -13,12 +13,11 @@
 // limitations under the License.
 using System;
 using System.ComponentModel;
-using System.Data.Entity;
 using System.Net;
 using System.Threading.Tasks;
 using Bloyteg.RwxViewer.Resources.DAL;
 using MrByte.RWX;
-using Model = MrByte.RWX.Model.Model;
+using Model = Bloyteg.AW.Model.RWX.Data.Model;
 
 namespace Bloyteg.RwxViewer.Resources
 {
