@@ -53,7 +53,7 @@ module ObjectPathItemLoader {
 
 
     function loadTexture(worldId: number, textureName: string) {
-        var deferred = $.Deferred();
+        var deferred = $.Deferred<{ image: HTMLImageElement; textureName: string }>();
 
         var image = new Image();
         image.onload = () => {

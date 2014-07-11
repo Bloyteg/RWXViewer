@@ -80,6 +80,37 @@ var CameraController;
     }
     CameraController.registerCamera = registerCamera;
 })(CameraController || (CameraController = {}));
+var ObjectPath;
+(function (ObjectPath) {
+    var IndexedDbCache = (function () {
+        function IndexedDbCache() {
+        }
+        IndexedDbCache.prototype.getModel = function (worldId, name) {
+            return null;
+        };
+
+        IndexedDbCache.prototype.getTexture = function (worldId, name) {
+            return null;
+        };
+
+        IndexedDbCache.prototype.getAnimation = function (worldId, name) {
+            return null;
+        };
+
+        IndexedDbCache.prototype.storeModel = function (worldId, name, model) {
+            return null;
+        };
+
+        IndexedDbCache.prototype.storeTexture = function (worldId, name, image) {
+            return null;
+        };
+
+        IndexedDbCache.prototype.storeAnimation = function (worldId, name, animation) {
+            return null;
+        };
+        return IndexedDbCache;
+    })();
+})(ObjectPath || (ObjectPath = {}));
 (function ($) {
     $.fn.roundSlider = function () {
         $(this).each(function () {

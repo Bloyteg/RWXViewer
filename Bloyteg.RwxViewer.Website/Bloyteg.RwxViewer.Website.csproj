@@ -250,6 +250,7 @@
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\knockout\knockout.d.ts" />
     <TypeScriptCompile Include="Scripts\viewer\CameraController.ts" />
+    <TypeScriptCompile Include="Scripts\viewer\ObjectPathCache.ts" />
     <TypeScriptCompile Include="Scripts\viewer\RoundSliderPlugin.ts" />
     <TypeScriptCompile Include="Scripts\viewer\ShaderProgramLoader.ts" />
     <TypeScriptCompile Include="Scripts\viewer\ObjectPathItemLoader.ts" />
