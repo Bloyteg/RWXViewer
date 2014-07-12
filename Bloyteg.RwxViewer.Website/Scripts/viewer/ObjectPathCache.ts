@@ -10,6 +10,8 @@
     }
 
     class IndexedDbCache implements Cache {
+        private _database: IDBDatabase;
+
         getModel(worldId: number, name: string): JQueryPromise<RwxViewer.Model> {
             return null;
         }
