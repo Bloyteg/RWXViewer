@@ -80,107 +80,37 @@ var CameraController;
     }
     CameraController.registerCamera = registerCamera;
 })(CameraController || (CameraController = {}));
-(function ($) {
-    $.fn.roundSlider = function () {
-        $(this).each(function () {
-            var slider = $(this);
+var ObjectPath;
+(function (ObjectPath) {
+    var IndexedDbCache = (function () {
+        function IndexedDbCache() {
+        }
+        IndexedDbCache.prototype.getModel = function (worldId, name) {
+            return null;
+        };
 
-            slider.hide();
-            slider.after('<div id="azimuthSlider" class="roundSlider">  \
-                     <div class="outerCircle">                 \
-                         <div class="innerCircle" >            \
-                             <div class="valueDisplay"></div>  \
-                         </div>                                \
-                     </div>                                    \
-                     <div class="sliderHandle" ></div>         \
-                 </div>');
+        IndexedDbCache.prototype.getTexture = function (worldId, name) {
+            return null;
+        };
 
-            var sliderRegion = slider.next('.roundSlider');
-            var sliderHandle = sliderRegion.find('.sliderHandle');
-            var sliderOuterCircle = sliderRegion.find('.outerCircle');
-            var sliderDisplay = sliderRegion.find('.valueDisplay');
-            var mouseDown = false;
+        IndexedDbCache.prototype.getAnimation = function (worldId, name) {
+            return null;
+        };
 
-            function setValue(angle, notify) {
-                slider.val(angle);
+        IndexedDbCache.prototype.storeModel = function (worldId, name, model) {
+            return null;
+        };
 
-                if (notify) {
-                    slider.change();
-                }
+        IndexedDbCache.prototype.storeTexture = function (worldId, name, image) {
+            return null;
+        };
 
-                sliderDisplay.html(angle + '&deg;');
-
-                var angleInRadians = angle * (Math.PI / 180);
-
-                sliderHandle.css({
-                    top: Math.sin(angleInRadians) * 56 + (sliderOuterCircle.height() / 2 - sliderHandle.height() / 2 + 4),
-                    left: -Math.cos(angleInRadians) * 56 + (sliderOuterCircle.width() / 2 - sliderHandle.width() / 2 + 4)
-                });
-            }
-
-            slider.change(function () {
-                setValue(slider.val(), false);
-            });
-
-            setValue(0, true);
-
-            sliderHandle.mousedown(function (event) {
-                event.preventDefault();
-                mouseDown = true;
-            });
-
-            $(document).mouseup(function () {
-                mouseDown = false;
-            });
-
-            $(document).mousemove(function (event) {
-                if (mouseDown) {
-                    event.preventDefault();
-
-                    var offset = sliderOuterCircle.offset();
-                    var newPosition = {
-                        left: event.pageX - offset.left - (sliderOuterCircle.width() / 2),
-                        top: event.pageY - offset.top - (sliderOuterCircle.height() / 2)
-                    };
-
-                    var angle = Math.floor(Math.atan2(newPosition.top, -newPosition.left) * 180 / Math.PI);
-                    angle = angle < 0 ? 360 + (angle % 360) : (angle % 360);
-
-                    setValue(angle, true);
-                }
-            });
-        });
-    };
-})(jQuery);
-// Copyright 2014 Joshua R. Rodgers
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-var ShaderProgramLoader;
-(function (ShaderProgramLoader) {
-    function loadShaderProgram(gl, vertexShader, fragmentShader) {
-        var shaderLocation = "/Content/Shaders/";
-        var deferred = $.Deferred();
-
-        $.when($.get(shaderLocation + vertexShader), $.get(shaderLocation + fragmentShader)).done(function (vertexShaderData, fragmentShaderData) {
-            return deferred.resolve(new RwxViewer.ShaderProgram(gl, vertexShaderData[0], fragmentShaderData[0]));
-        }).fail(function () {
-            return deferred.fail();
-        });
-
-        return deferred.promise();
-    }
-    ShaderProgramLoader.loadShaderProgram = loadShaderProgram;
-})(ShaderProgramLoader || (ShaderProgramLoader = {}));
+        IndexedDbCache.prototype.storeAnimation = function (worldId, name, animation) {
+            return null;
+        };
+        return IndexedDbCache;
+    })();
+})(ObjectPath || (ObjectPath = {}));
 // Copyright 2014 Joshua R. Rodgers
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -309,6 +239,83 @@ var ObjectPathItemLoader;
     }
     ObjectPathItemLoader.getAnimations = getAnimations;
 })(ObjectPathItemLoader || (ObjectPathItemLoader = {}));
+(function ($) {
+    $.fn.roundSlider = function () {
+        $(this).each(function () {
+            var slider = $(this);
+
+            slider.hide();
+            slider.after('<div id="azimuthSlider" class="roundSlider">  \
+                     <div class="outerCircle">                 \
+                         <div class="innerCircle" >            \
+                             <div class="valueDisplay"></div>  \
+                         </div>                                \
+                     </div>                                    \
+                     <div class="sliderHandle" ></div>         \
+                 </div>');
+
+            var sliderRegion = slider.next('.roundSlider');
+            var sliderHandle = sliderRegion.find('.sliderHandle');
+            var sliderOuterCircle = sliderRegion.find('.outerCircle');
+            var sliderDisplay = sliderRegion.find('.valueDisplay');
+            var mouseDown = false;
+
+            var outerCircleHeight = sliderOuterCircle.height();
+            var outerCircleWidth = sliderOuterCircle.width();
+            var sliderHandleHeight = sliderHandle.height();
+            var sliderHandleWidth = sliderHandle.width();
+            var offset = sliderOuterCircle.offset();
+
+            function setValue(angle, notify) {
+                slider.val(angle);
+
+                if (notify) {
+                    slider.change();
+                }
+
+                sliderDisplay.html(angle + '&deg;');
+
+                var angleInRadians = angle * (Math.PI / 180);
+
+                sliderHandle.css({
+                    top: Math.sin(angleInRadians) * (outerCircleHeight / 2 - 4) + (outerCircleHeight / 2) - (sliderHandleHeight / 2) + 4,
+                    left: -Math.cos(angleInRadians) * (outerCircleWidth / 2 - 4) + (outerCircleWidth / 2) - (sliderHandleWidth / 2) + 4
+                });
+            }
+
+            slider.change(function () {
+                setValue(slider.val(), false);
+            });
+
+            setValue(0, true);
+
+            sliderHandle.mousedown(function (event) {
+                event.preventDefault();
+                mouseDown = true;
+            });
+
+            $(document).mouseup(function () {
+                mouseDown = false;
+            });
+
+            $(document).mousemove(function (event) {
+                if (mouseDown) {
+                    event.preventDefault();
+
+                    var newPosition = {
+                        left: event.pageX - offset.left - (outerCircleWidth / 2),
+                        top: event.pageY - offset.top - (outerCircleHeight / 2)
+                    };
+
+                    var angle = Math.floor(Math.atan2(newPosition.top, -newPosition.left) * 180 / Math.PI);
+                    angle = angle < 0 ? 360 + (angle % 360) : (angle % 360);
+
+                    setValue(angle, true);
+                }
+            });
+        });
+    };
+})(jQuery);
 // Copyright 2014 Joshua R. Rodgers
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -564,4 +571,33 @@ var Viewer;
 ;
 
 $(document).ready(Viewer.start);
+// Copyright 2014 Joshua R. Rodgers
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+var ShaderProgramLoader;
+(function (ShaderProgramLoader) {
+    function loadShaderProgram(gl, vertexShader, fragmentShader) {
+        var shaderLocation = "/Content/Shaders/";
+        var deferred = $.Deferred();
+
+        $.when($.get(shaderLocation + vertexShader), $.get(shaderLocation + fragmentShader)).done(function (vertexShaderData, fragmentShaderData) {
+            return deferred.resolve(new RwxViewer.ShaderProgram(gl, vertexShaderData[0], fragmentShaderData[0]));
+        }).fail(function () {
+            return deferred.fail();
+        });
+
+        return deferred.promise();
+    }
+    ShaderProgramLoader.loadShaderProgram = loadShaderProgram;
+})(ShaderProgramLoader || (ShaderProgramLoader = {}));
 //# sourceMappingURL=viewer.js.map

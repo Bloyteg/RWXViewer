@@ -13,7 +13,7 @@
 // limitations under the License.
 using System.Threading.Tasks;
 using Bloyteg.AW.Animation.Seq;
-using MrByte.RWX.Model;
+using Bloyteg.AW.Model.RWX.Data;
 
 namespace Bloyteg.RwxViewer.Resources
 {

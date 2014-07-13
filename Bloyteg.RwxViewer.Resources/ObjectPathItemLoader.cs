@@ -16,7 +16,7 @@ using System.Data.Entity;
 using System.Threading.Tasks;
 using Bloyteg.RwxViewer.Resources.DAL;
 using Animation = Bloyteg.AW.Animation.Seq.Animation;
-using Model = MrByte.RWX.Model.Model;
+using Model = Bloyteg.AW.Model.RWX.Data.Model;
 
 
 namespace Bloyteg.RwxViewer.Resources
